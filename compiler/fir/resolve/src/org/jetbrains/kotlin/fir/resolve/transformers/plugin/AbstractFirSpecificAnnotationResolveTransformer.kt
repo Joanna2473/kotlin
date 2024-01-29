@@ -335,7 +335,7 @@ abstract class AbstractFirSpecificAnnotationResolveTransformer(
         val requiredAnnotationsWithArguments = session.annotationPlatformSupport.requiredAnnotationsWithArguments
 
         if (transformedAnnotationType.coneType.classLikeLookupTagIfAny?.classId in requiredAnnotationsWithArguments) {
-            argumentsTransformer.transformAnnotation(annotationCall, ResolutionMode.ContextDependent)
+            argumentsTransformer.transformAnnotation(annotationCall, ResolutionMode.ContextDependentFunctionArgument)
         }
     }
 

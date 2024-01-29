@@ -1152,7 +1152,7 @@ open class FirDeclarationsResolveTransformer(
         }
 
         return when (data) {
-            is ResolutionMode.ContextDependent -> {
+            is ResolutionMode.ContextDependentWithInfo -> {
                 context.storeContextForAnonymousFunction(anonymousFunction)
                 anonymousFunction
             }

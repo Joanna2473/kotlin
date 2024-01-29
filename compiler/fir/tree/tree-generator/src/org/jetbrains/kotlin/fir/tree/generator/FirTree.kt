@@ -1076,6 +1076,12 @@ object FirTree : AbstractFirTreeBuilder() {
         +FieldSets.name
     }
 
+    val delayedNameReference: Element by element(Reference) {
+        parent(namedReference)
+
+        +field("delayedReference", namedReference)
+    }
+
     val namedReferenceWithCandidateBase: Element by element(Reference) {
         parent(namedReference)
 

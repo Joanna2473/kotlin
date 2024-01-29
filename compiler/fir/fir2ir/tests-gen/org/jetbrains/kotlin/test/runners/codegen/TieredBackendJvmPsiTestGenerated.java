@@ -25252,6 +25252,24 @@ public class TieredBackendJvmPsiTestGenerated extends AbstractTieredBackendJvmPs
       }
 
       @Test
+      @TestMetadata("enumWithTheSameNameAsEntry.kt")
+      public void testEnumWithTheSameNameAsEntry() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/enumWithTheSameNameAsEntry.kt");
+      }
+
+      @Test
+      @TestMetadata("functionCall.kt")
+      public void testFunctionCall() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/functionCall.kt");
+      }
+
+      @Test
+      @TestMetadata("inheritance.kt")
+      public void testInheritance() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/inheritance.kt");
+      }
+
+      @Test
       @TestMetadata("nested.kt")
       public void testNested() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/nested.kt");
@@ -25261,6 +25279,12 @@ public class TieredBackendJvmPsiTestGenerated extends AbstractTieredBackendJvmPs
       @TestMetadata("typeAlias.kt")
       public void testTypeAlias() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/typeAlias.kt");
+      }
+
+      @Test
+      @TestMetadata("unqualifiedEnum.kt")
+      public void testUnqualifiedEnum() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/unqualifiedEnum.kt");
       }
     }
 

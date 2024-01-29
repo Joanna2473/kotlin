@@ -25175,6 +25175,24 @@ public class TieredBackendJvmLightTreeTestGenerated extends AbstractTieredBacken
       }
 
       @Test
+      @TestMetadata("enumWithTheSameNameAsEntry.kt")
+      public void testEnumWithTheSameNameAsEntry() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/enumWithTheSameNameAsEntry.kt");
+      }
+
+      @Test
+      @TestMetadata("functionCall.kt")
+      public void testFunctionCall() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/functionCall.kt");
+      }
+
+      @Test
+      @TestMetadata("inheritance.kt")
+      public void testInheritance() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/inheritance.kt");
+      }
+
+      @Test
       @TestMetadata("nested.kt")
       public void testNested() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/nested.kt");
@@ -25184,6 +25202,12 @@ public class TieredBackendJvmLightTreeTestGenerated extends AbstractTieredBacken
       @TestMetadata("typeAlias.kt")
       public void testTypeAlias() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/typeAlias.kt");
+      }
+
+      @Test
+      @TestMetadata("unqualifiedEnum.kt")
+      public void testUnqualifiedEnum() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/unqualifiedEnum.kt");
       }
     }
 

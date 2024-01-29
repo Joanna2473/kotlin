@@ -29788,9 +29788,15 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
     @TestDataPath("$PROJECT_ROOT")
     public class UnqualifiedEnum {
       @Test
-      @TestMetadata("enumWithTheSameNameAsEntry.kt")
-      public void testEnumWithTheSameNameAsEntry() {
-        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/enumWithTheSameNameAsEntry.kt");
+      @TestMetadata("either.kt")
+      public void testEither() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/either.kt");
+      }
+
+      @Test
+      @TestMetadata("extensions.kt")
+      public void testExtensions() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/extensions.kt");
       }
 
       @Test
@@ -29800,9 +29806,27 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       }
 
       @Test
+      @TestMetadata("lambas.kt")
+      public void testLambas() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/lambas.kt");
+      }
+
+      @Test
       @TestMetadata("notInsideBranches.kt")
       public void testNotInsideBranches() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/notInsideBranches.kt");
+      }
+
+      @Test
+      @TestMetadata("oneLevelDeep.kt")
+      public void testOneLevelDeep() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/oneLevelDeep.kt");
+      }
+
+      @Test
+      @TestMetadata("pcla.kt")
+      public void testPcla() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/pcla.kt");
       }
 
       @Test
@@ -29812,9 +29836,9 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       }
 
       @Test
-      @TestMetadata("unqualifiedEnum.kt")
-      public void testUnqualifiedEnum() {
-        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/unqualifiedEnum.kt");
+      @TestMetadata("smartcast.kt")
+      public void testSmartcast() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/smartcast.kt");
       }
     }
 
@@ -29885,6 +29909,23 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       @TestMetadata("extensionFunctionAddedToStdlib.kt")
       public void testExtensionFunctionAddedToStdlib() {
         runTest("compiler/fir/analysis-tests/testData/resolve/withAllowedKotlinPackage/extensionFunctionAddedToStdlib.kt");
+      }
+    }
+
+    @Nested
+    @TestMetadata("compiler/fir/analysis-tests/testData/resolve/withExpectedType")
+    @TestDataPath("$PROJECT_ROOT")
+    public class WithExpectedType {
+      @Test
+      @TestMetadata("enum.kt")
+      public void testEnum() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/withExpectedType/enum.kt");
+      }
+
+      @Test
+      @TestMetadata("nested.kt")
+      public void testNested() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/withExpectedType/nested.kt");
       }
     }
   }

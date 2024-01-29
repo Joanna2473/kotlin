@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.fir.expressions.builder.buildResolvedReifiedParamete
 import org.jetbrains.kotlin.fir.getPrimaryConstructorSymbol
 import org.jetbrains.kotlin.fir.references.*
 import org.jetbrains.kotlin.fir.references.builder.buildBackingFieldReference
+import org.jetbrains.kotlin.fir.references.builder.buildDelayedNameReference
 import org.jetbrains.kotlin.fir.references.builder.buildResolvedNamedReference
 import org.jetbrains.kotlin.fir.references.impl.FirSimpleNamedReference
 import org.jetbrains.kotlin.fir.resolve.*
@@ -274,7 +275,11 @@ class FirCallResolver(
         callSite: FirElement = qualifiedAccess,
         acceptCandidates: (Collection<Candidate>) -> Boolean,
     ): FirExpression {
-        val callee = qualifiedAccess.calleeReference as? FirSimpleNamedReference ?: return qualifiedAccess
+        val callee = when (val calleeReference = qualifiedAccess.calleeReference) {
+            is FirSimpleNamedReference -> calleeReference
+            is FirDelayedNameReference -> calleeReference.delayedReference as? FirSimpleNamedReference ?: return qualifiedAccess
+            else -> return qualifiedAccess
+        }
 
         @Suppress("NAME_SHADOWING")
         val qualifiedAccess = qualifiedAccess.let(transformer::transformExplicitReceiverOf)
@@ -347,15 +352,24 @@ class FirCallResolver(
         val reducedCandidates = result.candidates
         if (!acceptCandidates(reducedCandidates)) return qualifiedAccess
 
-        val nameReference = createResolvedNamedReference(
-            callee,
-            callee.name,
-            result.info,
-            reducedCandidates,
-            result.applicability,
-            qualifiedAccess.explicitReceiver,
-            expectedCallKind = if (functionCallExpected) CallKind.Function else null
-        )
+        val mayDelay = resolutionMode is ResolutionMode.ContextDependentWithInfo && resolutionMode.isFunctionArgument
+        val nameReference = when {
+            reducedCandidates.isEmpty() && qualifiedAccess.explicitReceiver == null && mayDelay ->
+                buildDelayedNameReference {
+                    source = callee.source
+                    name = callee.name
+                    delayedReference = callee
+                }
+            else -> createResolvedNamedReference(
+                callee,
+                callee.name,
+                result.info,
+                reducedCandidates,
+                result.applicability,
+                qualifiedAccess.explicitReceiver,
+                expectedCallKind = if (functionCallExpected) CallKind.Function else null
+            )
+        }
 
         val referencedSymbol = when (nameReference) {
             is FirResolvedNamedReference -> nameReference.resolvedSymbol
@@ -420,7 +434,9 @@ class FirCallResolver(
                 addNonFatalDiagnostics(candidate)
             }
         }
-        transformer.storeTypeFromCallee(qualifiedAccess, isLhsOfAssignment = callSite is FirVariableAssignment)
+        if (nameReference !is FirDelayedNameReference) {
+            transformer.storeTypeFromCallee(qualifiedAccess, isLhsOfAssignment = callSite is FirVariableAssignment)
+        }
         return qualifiedAccess
     }
 
@@ -632,7 +648,12 @@ class FirCallResolver(
                 explicitReceiver = null
             )
         } else {
-            annotation.replaceArgumentList(annotation.argumentList.transform(transformer, ResolutionMode.ContextDependent))
+            annotation.replaceArgumentList(
+                annotation.argumentList.transform(
+                    transformer,
+                    ResolutionMode.ContextDependentFunctionArgument
+                )
+            )
 
             val callInfo = toCallInfo(annotation, reference)
 
