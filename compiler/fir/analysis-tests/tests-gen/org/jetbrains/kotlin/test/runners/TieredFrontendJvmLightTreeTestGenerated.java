@@ -24570,6 +24570,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       }
 
       @Test
+      @TestMetadata("ExhaustiveSeparate.kt")
+      public void testExhaustiveSeparate() {
+        runTest("compiler/testData/diagnostics/tests/when/ExhaustiveSeparate.kt");
+      }
+
+      @Test
       @TestMetadata("ExhaustiveValOverConditionalInit.kt")
       public void testExhaustiveValOverConditionalInit() {
         runTest("compiler/testData/diagnostics/tests/when/ExhaustiveValOverConditionalInit.kt");

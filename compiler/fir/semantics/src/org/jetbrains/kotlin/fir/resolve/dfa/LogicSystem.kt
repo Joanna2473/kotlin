@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.fir.resolve.dfa
 
 import kotlinx.collections.immutable.*
 import org.jetbrains.kotlin.fir.FirSession
+import org.jetbrains.kotlin.fir.symbols.impl.FirEnumEntrySymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.types.AbstractTypeChecker
 import java.util.*
@@ -32,7 +33,7 @@ abstract class LogicSystem(private val context: ConeInferenceContext) {
      * flow.
      * @param union Determines if [TypeStatement]s from different flows should be combined with union or intersection logic.
      */
-    fun joinFlow(flows: Collection<PersistentFlow>, statementFlows: Collection<PersistentFlow>, union: Boolean): MutableFlow {
+    fun joinFlow(flows: Collection<PersistentFlow>, statementFlows: Collection<PersistentFlow>, union: Boolean, mergeImplications: Boolean): MutableFlow {
         when (flows.size) {
             0 -> return MutableFlow()
             1 -> return flows.first().fork()
@@ -49,7 +50,7 @@ abstract class LogicSystem(private val context: ConeInferenceContext) {
             result.copyCommonAliases(flows)
         }
         result.copyStatements(statementFlows, commonFlow, union)
-        result.copyImplications(statementFlows)
+        if (mergeImplications) result.copyImplications(statementFlows, union)
         return result
     }
 
@@ -60,12 +61,17 @@ abstract class LogicSystem(private val context: ConeInferenceContext) {
     }
 
     fun addTypeStatement(flow: MutableFlow, statement: TypeStatement): TypeStatement? {
-        if (statement.exactType.isEmpty()) return null
+        if (statement.isEmpty) return null
         val variable = statement.variable
-        val oldExactType = flow.approvedTypeStatements[variable]?.exactType
+        val oldStatement = flow.approvedTypeStatements[variable]
+        val oldExactType = oldStatement?.exactType
         val newExactType = oldExactType?.addAll(statement.exactType) ?: statement.exactType.toPersistentSet()
-        if (newExactType === oldExactType) return null
-        return PersistentTypeStatement(variable, newExactType).also { flow.approvedTypeStatements[variable] = it }
+        val oldNegativeTypes = oldStatement?.negativeTypes
+        val newNegativeTypes = oldNegativeTypes?.addAll(statement.negativeTypes) ?: statement.negativeTypes.toPersistentSet()
+        val oldNegativeEntries = oldStatement?.negativeEntries
+        val newNegativeEntries = oldNegativeEntries?.addAll(statement.negativeEntries) ?: statement.negativeEntries.toPersistentSet()
+        if (newExactType === oldExactType && newNegativeTypes === oldNegativeEntries && newNegativeEntries === oldNegativeEntries) return null
+        return PersistentTypeStatement(variable, newExactType, newNegativeTypes, newNegativeEntries).also { flow.approvedTypeStatements[variable] = it }
     }
 
     fun addTypeStatements(flow: MutableFlow, statements: TypeStatements): List<TypeStatement> =
@@ -74,8 +80,17 @@ abstract class LogicSystem(private val context: ConeInferenceContext) {
     fun addImplication(flow: MutableFlow, implication: Implication) {
         val effect = implication.effect
         val redundant = effect == implication.condition || when (effect) {
-            is TypeStatement ->
-                effect.isEmpty || flow.approvedTypeStatements[effect.variable]?.exactType?.containsAll(effect.exactType) == true
+            is TypeStatement -> {
+                if (effect.isEmpty) {
+                    true
+                } else {
+                    val statement = flow.approvedTypeStatements[effect.variable]
+                    val sameExactType = statement?.exactType?.containsAll(effect.exactType) == true
+                    val sameNegativeTypes = statement?.negativeTypes?.containsAll(effect.negativeTypes) == true
+                    val sameNegativeEntries = statement?.negativeEntries?.containsAll(effect.negativeEntries) == true
+                    sameExactType && sameNegativeTypes && sameNegativeEntries
+                }
+            }
             // Synthetic variables can only be referenced in tree order, so implications with synthetic variables can
             // only look like "if <expression> is A, then <part of that expression> is B". If we don't already have any
             // statements about a part of the expression, then we never will, as we're already exiting the entire expression.
@@ -207,11 +222,13 @@ abstract class LogicSystem(private val context: ConeInferenceContext) {
         }
     }
 
-    private fun MutableFlow.copyImplications(flows: Collection<PersistentFlow>) {
+    private fun MutableFlow.copyImplications(flows: Collection<PersistentFlow>, union: Boolean) {
         when (flows.size) {
             0 -> {}
             1 -> implications += flows.first().implications
-            else -> {} // TODO, KT-65293: compute common implications?
+            else -> if (!union) {
+                for (flow in flows) implications += flow.implications
+            }
         }
     }
 
@@ -268,7 +285,10 @@ abstract class LogicSystem(private val context: ConeInferenceContext) {
             val variable = next.variable
             if (variable.isReal()) {
                 val impliedType = if (operation == Operation.EqNull) nullableNothingType else anyType
-                result.getOrPut(variable) { MutableTypeStatement(variable) }.exactType.add(impliedType)
+                val impliedNegativeType = if (operation == Operation.EqNull) anyType else nullableNothingType
+                val statement = result.getOrPut(variable) { MutableTypeStatement(variable) }
+                statement.exactType.add(impliedType)
+                statement.negativeTypes.add(impliedNegativeType)
             }
 
             val statements = logicStatements[variable] ?: continue
@@ -318,6 +338,8 @@ abstract class LogicSystem(private val context: ConeInferenceContext) {
 
     private operator fun MutableTypeStatement.plusAssign(other: TypeStatement) {
         exactType += other.exactType
+        negativeTypes += other.negativeTypes
+        negativeEntries += other.negativeEntries
     }
 
     fun and(a: TypeStatement?, b: TypeStatement): TypeStatement {
@@ -345,7 +367,10 @@ abstract class LogicSystem(private val context: ConeInferenceContext) {
         val variable = statements.first().variable
         assert(statements.all { it.variable == variable }) { "folding statements for different variables" }
         if (statements.any { it.isEmpty }) return null
-        val intersected = statements.map { ConeTypeIntersector.intersectTypes(context, it.exactType.toList()) }
+        val intersected = statements.map {
+            if (it.exactType.isEmpty()) context.nullableAnyType()
+            else ConeTypeIntersector.intersectTypes(context, it.exactType.toList())
+        }
         val unified = context.commonSuperTypeOrNull(intersected) ?: return null
         val result = when {
             unified.isNullableAny -> return null
@@ -353,19 +378,25 @@ abstract class LogicSystem(private val context: ConeInferenceContext) {
             unified.canBeNull(context.session) -> return null
             else -> context.anyType()
         }
-        return PersistentTypeStatement(variable, persistentSetOf(result))
+        val negativeTypes =
+            statements.map { it.negativeTypes }.reduceOrNull(Set<ConeKotlinType>::intersect)?.toPersistentSet()
+                ?: persistentSetOf()
+        val negativeEntries =
+            statements.map { it.negativeEntries }.reduceOrNull(Set<FirEnumEntrySymbol>::intersect)?.toPersistentSet()
+                ?: persistentSetOf()
+        return PersistentTypeStatement(variable, persistentSetOf(result), negativeTypes, negativeEntries)
     }
 }
 
 private fun TypeStatement.toPersistent(): PersistentTypeStatement = when (this) {
     is PersistentTypeStatement -> this
     // If this statement was obtained via `toMutable`, `toPersistentSet` will call `build`.
-    else -> PersistentTypeStatement(variable, exactType.toPersistentSet())
+    else -> PersistentTypeStatement(variable, exactType.toPersistentSet(), negativeTypes.toPersistentSet(), negativeEntries.toPersistentSet())
 }
 
 private fun TypeStatement.toMutable(): MutableTypeStatement = when (this) {
-    is PersistentTypeStatement -> MutableTypeStatement(variable, exactType.builder())
-    else -> MutableTypeStatement(variable, LinkedHashSet(exactType))
+    is PersistentTypeStatement -> MutableTypeStatement(variable, exactType.builder(), negativeTypes.builder(), negativeEntries.builder())
+    else -> MutableTypeStatement(variable, LinkedHashSet(exactType), LinkedHashSet(negativeTypes), LinkedHashSet(negativeEntries))
 }
 
 @JvmName("replaceVariableInStatements")
@@ -419,6 +450,6 @@ private fun Statement.replaceVariable(from: RealVariable, to: RealVariable): Sta
     return when (this) {
         is OperationStatement -> copy(variable = to)
         is PersistentTypeStatement -> copy(variable = to)
-        is MutableTypeStatement -> MutableTypeStatement(to, exactType)
+        is MutableTypeStatement -> MutableTypeStatement(to, exactType, negativeTypes, negativeEntries)
     }
 }

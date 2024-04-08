@@ -59,6 +59,7 @@ public interface KaAnnotationUseSiteTargetRenderer {
             annotationRenderer: KaAnnotationRenderer,
             printer: PrettyPrinter,
         ) {
+            @Suppress("REDUNDANT_ELSE_IN_WHEN")
             val print = when (owner) {
                 is KaReceiverParameterSymbol -> true
                 !is KaCallableSymbol -> return

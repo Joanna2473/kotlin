@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.fir.resolve.SessionHolderImpl
 import org.jetbrains.kotlin.fir.resolve.calls.ImplicitValue
 import org.jetbrains.kotlin.fir.resolve.dfa.DataFlowAnalyzerContext
 import org.jetbrains.kotlin.fir.resolve.dfa.RealVariable
+import org.jetbrains.kotlin.fir.resolve.dfa.RealVariableFromSymbol
 import org.jetbrains.kotlin.fir.resolve.dfa.cfg.CFGNode
 import org.jetbrains.kotlin.fir.resolve.dfa.cfg.ClassExitNode
 import org.jetbrains.kotlin.fir.resolve.dfa.cfg.MergePostponedLambdaExitsNode
@@ -280,7 +281,9 @@ private class ContextCollectorVisitor(
             val flow = cfgNode.flow
 
             val realVariables = flow.knownVariables
-                .sortedBy { it.symbol.memberDeclarationNameOrNull?.asString() }
+                .sortedBy {
+                    (it as? RealVariableFromSymbol)?.symbol?.memberDeclarationNameOrNull?.asString()
+                }
 
             for (realVariable in realVariables) {
                 val typeStatement = flow.getTypeStatement(realVariable) ?: continue
@@ -294,7 +297,7 @@ private class ContextCollectorVisitor(
                 // The compiler pushes smart-cast types for implicit receivers to ease later lookups.
                 // Here we emulate such behavior. Unlike the compiler, though, modified types are only reflected in the created snapshot.
                 // See other usages of 'replaceReceiverType()' for more information.
-                if (realVariable.isImplicit) {
+                if (realVariable.isImplicit && realVariable is RealVariableFromSymbol) {
                     val smartCastedType = typeStatement.smartCastedType(bodyHolder.session.typeContext)
                     implicitReceiverStack.replaceImplicitValueType(realVariable.symbol, smartCastedType)
                 }
@@ -304,7 +307,7 @@ private class ContextCollectorVisitor(
         val towerDataContextSnapshot = context.towerDataContext.createSnapshot(keepMutable = true)
 
         for (realVariable in smartCasts.keys) {
-            if (realVariable.isImplicit) {
+            if (realVariable.isImplicit && realVariable is RealVariableFromSymbol) {
                 implicitReceiverStack.replaceImplicitValueType(realVariable.symbol, realVariable.originalType)
             }
         }

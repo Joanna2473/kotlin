@@ -19404,6 +19404,18 @@ public class TieredBackendJvmLightTreeTestGenerated extends AbstractTieredBacken
       }
 
       @Test
+      @TestMetadata("ExhaustiveCast.kt")
+      public void testExhaustiveCast() {
+        runTest("compiler/testData/diagnostics/tests/when/ExhaustiveCast.kt");
+      }
+
+      @Test
+      @TestMetadata("ExhaustiveComplex.kt")
+      public void testExhaustiveComplex() {
+        runTest("compiler/testData/diagnostics/tests/when/ExhaustiveComplex.kt");
+      }
+
+      @Test
       @TestMetadata("ExhaustiveInitialization.kt")
       public void testExhaustiveInitialization() {
         runTest("compiler/testData/diagnostics/tests/when/ExhaustiveInitialization.kt");
@@ -25822,6 +25834,12 @@ public class TieredBackendJvmLightTreeTestGenerated extends AbstractTieredBacken
           @TestMetadata("compiler/fir/analysis-tests/testData/resolveWithStdlib/contracts/fromSource/bad/returnsImplies")
           @TestDataPath("$PROJECT_ROOT")
           public class ReturnsImplies {
+            @Test
+            @TestMetadata("negativeTypes.kt")
+            public void testNegativeTypes() {
+              runTest("compiler/fir/analysis-tests/testData/resolveWithStdlib/contracts/fromSource/bad/returnsImplies/negativeTypes.kt");
+            }
+
             @Test
             @TestMetadata("notNull.kt")
             public void testNotNull() {

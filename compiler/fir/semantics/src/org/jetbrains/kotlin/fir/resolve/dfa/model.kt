@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.fir.resolve.dfa
 
 import kotlinx.collections.immutable.PersistentSet
+import org.jetbrains.kotlin.fir.symbols.impl.FirEnumEntrySymbol
 import org.jetbrains.kotlin.fir.types.ConeErrorType
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
 import kotlin.contracts.ExperimentalContracts
@@ -16,16 +17,22 @@ import kotlin.contracts.contract
 data class PersistentTypeStatement(
     override val variable: RealVariable,
     override val exactType: PersistentSet<ConeKotlinType>,
+    override val negativeTypes: PersistentSet<ConeKotlinType>,
+    override val negativeEntries: PersistentSet<FirEnumEntrySymbol>,
 ) : TypeStatement()
 
 class MutableTypeStatement(
     override val variable: RealVariable,
     override val exactType: MutableSet<ConeKotlinType> = linkedSetOf(),
+    override val negativeTypes: MutableSet<ConeKotlinType> = linkedSetOf(),
+    override val negativeEntries: MutableSet<FirEnumEntrySymbol> = linkedSetOf(),
 ) : TypeStatement()
 
 // --------------------------------------- Aliases ---------------------------------------
 
 typealias TypeStatements = Map<RealVariable, TypeStatement>
+
+fun emptyTypeStatements(): TypeStatements = mapOf()
 
 // --------------------------------------- DSL ---------------------------------------
 
@@ -44,6 +51,15 @@ infix fun OperationStatement.implies(effect: Statement): Implication = Implicati
 
 infix fun RealVariable.typeEq(type: ConeKotlinType): MutableTypeStatement =
     MutableTypeStatement(this, if (type is ConeErrorType) linkedSetOf() else linkedSetOf(type))
+
+infix fun RealVariable.typeEq(types: Set<ConeKotlinType>): MutableTypeStatement =
+    MutableTypeStatement(this, types.toMutableSet())
+
+infix fun RealVariable.typeNotEq(type: ConeKotlinType): MutableTypeStatement =
+    MutableTypeStatement(this, negativeTypes = if (type is ConeErrorType) linkedSetOf() else linkedSetOf(type))
+
+infix fun RealVariable.entryNotEq(entry: FirEnumEntrySymbol): MutableTypeStatement =
+    MutableTypeStatement(this, negativeEntries = linkedSetOf(entry))
 
 // --------------------------------------- Utils ---------------------------------------
 

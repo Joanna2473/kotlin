@@ -55,7 +55,7 @@ fun testNullableB(foo: B?, bar: B?) {
 }
 
 fun testC(foo: C, bar: Any) {
-    if (foo == bar) bar.<!UNRESOLVED_REFERENCE!>c<!>()
+    if (foo == bar) bar.c()
     if (bar == foo) bar.<!UNRESOLVED_REFERENCE!>c<!>()
 }
 
@@ -73,7 +73,7 @@ fun testNullableD(foo: D?, bar: D?) {
 }
 
 fun testE(foo: E, bar: Any) {
-    if (foo == bar) bar.<!UNRESOLVED_REFERENCE!>e<!>()
+    if (foo == bar) bar.e()
     if (bar == foo) bar.<!UNRESOLVED_REFERENCE!>e<!>()
 }
 
@@ -89,12 +89,12 @@ fun testSmartcast(foo: Any, bar: Any) {
         bar.<!UNRESOLVED_REFERENCE!>b<!>()
     }
     if (foo is C && foo == bar) {
-        bar.<!UNRESOLVED_REFERENCE!>c<!>()
+        bar.c()
     }
     if (foo is D && foo == bar) {
         bar.<!UNRESOLVED_REFERENCE!>d<!>()
     }
     if (foo is E && foo == bar) {
-        bar.<!UNRESOLVED_REFERENCE!>e<!>()
+        bar.e()
     }
 }
