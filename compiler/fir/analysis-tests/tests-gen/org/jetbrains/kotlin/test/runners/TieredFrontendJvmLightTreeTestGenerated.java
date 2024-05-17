@@ -25212,39 +25212,6 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       }
 
       @Nested
-      @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault")
-      @TestDataPath("$PROJECT_ROOT")
-      public class JvmDefault {
-        @Nested
-        @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/jvmDefaultWithCompatibility")
-        @TestDataPath("$PROJECT_ROOT")
-        public class JvmDefaultWithCompatibility {
-          @Test
-          @TestMetadata("target8.kt")
-          public void testTarget8() {
-            runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/jvmDefaultWithCompatibility/target8.kt");
-          }
-
-          @Test
-          @TestMetadata("target8Disabled.kt")
-          public void testTarget8Disabled() {
-            runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/jvmDefaultWithCompatibility/target8Disabled.kt");
-          }
-        }
-
-        @Nested
-        @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/jvmDefaultWithoutCompatibility")
-        @TestDataPath("$PROJECT_ROOT")
-        public class JvmDefaultWithoutCompatibility {
-          @Test
-          @TestMetadata("target8Disabled.kt")
-          public void testTarget8Disabled() {
-            runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/jvmDefaultWithoutCompatibility/target8Disabled.kt");
-          }
-        }
-      }
-
-      @Nested
       @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmField")
       @TestDataPath("$PROJECT_ROOT")
       public class JvmField {
@@ -26982,6 +26949,39 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       @TestMetadata("inheritedFunctionN.kt")
       public void testInheritedFunctionN() {
         runTest("compiler/testData/diagnostics/testsWithStdLib/java/inheritedFunctionN.kt");
+      }
+    }
+
+    @Nested
+    @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/jvmDefault")
+    @TestDataPath("$PROJECT_ROOT")
+    public class JvmDefault {
+      @Nested
+      @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/jvmDefaultWithCompatibility")
+      @TestDataPath("$PROJECT_ROOT")
+      public class JvmDefaultWithCompatibility {
+        @Test
+        @TestMetadata("target8.kt")
+        public void testTarget8() {
+          runTest("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/jvmDefaultWithCompatibility/target8.kt");
+        }
+
+        @Test
+        @TestMetadata("target8Disabled.kt")
+        public void testTarget8Disabled() {
+          runTest("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/jvmDefaultWithCompatibility/target8Disabled.kt");
+        }
+      }
+
+      @Nested
+      @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/jvmDefaultWithoutCompatibility")
+      @TestDataPath("$PROJECT_ROOT")
+      public class JvmDefaultWithoutCompatibility {
+        @Test
+        @TestMetadata("target8Disabled.kt")
+        public void testTarget8Disabled() {
+          runTest("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/jvmDefaultWithoutCompatibility/target8Disabled.kt");
+        }
       }
     }
 

@@ -19980,51 +19980,6 @@ public class TieredBackendJvmLightTreeTestGenerated extends AbstractTieredBacken
       }
 
       @Nested
-      @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault")
-      @TestDataPath("$PROJECT_ROOT")
-      public class JvmDefault {
-        @Test
-        @TestMetadata("generic.kt")
-        public void testGeneric() {
-          runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/generic.kt");
-        }
-
-        @Test
-        @TestMetadata("jvmDefaults.kt")
-        public void testJvmDefaults() {
-          runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/jvmDefaults.kt");
-        }
-
-        @Test
-        @TestMetadata("jvmDefaultsWithJava.kt")
-        public void testJvmDefaultsWithJava() {
-          runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/jvmDefaultsWithJava.kt");
-        }
-
-        @Nested
-        @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/allCompatibility")
-        @TestDataPath("$PROJECT_ROOT")
-        public class AllCompatibility {
-          @Test
-          @TestMetadata("specialization.kt")
-          public void testSpecialization() {
-            runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/allCompatibility/specialization.kt");
-          }
-        }
-
-        @Nested
-        @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/jvmDefaultWithoutCompatibility")
-        @TestDataPath("$PROJECT_ROOT")
-        public class JvmDefaultWithoutCompatibility {
-          @Test
-          @TestMetadata("target8.kt")
-          public void testTarget8() {
-            runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmDefault/jvmDefaultWithoutCompatibility/target8.kt");
-          }
-        }
-      }
-
-      @Nested
       @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/annotations/jvmField")
       @TestDataPath("$PROJECT_ROOT")
       public class JvmField {
@@ -21573,6 +21528,51 @@ public class TieredBackendJvmLightTreeTestGenerated extends AbstractTieredBacken
       @TestMetadata("patternCompileCallableReference.kt")
       public void testPatternCompileCallableReference() {
         runTest("compiler/testData/diagnostics/testsWithStdLib/java/patternCompileCallableReference.kt");
+      }
+    }
+
+    @Nested
+    @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/jvmDefault")
+    @TestDataPath("$PROJECT_ROOT")
+    public class JvmDefault {
+      @Test
+      @TestMetadata("generic.kt")
+      public void testGeneric() {
+        runTest("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/generic.kt");
+      }
+
+      @Test
+      @TestMetadata("jvmDefaults.kt")
+      public void testJvmDefaults() {
+        runTest("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/jvmDefaults.kt");
+      }
+
+      @Test
+      @TestMetadata("jvmDefaultsWithJava.kt")
+      public void testJvmDefaultsWithJava() {
+        runTest("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/jvmDefaultsWithJava.kt");
+      }
+
+      @Nested
+      @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/allCompatibility")
+      @TestDataPath("$PROJECT_ROOT")
+      public class AllCompatibility {
+        @Test
+        @TestMetadata("specialization.kt")
+        public void testSpecialization() {
+          runTest("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/allCompatibility/specialization.kt");
+        }
+      }
+
+      @Nested
+      @TestMetadata("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/jvmDefaultWithoutCompatibility")
+      @TestDataPath("$PROJECT_ROOT")
+      public class JvmDefaultWithoutCompatibility {
+        @Test
+        @TestMetadata("target8.kt")
+        public void testTarget8() {
+          runTest("compiler/testData/diagnostics/testsWithStdLib/jvmDefault/jvmDefaultWithoutCompatibility/target8.kt");
+        }
       }
     }
 
