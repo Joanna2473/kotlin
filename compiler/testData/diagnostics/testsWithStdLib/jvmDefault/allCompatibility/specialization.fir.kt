@@ -13,13 +13,13 @@ interface FooDerived: Foo<String>
 
 class Unspecialized<Y> : Foo<Y>
 
-open class UnspecializedFromDerived : FooDerived
+open class <!EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE, EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE!>UnspecializedFromDerived<!> : FooDerived
 
-abstract class AbstractUnspecializedFromDerived : FooDerived
+abstract class <!EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE, EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE!>AbstractUnspecializedFromDerived<!> : FooDerived
 
-open class Specialized : Foo<String>
+open class <!EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE, EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE!>Specialized<!> : Foo<String>
 
-abstract class AbstractSpecialized : Foo<String>
+abstract class <!EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE, EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE!>AbstractSpecialized<!> : Foo<String>
 
 
 @JvmDefaultWithoutCompatibility
@@ -38,7 +38,7 @@ abstract class AbstractSpecializedNC : Foo<String>
 final class FinalSpecialized : Foo<String>
 
 sealed class SealedSpecialized : Foo<String> {
-    open class A : SealedSpecialized();
+    open class <!EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE, EXPLICIT_OVERRIDE_REQUIRED_IN_COMPATIBILITY_MODE!>A<!> : SealedSpecialized();
 }
 
 enum class EnumSpecialized : Foo<String> {
