@@ -216,6 +216,7 @@ class Fir2IrLazyProperty(
             correspondingPropertySymbol = this.symbol
         ).apply {
             classifiersGenerator.setTypeParameters(this, this@Fir2IrLazyProperty.fir, ConversionTypeOrigin.DEFAULT)
+            //(this@Fir2IrLazyProperty.parent as? Fir2IrLazyClass)?.declarationsStatic?.add(this)
         }
     }
 
@@ -240,6 +241,7 @@ class Fir2IrLazyProperty(
             correspondingPropertySymbol = this.symbol
         ).apply {
             classifiersGenerator.setTypeParameters(this, this@Fir2IrLazyProperty.fir, ConversionTypeOrigin.SETTER)
+            //(this@Fir2IrLazyProperty.parent as? Fir2IrLazyClass)?.declarationsStatic?.add(this)
         }
     }
 

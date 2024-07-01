@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.backend.jvm.JvmBackendContext
 import org.jetbrains.kotlin.backend.jvm.JvmLoweredDeclarationOrigin
 import org.jetbrains.kotlin.backend.jvm.ir.*
 import org.jetbrains.kotlin.backend.jvm.unboxInlineClass
+import org.jetbrains.kotlin.builtins.StandardNames
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
@@ -36,6 +37,7 @@ import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.ir.visitors.acceptVoid
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.StandardClassIds
 import org.jetbrains.kotlin.types.Variance
 import org.jetbrains.org.objectweb.asm.Handle
 import org.jetbrains.org.objectweb.asm.Opcodes
@@ -410,7 +412,8 @@ internal class TypeOperatorLowering(private val backendContext: JvmBackendContex
         )
     }
 
-    private val equalsAny = backendContext.irBuiltIns.anyClass.getSimpleFunction("equals")!!
+    private val equalsAny = backendContext.irBuiltIns
+        .findBuiltInClassMemberFunctions(backendContext.irBuiltIns.anyClass, StandardNames.EQUALS_NAME).single()
 
     private fun JvmIrBuilder.irObjectEquals(receiver: IrExpression, arg: IrExpression) =
         irCall(equalsAny).apply {

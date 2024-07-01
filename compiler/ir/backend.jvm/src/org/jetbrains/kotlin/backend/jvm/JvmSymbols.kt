@@ -211,7 +211,7 @@ class JvmSymbols(
     override val stringBuilder: IrClassSymbol = createClass(FqName("java.lang.StringBuilder")) { klass ->
         klass.addConstructor()
         klass.addFunction("toString", irBuiltIns.stringType).apply {
-            overriddenSymbols = overriddenSymbols + any.functionByName("toString")
+            overriddenSymbols = overriddenSymbols + irBuiltIns.findBuiltInClassMemberFunctions(any, StandardNames.TO_STRING_NAME).single()
         }
 
         val appendTypes = with(irBuiltIns) {
