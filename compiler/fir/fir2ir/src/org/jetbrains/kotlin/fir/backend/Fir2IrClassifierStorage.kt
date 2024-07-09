@@ -12,29 +12,26 @@ import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.descriptors.Visibility
 import org.jetbrains.kotlin.fir.backend.generators.addDeclarationToParent
 import org.jetbrains.kotlin.fir.backend.generators.isExternalParent
-import org.jetbrains.kotlin.fir.backend.generators.isFakeOverride
 import org.jetbrains.kotlin.fir.backend.utils.ConversionTypeOrigin
 import org.jetbrains.kotlin.fir.backend.utils.unsubstitutedScope
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.declarations.utils.*
 import org.jetbrains.kotlin.fir.expressions.FirAnonymousObjectExpression
 import org.jetbrains.kotlin.fir.lazy.Fir2IrLazyClass
-import org.jetbrains.kotlin.fir.originalOrSelf
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
+import org.jetbrains.kotlin.fir.resolve.toClassSymbol
 import org.jetbrains.kotlin.fir.resolve.toSymbol
-import org.jetbrains.kotlin.fir.scopes.FirContainingNamesAwareScope
 import org.jetbrains.kotlin.fir.scopes.collectAllFunctions
 import org.jetbrains.kotlin.fir.scopes.staticScopeForBackend
+import org.jetbrains.kotlin.fir.scopes.unsubstitutedScope
 import org.jetbrains.kotlin.fir.symbols.ConeClassLikeLookupTag
 import org.jetbrains.kotlin.fir.symbols.impl.*
-import org.jetbrains.kotlin.fir.visibilityChecker
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrSyntheticBodyKind
 import org.jetbrains.kotlin.ir.symbols.*
 import org.jetbrains.kotlin.ir.symbols.impl.*
-import org.jetbrains.kotlin.ir.util.isEnumClass
-import org.jetbrains.kotlin.ir.util.isObject
+import org.jetbrains.kotlin.ir.util.getPackageFragment
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
@@ -257,7 +254,18 @@ class Fir2IrClassifierStorage(
                     .map { Name.identifier(it) }
             }
             if (irClass.kind == ClassKind.INTERFACE) {
-                val functions = irClass.fir.declarations.filterIsInstance<FirSimpleFunction>()
+                /*val callableNames = scope.getCallableNames()
+                val singleCallableName = callableNames.singleOrNull()
+                if (singleCallableName != null) {
+                    val singleCallable = scope.getFunctions(singleCallableName).singleOrNull()
+                    if (singleCallable != null && singleCallable.isAbstract) {
+                        functionNames += singleCallable.name
+                    }
+                }*/
+
+                //val functions = irClass.fir.declarations.filterIsInstance<FirSimpleFunction>()
+                val scope = irClass.fir.unsubstitutedScope(c.session, c.scopeSession, withForcedTypeCalculator = false, memberRequiredPhase = null)
+                val functions = scope.collectAllFunctions()
                 val sam = functions.singleOrNull { it.isAbstract }
                 functionNames.addIfNotNull(sam?.name)
             }

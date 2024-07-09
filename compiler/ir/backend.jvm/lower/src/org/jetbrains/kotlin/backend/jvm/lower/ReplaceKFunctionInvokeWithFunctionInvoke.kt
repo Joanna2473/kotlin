@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.backend.jvm.lower
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.phaser.PhaseDescription
 import org.jetbrains.kotlin.backend.jvm.JvmBackendContext
+import org.jetbrains.kotlin.builtins.StandardNames
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrFile
@@ -20,6 +21,10 @@ import org.jetbrains.kotlin.ir.util.isKSuspendFunction
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
+import org.jetbrains.kotlin.name.ClassId
+import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.StandardClassIds
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
 /**
@@ -31,7 +36,7 @@ import org.jetbrains.kotlin.util.OperatorNameConventions
     name = "ReplaceKFunctionInvokeWithFunctionInvoke",
     description = "Replace KFunction{n}.invoke with Function{n}.invoke"
 )
-internal class ReplaceKFunctionInvokeWithFunctionInvoke(@Suppress("UNUSED_PARAMETER", "unused") context: JvmBackendContext) :
+internal class ReplaceKFunctionInvokeWithFunctionInvoke(private val context: JvmBackendContext) :
     FileLoweringPass, IrElementVisitorVoid {
     override fun lower(irFile: IrFile) {
         irFile.acceptChildrenVoid(this)
@@ -53,8 +58,10 @@ internal class ReplaceKFunctionInvokeWithFunctionInvoke(@Suppress("UNUSED_PARAME
             return
         }
 
-        // The single overridden function of KFunction{n}.invoke must be Function{n}.invoke.
-        expression.symbol = callee.overriddenSymbols.single()
+        val i = parentClass.name.asString().takeLastWhile(Character::isDigit)
+        val functionClass = context.irBuiltIns.findClass(Name.identifier("Function$i"), FqName("kotlin.jvm.functions"))!!
+        expression.symbol = context.irBuiltIns.findBuiltInClassMemberFunctions(functionClass, OperatorNameConventions.INVOKE).single()
+
         expression.dispatchReceiver = expression.dispatchReceiver?.let {
             val newType = expression.symbol.owner.parentAsClass.defaultType
             IrTypeOperatorCallImpl(expression.startOffset, expression.endOffset, newType, IrTypeOperator.IMPLICIT_CAST, newType, it)
