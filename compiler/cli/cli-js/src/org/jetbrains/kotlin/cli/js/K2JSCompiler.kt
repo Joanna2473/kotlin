@@ -12,6 +12,7 @@ import com.intellij.util.ExceptionUtil
 import org.jetbrains.kotlin.analyzer.CompilationErrorException
 import org.jetbrains.kotlin.backend.common.CompilationException
 import org.jetbrains.kotlin.backend.common.phaser.PhaseConfig
+import org.jetbrains.kotlin.backend.wasm.WasmBackendContext
 import org.jetbrains.kotlin.backend.wasm.compileToLoweredIr
 import org.jetbrains.kotlin.backend.wasm.compileWasm
 import org.jetbrains.kotlin.backend.wasm.dce.eliminateDeadDeclarations
@@ -57,6 +58,7 @@ import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImplForJsIC
 import org.jetbrains.kotlin.ir.linkage.partial.setupPartialLinkageConfig
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.js.analyzer.JsAnalysisResult
 import org.jetbrains.kotlin.js.config.*
 import org.jetbrains.kotlin.konan.file.ZipFileSystemAccessor
@@ -173,6 +175,7 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
             }
         }
 
+    @OptIn(UnsafeDuringIrConstructionAPI::class)
     override fun doExecute(
         arguments: K2JSCompilerArguments,
         configuration: CompilerConfiguration,
@@ -376,6 +379,7 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
 
                 val res = compileWasm(
                     wasmCompiledFileFragments = wasmArtifacts,
+                    specialITableTypes = emptyList(),//!!!!!
                     moduleName = moduleName,
                     configuration = configuration,
                     typeScriptFragment = null,
@@ -487,8 +491,13 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
             )
             val wasmCompiledFileFragments = allModules.map { codeGenerator.generateModuleAsSingleFileFragment(it) }
 
+            val specialITableTypes = WasmBackendContext.getSpecialITableTypes(backendContext.irBuiltIns).map {
+                irFactory.declarationSignature(it.owner)
+            }
+
             val res = compileWasm(
                 wasmCompiledFileFragments = wasmCompiledFileFragments,
+                specialITableTypes = specialITableTypes,
                 moduleName = allModules.last().descriptor.name.asString(),
                 configuration = configuration,
                 typeScriptFragment = typeScriptFragment,

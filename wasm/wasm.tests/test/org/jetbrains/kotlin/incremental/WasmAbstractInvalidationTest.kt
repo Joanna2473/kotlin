@@ -92,6 +92,7 @@ abstract class WasmAbstractInvalidationTest(
 
                 val res = compileWasm(
                     wasmCompiledFileFragments = fileFragments,
+                    specialITableTypes = emptyList(),
                     moduleName = mainModuleInfo.moduleName,
                     configuration = configuration,
                     typeScriptFragment = null,

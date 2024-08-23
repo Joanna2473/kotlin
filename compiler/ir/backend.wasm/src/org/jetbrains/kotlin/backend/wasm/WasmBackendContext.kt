@@ -15,16 +15,11 @@ import org.jetbrains.kotlin.backend.wasm.utils.WasmInlineClassesUtils
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.messageCollector
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
-import org.jetbrains.kotlin.descriptors.impl.EmptyPackageFragmentDescriptor
-import org.jetbrains.kotlin.ir.*
+import org.jetbrains.kotlin.ir.IrBuiltIns
 import org.jetbrains.kotlin.ir.backend.js.*
-import org.jetbrains.kotlin.ir.backend.js.ir.JsIrBuilder
 import org.jetbrains.kotlin.ir.backend.js.lower.JsInnerClassesSupport
-import org.jetbrains.kotlin.ir.builders.declarations.addFunction
-import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
-import org.jetbrains.kotlin.ir.declarations.impl.IrFileImpl
 import org.jetbrains.kotlin.ir.linkage.partial.partialLinkageConfig
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFileSymbol
@@ -33,8 +28,6 @@ import org.jetbrains.kotlin.ir.symbols.impl.DescriptorlessExternalPackageFragmen
 import org.jetbrains.kotlin.ir.types.IrTypeSystemContext
 import org.jetbrains.kotlin.ir.types.IrTypeSystemContextImpl
 import org.jetbrains.kotlin.ir.util.SymbolTable
-import org.jetbrains.kotlin.ir.util.addChild
-import org.jetbrains.kotlin.ir.util.file
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.platform.wasm.WasmTarget
@@ -140,4 +133,32 @@ class WasmBackendContext(
         FqName("kotlin")
     )
 
+    companion object {
+        fun getSpecialITableTypes(irBuiltIns: IrBuiltIns) = listOf(
+            irBuiltIns.collectionClass,
+            irBuiltIns.setClass,
+            irBuiltIns.listClass,
+            irBuiltIns.mapClass,
+            irBuiltIns.mapEntryClass,
+            irBuiltIns.iterableClass,
+            irBuiltIns.iteratorClass,
+            irBuiltIns.listIteratorClass,
+            irBuiltIns.mutableCollectionClass,
+            irBuiltIns.mutableSetClass,
+            irBuiltIns.mutableListClass,
+            irBuiltIns.mutableMapClass,
+            irBuiltIns.mutableMapEntryClass,
+            irBuiltIns.mutableIterableClass,
+            irBuiltIns.mutableIteratorClass,
+            irBuiltIns.mutableListIteratorClass,
+            irBuiltIns.comparableClass,
+            irBuiltIns.charSequenceClass,
+            //FUNCTION_INTERFACE_CLASS
+        )
+    }
+
+    val specialSlotITableTypes by lazy(LazyThreadSafetyMode.NONE) {
+        getSpecialITableTypes(irBuiltIns)
+    }
 }
+
