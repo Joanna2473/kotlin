@@ -1880,6 +1880,12 @@ public class DiagnosticCompilerTestFirTestdataTestGenerated extends AbstractDiag
       }
 
       @Test
+      @TestMetadata("controlFlow.kt")
+      public void testControlFlow() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/crv/controlFlow.kt");
+      }
+
+      @Test
       @TestMetadata("exclusions.kt")
       public void testExclusions() {
         runTest("compiler/fir/analysis-tests/testData/resolve/crv/exclusions.kt");
