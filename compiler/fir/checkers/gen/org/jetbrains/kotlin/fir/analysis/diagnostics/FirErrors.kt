@@ -889,8 +889,6 @@ object FirErrors {
     val UNUSED_EXPRESSION: KtDiagnosticFactory0 = KtDiagnosticFactory0("UNUSED_EXPRESSION", WARNING, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
     val UNUSED_LAMBDA_EXPRESSION: KtDiagnosticFactory0 = KtDiagnosticFactory0("UNUSED_LAMBDA_EXPRESSION", WARNING, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
 
-    val RETURN_VALUE_NOT_USED: KtDiagnosticFactory1<String> = KtDiagnosticFactory1("RETURN_VALUE_NOT_USED", ERROR, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
-
     // Returns
     val RETURN_NOT_ALLOWED: KtDiagnosticFactory0 = KtDiagnosticFactory0("RETURN_NOT_ALLOWED", ERROR, SourceElementPositioningStrategies.RETURN_WITH_LABEL, KtReturnExpression::class)
     val NOT_A_FUNCTION_LABEL: KtDiagnosticFactory0 = KtDiagnosticFactory0("NOT_A_FUNCTION_LABEL", ERROR, SourceElementPositioningStrategies.RETURN_WITH_LABEL, KtReturnExpression::class)
