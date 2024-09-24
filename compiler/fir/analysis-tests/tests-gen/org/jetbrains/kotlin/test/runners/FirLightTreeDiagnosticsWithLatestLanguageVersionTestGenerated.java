@@ -1910,6 +1910,12 @@ public class FirLightTreeDiagnosticsWithLatestLanguageVersionTestGenerated exten
       }
 
       @Test
+      @TestMetadata("nullability.kt")
+      public void testNullability() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/crv/nullability.kt");
+      }
+
+      @Test
       @TestMetadata("scopes.kt")
       public void testScopes() {
         runTest("compiler/fir/analysis-tests/testData/resolve/crv/scopes.kt");
