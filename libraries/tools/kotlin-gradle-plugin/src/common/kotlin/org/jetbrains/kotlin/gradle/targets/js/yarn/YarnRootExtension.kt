@@ -13,7 +13,9 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.targets.js.AbstractSettings
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.*
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnv
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NpmApiExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.Platform
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin.Companion.RESTORE_YARN_LOCK_NAME
@@ -80,7 +82,7 @@ open class YarnRootExtension(
     val yarnSetupTaskProvider: TaskProvider<YarnSetupTask>
         get() = project.tasks
             .withType(YarnSetupTask::class.java)
-            .named(YarnSetupTask.NAME)
+            .named(nodeJsRoot.extensionName(YarnSetupTask.NAME))
 
     internal val platform: org.gradle.api.provider.Property<Platform> = project.objects.property(Platform::class.java)
 
@@ -106,10 +108,12 @@ open class YarnRootExtension(
     }
 
     val restoreYarnLockTaskProvider: TaskProvider<YarnLockCopyTask>
-        get() = project.tasks.withType(YarnLockCopyTask::class.java).named(RESTORE_YARN_LOCK_NAME)
+        get() = project.tasks.withType(YarnLockCopyTask::class.java)
+            .named(nodeJsRoot.extensionName(RESTORE_YARN_LOCK_NAME))
 
     val storeYarnLockTaskProvider: TaskProvider<YarnLockStoreTask>
-        get() = project.tasks.withType(YarnLockStoreTask::class.java).named(STORE_YARN_LOCK_NAME)
+        get() = project.tasks.withType(YarnLockStoreTask::class.java)
+            .named(nodeJsRoot.extensionName(STORE_YARN_LOCK_NAME))
 
     companion object {
         const val YARN: String = "kotlinYarn"

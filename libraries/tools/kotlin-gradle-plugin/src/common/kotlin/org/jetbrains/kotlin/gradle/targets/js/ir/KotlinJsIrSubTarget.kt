@@ -19,12 +19,17 @@ import org.jetbrains.kotlin.gradle.targets.js.dsl.Distribution
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsBinaryMode
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsSubTargetDsl
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.targetVariant
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.tasks.registerTask
 import org.jetbrains.kotlin.gradle.testing.internal.configureConventions
 import org.jetbrains.kotlin.gradle.testing.internal.kotlinTestRegistry
 import org.jetbrains.kotlin.gradle.utils.domainObjectSet
 import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsWasmEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 
 interface KotlinJsIrSubTargetWithBinary : KotlinJsSubTargetDsl, Named {
     fun processBinary()
@@ -51,6 +56,16 @@ abstract class KotlinJsIrSubTarget(
 
     internal val subTargetConfigurators: DomainObjectSet<SubTargetConfigurator<*, *>> =
         project.objects.domainObjectSet<SubTargetConfigurator<*, *>>()
+
+    protected val nodeJsRoot = target.targetVariant(
+        { project.rootProject.kotlinNodeJsRootExtension },
+        { project.rootProject.kotlinNodeJsForWasmRootExtension },
+    )
+
+    protected val nodeJsEnvSpec = target.targetVariant(
+        { project.kotlinNodeJsEnvSpec },
+        { project.kotlinNodeJsWasmEnvSpec },
+    )
 
     @ExperimentalDistributionDsl
     override fun distribution(body: Action<Distribution>) {
@@ -129,6 +144,9 @@ abstract class KotlinJsIrSubTarget(
                 testJs.dependsOn(binary.linkTask)
                 binary.mainFile
             }
+
+            testJs.nodeExecutable.value(nodeJsEnvSpec.executable)
+                .disallowChanges()
 
             testJs.inputFileProperty.set(
                 inputFileProperty

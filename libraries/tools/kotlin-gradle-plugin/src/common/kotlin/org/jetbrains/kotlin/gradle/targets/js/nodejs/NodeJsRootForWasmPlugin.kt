@@ -10,54 +10,58 @@ import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnForWasmPlugin
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 import kotlin.reflect.KClass
 
-open class NodeJsRootPlugin : AbstractNodeJsRootPlugin() {
+open class NodeJsRootForWasmPlugin : AbstractNodeJsRootPlugin() {
 
     override val rootDirectoryName: String
-        get() = jsPlatform
+        get() = wasmPlatform
 
     override val platformDisambiguate: String?
-        get() = null
+        get() = wasmPlatform
 
     override fun lockFileDirectory(projectDirectory: Directory): Directory {
-        return projectDirectory.dir(LockCopyTask.KOTLIN_JS_STORE)
+        return projectDirectory.dir(LockCopyTask.KOTLIN_JS_STORE).dir(rootDirectoryName)
     }
 
     override fun singleNodeJsPluginApply(project: Project): NodeJsEnvSpec =
-        NodeJsPlugin.apply(project)
+        NodeJsForWasmPlugin.apply(project)
 
     override val yarnPlugin: KClass<out Plugin<Project>> =
-        YarnPlugin::class
+        YarnForWasmPlugin::class
 
     override val platformType: KotlinPlatformType
-        get() = KotlinPlatformType.js
+        get() = KotlinPlatformType.wasm
 
-    companion object {
+    companion object : HasPlatformDisambiguate {
         fun apply(rootProject: Project): NodeJsRootExtension {
             check(rootProject == rootProject.rootProject)
-            rootProject.plugins.apply(NodeJsRootPlugin::class.java)
-            return rootProject.extensions.getByName(NodeJsRootExtension.EXTENSION_NAME) as NodeJsRootExtension
+            rootProject.plugins.apply(NodeJsRootForWasmPlugin::class.java)
+            return rootProject.extensions.getByName(extensionName(NodeJsRootExtension.EXTENSION_NAME)) as NodeJsRootExtension
         }
 
         val Project.kotlinNodeJsRootExtension: NodeJsRootExtension
-            get() = extensions.getByName(NodeJsRootExtension.EXTENSION_NAME).castIsolatedKotlinPluginClassLoaderAware()
+            get() = extensions.getByName(extensionName(NodeJsRootExtension.EXTENSION_NAME)).castIsolatedKotlinPluginClassLoaderAware()
 
         val Project.kotlinNpmResolutionManager: Provider<KotlinNpmResolutionManager>
             get() {
                 return project.gradle.sharedServices.registerIfAbsent(
-                    KotlinNpmResolutionManager::class.java.name,
+                    extensionName(KotlinNpmResolutionManager::class.java.name),
                     KotlinNpmResolutionManager::class.java
                 ) {
                     error("Must be already registered")
                 }
             }
 
-        val jsPlatform: String
-            get() = KotlinPlatformType.js.name
+        val wasmPlatform: String
+            get() = KotlinPlatformType.wasm.name
+
+        override val platformDisambiguate: String
+            get() = wasmPlatform
     }
 }

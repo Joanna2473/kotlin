@@ -12,6 +12,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
+import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.NpmVersions
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.KotlinRootNpmResolver
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.PACKAGE_JSON_UMBRELLA_TASK_NAME
@@ -24,7 +25,9 @@ import java.io.File
 open class NodeJsRootExtension(
     val project: Project,
     private val nodeJs: () -> NodeJsEnvSpec,
-) {
+    rootDir: String,
+    override val platformDisambiguate: String? = null,
+) : HasPlatformDisambiguate {
 
     init {
         check(project.rootProject == project)
@@ -110,7 +113,7 @@ open class NodeJsRootExtension(
 
     lateinit var resolver: KotlinRootNpmResolver
 
-    val rootPackageDirectory: Provider<Directory> = project.layout.buildDirectory.dir("js")
+    val rootPackageDirectory: Provider<Directory> = project.layout.buildDirectory.dir(rootDir)
 
     val projectPackagesDirectory: Provider<Directory>
         get() = rootPackageDirectory.map { it.dir("packages") }
@@ -121,16 +124,19 @@ open class NodeJsRootExtension(
     val versions = NpmVersions()
 
     val npmInstallTaskProvider: TaskProvider<out KotlinNpmInstallTask>
-        get() = project.tasks.withType(KotlinNpmInstallTask::class.java).named(KotlinNpmInstallTask.NAME)
+        get() = project.tasks.withType(KotlinNpmInstallTask::class.java)
+            .named(extensionName(KotlinNpmInstallTask.NAME))
 
     val rootPackageJsonTaskProvider: TaskProvider<RootPackageJsonTask>
-        get() = project.tasks.withType(RootPackageJsonTask::class.java).named(RootPackageJsonTask.NAME)
+        get() = project.tasks.withType(RootPackageJsonTask::class.java)
+            .named(extensionName(RootPackageJsonTask.NAME))
 
     val packageJsonUmbrellaTaskProvider: TaskProvider<Task>
-        get() = project.tasks.named(PACKAGE_JSON_UMBRELLA_TASK_NAME)
+        get() = project.tasks.named(extensionName(PACKAGE_JSON_UMBRELLA_TASK_NAME))
 
     val npmCachesSetupTaskProvider: TaskProvider<out KotlinNpmCachesSetup>
-        get() = project.tasks.withType(KotlinNpmCachesSetup::class.java).named(KotlinNpmCachesSetup.NAME)
+        get() = project.tasks.withType(KotlinNpmCachesSetup::class.java)
+            .named(extensionName(KotlinNpmCachesSetup.NAME))
 
     @Deprecated(
         "Use nodeJsSetupTaskProvider from NodeJsEnvSpec (not NodeJsRootExtension) instead. " +
