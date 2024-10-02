@@ -10,7 +10,6 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.process.ExecSpec
-import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJsCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.disambiguateName
 import org.jetbrains.kotlin.gradle.plugin.mpp.fileExtension
@@ -19,10 +18,12 @@ import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinPackageJsonTask
+import org.jetbrains.kotlin.gradle.targets.js.targetVariant
 import org.jetbrains.kotlin.gradle.utils.getFile
-import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 import java.io.File
 import java.io.Serializable
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsForWasmEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 
 val KotlinJsIrCompilation.npmProject: NpmProject
     get() = NpmProject(this)
@@ -46,12 +47,18 @@ open class NpmProject(@Transient val compilation: KotlinJsIrCompilation) : Seria
 
     @delegate:Transient
     val nodeJsRoot by lazy {
-        project.rootProject.kotlinNodeJsRootExtension
+        compilation.targetVariant(
+            { project.rootProject.kotlinNodeJsRootExtension },
+            { project.rootProject.kotlinNodeJsForWasmRootExtension },
+        )
     }
 
     @delegate:Transient
     val nodeJs by lazy {
-        project.kotlinNodeJsEnvSpec
+        compilation.targetVariant(
+            { project.kotlinNodeJsEnvSpec },
+            { project.kotlinNodeJsForWasmEnvSpec },
+        )
     }
 
     val dir: Provider<Directory> = nodeJsRoot.projectPackagesDirectory.zip(name) { directory, name ->
@@ -101,7 +108,7 @@ open class NpmProject(@Transient val compilation: KotlinJsIrCompilation) : Seria
         exec: ExecSpec,
         tool: String,
         nodeArgs: List<String> = listOf(),
-        args: List<String>
+        args: List<String>,
     ) {
         exec.workingDir(dir)
         exec.executable(nodeExecutable)

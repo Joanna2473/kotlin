@@ -16,9 +16,10 @@ import org.jetbrains.kotlin.gradle.targets.js.internal.parseNodeJsStackTraceAsJv
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTarget
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
+import org.jetbrains.kotlin.gradle.targets.js.targetVariant
 import org.jetbrains.kotlin.gradle.targets.js.writeWasmUnitTestRunner
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsForWasmEnvSpec
 
 internal class KotlinWasmNode(kotlinJsTest: KotlinJsTest) : KotlinJsTestFramework {
     override val settingsState: String = "KotlinWasmNode"
@@ -26,10 +27,13 @@ internal class KotlinWasmNode(kotlinJsTest: KotlinJsTest) : KotlinJsTestFramewor
     private val testPath = kotlinJsTest.path
 
     @Transient
-    private val nodeJs = kotlinJsTest.project.kotlinNodeJsEnvSpec
+    override val compilation: KotlinJsIrCompilation = kotlinJsTest.compilation
 
     @Transient
-    override val compilation: KotlinJsIrCompilation = kotlinJsTest.compilation
+    private val nodeJsEnvSpec = compilation.targetVariant(
+        { compilation.project.kotlinNodeJsEnvSpec },
+        { compilation.project.kotlinNodeJsForWasmEnvSpec },
+    )
 
     private val projectLayout = kotlinJsTest.project.layout
 
@@ -42,7 +46,7 @@ internal class KotlinWasmNode(kotlinJsTest: KotlinJsTest) : KotlinJsTestFramewor
             }
         }
 
-    override val executable: Provider<String> = nodeJs.executable
+    override val executable: Provider<String> = nodeJsEnvSpec.executable
 
     override fun createTestExecutionSpec(
         task: KotlinJsTest,

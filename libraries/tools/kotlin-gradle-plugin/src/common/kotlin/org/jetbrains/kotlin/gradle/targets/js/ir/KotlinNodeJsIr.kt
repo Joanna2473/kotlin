@@ -15,8 +15,6 @@ import org.jetbrains.kotlin.gradle.targets.js.KotlinWasmTargetType
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalMainFunctionArgumentsDsl
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsNodeDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinWasmNode
 import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
@@ -28,8 +26,6 @@ import javax.inject.Inject
 abstract class KotlinNodeJsIr @Inject constructor(target: KotlinJsIrTarget) :
     KotlinJsIrNpmBasedSubTarget(target, "node"),
     KotlinJsNodeDsl {
-
-    private val nodeJs = project.kotlinNodeJsEnvSpec
 
     override val testTaskDescription: String
         get() = "Run all ${target.name} tests inside nodejs using the builtin test framework"
@@ -48,11 +44,11 @@ abstract class KotlinNodeJsIr @Inject constructor(target: KotlinJsIrTarget) :
     }
 
     override fun configureTestDependencies(test: KotlinJsTest, binary: JsIrBinary) {
-        with(nodeJs) {
+        with(nodeJsEnvSpec) {
             test.dependsOn(project.nodeJsSetupTaskProvider)
         }
+
         if (target.wasmTargetType != KotlinWasmTargetType.WASI) {
-            val nodeJsRoot = project.rootProject.kotlinNodeJsRootExtension
             test.dependsOn(
                 nodeJsRoot.npmInstallTaskProvider,
             )
@@ -98,7 +94,6 @@ abstract class KotlinNodeJsIr @Inject constructor(target: KotlinJsIrTarget) :
 
     override fun configureDefaultTestFramework(test: KotlinJsTest) {
         if (target.platformType != KotlinPlatformType.wasm) {
-            val nodeJsRoot = project.rootProject.kotlinNodeJsRootExtension
             if (test.testFramework == null) {
                 test.useMocha { }
             }
