@@ -204,8 +204,35 @@ abstract class IrMemberAccessExpression<S : IrSymbol> : IrDeclarationReference()
             }
         }
         set(value) {
-            targetHasDispatchReceiver = setReceiverArgument(0, value, targetHasDispatchReceiver)
+            if (targetHasDispatchReceiver) {
+                arguments[0] = value
+            } else {
+                require(value == null) {
+                    "${this.javaClass.simpleName} has no argument slot for the corresponding extension receiver parameter." +
+                            "If you are sure want to add it (most likely for when the parameter has been added to the function since)," +
+                            " use insertExtensionReceiver() instead."
+                }
+            }
         }
+
+    /**
+     *
+     */
+    fun insertDispatchReceiver(value: IrExpression?) {
+        if (targetHasDispatchReceiver) {
+            arguments[0] = value
+        } else {
+            arguments.add(0, value)
+            targetHasDispatchReceiver = true
+        }
+    }
+
+    fun removeDispatchReceiver() {
+        if (targetHasDispatchReceiver) {
+            arguments.removeAt(0)
+            targetHasDispatchReceiver = false
+        }
+    }
 
     /**
      * Argument corresponding to the [IrParameterKind.ExtensionReceiver] parameter, if any.
@@ -229,34 +256,36 @@ abstract class IrMemberAccessExpression<S : IrSymbol> : IrDeclarationReference()
             }
         }
         set(value) {
-            targetHasExtensionReceiver = setReceiverArgument(getExtensionReceiverIndex(), value, targetHasExtensionReceiver)
+            if (targetHasExtensionReceiver) {
+                arguments[getExtensionReceiverIndex()] = value
+            } else {
+                require(value == null) {
+                    "${this.javaClass.simpleName} has no argument slot for the corresponding extension receiver parameter." +
+                            "If you are sure want to add it (most likely for when the parameter has been added to the function since)," +
+                            " use insertExtensionReceiver() instead."
+                }
+            }
         }
+
+    fun insertExtensionReceiver(value: IrExpression?) {
+        val index = getExtensionReceiverIndex()
+        if (targetHasExtensionReceiver) {
+            arguments[index] = value
+        } else {
+            arguments.add(index, value)
+            targetHasExtensionReceiver = true
+        }
+    }
+
+    fun removeExtensionReceiver() {
+        if (targetHasExtensionReceiver) {
+            arguments.removeAt(getExtensionReceiverIndex())
+            targetHasExtensionReceiver = false
+        }
+    }
 
     private fun getExtensionReceiverIndex(): Int {
         return (if (targetHasDispatchReceiver) 1 else 0) + targetContextParameterCount
-    }
-
-    private fun setReceiverArgument(index: Int, value: IrExpression?, targetHasThatReceiverParameter: Boolean): Boolean {
-        if (targetHasThatReceiverParameter) {
-            if (value != null) {
-                arguments[index] = value
-                return true
-            } else {
-                if (arguments[index] != null) {
-                    arguments.removeAt(index)
-                    return false
-                } else {
-                    return true
-                }
-            }
-        } else {
-            if (value != null) {
-                arguments.add(index, value)
-                return true
-            } else {
-                return false
-            }
-        }
     }
 
     /**
