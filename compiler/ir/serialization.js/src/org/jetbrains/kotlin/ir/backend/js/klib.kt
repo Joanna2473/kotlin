@@ -440,6 +440,7 @@ fun getModuleDescriptorByLibrary(current: KotlinLibrary, mapping: Map<String, Mo
     return md
 }
 
+// path to klib
 sealed class MainModule {
     class SourceFiles(val files: List<KtFile>) : MainModule()
     class Klib(val libPath: String) : MainModule()

@@ -287,6 +287,7 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
 
         // Run analysis if main module is sources
         var sourceModule: ModulesStructure? = null
+        // enables source transformation step
         val includes = arguments.includes
         if (includes == null) {
             val outputKlibPath =
@@ -298,6 +299,7 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
                 return OK
         }
 
+        // enables linkage
         if (!arguments.irProduceJs) {
             performanceManager?.notifyIRTranslationFinished()
             return OK
@@ -672,6 +674,7 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
 
         // Serialize klib
         if (arguments.irProduceKlibDir || arguments.irProduceKlibFile) {
+            // this is a default path
             val phaseConfig = createPhaseConfig(
                 JsPreSerializationLoweringPhasesProvider.lowerings(configuration),
                 arguments,
