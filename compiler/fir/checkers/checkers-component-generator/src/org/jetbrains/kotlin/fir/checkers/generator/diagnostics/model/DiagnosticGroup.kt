@@ -37,7 +37,7 @@ abstract class AbstractDiagnosticGroup @PrivateForInline constructor(val name: S
 
     @OptIn(PrivateForInline::class)
     internal inline fun <reified P : PsiElement> deprecationError(
-        featureForError: LanguageFeature,
+        featureForError: LanguageFeature?,
         positioningStrategy: PositioningStrategy = PositioningStrategy.DEFAULT,
         crossinline init: DiagnosticBuilder.Deprecation.() -> Unit = {}
     ) = deprecationDiagnosticDelegateProvider<P>(featureForError, positioningStrategy, init)
@@ -61,7 +61,7 @@ abstract class AbstractDiagnosticGroup @PrivateForInline constructor(val name: S
 
     @PrivateForInline
     internal inline fun <reified P : PsiElement> deprecationDiagnosticDelegateProvider(
-        featureForError: LanguageFeature,
+        featureForError: LanguageFeature?,
         positioningStrategy: PositioningStrategy,
         crossinline init: DiagnosticBuilder.Deprecation.() -> Unit = {}
     ) = PropertyDelegateProvider<Any?, ReadOnlyProperty<AbstractDiagnosticGroup, DeprecationDiagnosticData>> { _, property ->

@@ -214,7 +214,7 @@ class KtDiagnosticFactory4<A, B, C, D>(
 
 sealed class KtDiagnosticFactoryForDeprecation<F : AbstractKtDiagnosticFactory>(
     val name: String,
-    val deprecatingFeature: LanguageFeature,
+    val deprecatingFeature: LanguageFeature?,
     val warningFactory: F,
     val errorFactory: F
 )
@@ -224,7 +224,7 @@ private const val ERROR = "_ERROR"
 
 class KtDiagnosticFactoryForDeprecation0(
     name: String,
-    featureForError: LanguageFeature,
+    featureForError: LanguageFeature?,
     defaultPositioningStrategy: AbstractSourceElementPositioningStrategy,
     psiType: KClass<*>
 ) : KtDiagnosticFactoryForDeprecation<KtDiagnosticFactory0>(
@@ -236,7 +236,7 @@ class KtDiagnosticFactoryForDeprecation0(
 
 class KtDiagnosticFactoryForDeprecation1<A>(
     name: String,
-    featureForError: LanguageFeature,
+    featureForError: LanguageFeature?,
     defaultPositioningStrategy: AbstractSourceElementPositioningStrategy,
     psiType: KClass<*>
 ) : KtDiagnosticFactoryForDeprecation<KtDiagnosticFactory1<A>>(
@@ -248,7 +248,7 @@ class KtDiagnosticFactoryForDeprecation1<A>(
 
 class KtDiagnosticFactoryForDeprecation2<A, B>(
     name: String,
-    featureForError: LanguageFeature,
+    featureForError: LanguageFeature?,
     defaultPositioningStrategy: AbstractSourceElementPositioningStrategy,
     psiType: KClass<*>
 ) : KtDiagnosticFactoryForDeprecation<KtDiagnosticFactory2<A, B>>(
@@ -260,7 +260,7 @@ class KtDiagnosticFactoryForDeprecation2<A, B>(
 
 class KtDiagnosticFactoryForDeprecation3<A, B, C>(
     name: String,
-    featureForError: LanguageFeature,
+    featureForError: LanguageFeature?,
     defaultPositioningStrategy: AbstractSourceElementPositioningStrategy,
     psiType: KClass<*>
 ) : KtDiagnosticFactoryForDeprecation<KtDiagnosticFactory3<A, B, C>>(
@@ -272,7 +272,7 @@ class KtDiagnosticFactoryForDeprecation3<A, B, C>(
 
 class KtDiagnosticFactoryForDeprecation4<A, B, C, D>(
     name: String,
-    featureForError: LanguageFeature,
+    featureForError: LanguageFeature?,
     defaultPositioningStrategy: AbstractSourceElementPositioningStrategy,
     psiType: KClass<*>
 ) : KtDiagnosticFactoryForDeprecation<KtDiagnosticFactory4<A, B, C, D>>(

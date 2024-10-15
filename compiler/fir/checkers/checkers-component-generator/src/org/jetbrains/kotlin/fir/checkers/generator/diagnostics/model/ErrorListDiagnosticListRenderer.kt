@@ -74,7 +74,7 @@ object ErrorListDiagnosticListRenderer : DiagnosticListRenderer() {
         val escapedName = "\"${diagnostic.name}\""
         val severityOrFeatureForError = when (diagnostic) {
             is RegularDiagnosticData -> diagnostic.severity.name
-            is DeprecationDiagnosticData -> diagnostic.featureForError.name
+            is DeprecationDiagnosticData -> diagnostic.featureForError?.name ?: "null"
         }
         val positioningStrategy = diagnostic.positioningStrategy.expressionToCreate
         val psiTypeClass = "${diagnostic.psiType.kClass.simpleName!!}::class"
@@ -137,7 +137,7 @@ object ErrorListDiagnosticListRenderer : DiagnosticListRenderer() {
                 when (diagnostic) {
                     is RegularDiagnosticData ->
                         add("org.jetbrains.kotlin.diagnostics.Severity.${diagnostic.severity.name}")
-                    is DeprecationDiagnosticData ->
+                    is DeprecationDiagnosticData -> if (diagnostic.featureForError != null)
                         add("org.jetbrains.kotlin.config.LanguageFeature.${diagnostic.featureForError.name}")
                 }
             }

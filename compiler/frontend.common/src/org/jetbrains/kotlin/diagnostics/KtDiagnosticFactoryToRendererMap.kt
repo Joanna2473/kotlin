@@ -124,7 +124,7 @@ class KtDiagnosticFactoryToRendererMap(val name: String) {
                 else -> append(". ")
             }
             append("This will become an error")
-            val sinceVersion = deprecatingFeature.sinceVersion
+            val sinceVersion = deprecatingFeature?.sinceVersion
             if (sinceVersion != null) {
                 append(" in Kotlin ")
                 append(sinceVersion.versionString)

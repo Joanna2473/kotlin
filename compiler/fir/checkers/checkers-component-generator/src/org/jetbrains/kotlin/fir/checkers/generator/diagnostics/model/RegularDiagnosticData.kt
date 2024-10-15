@@ -29,7 +29,7 @@ data class RegularDiagnosticData(
 
 data class DeprecationDiagnosticData(
     override val containingObjectName: String,
-    val featureForError: LanguageFeature,
+    val featureForError: LanguageFeature?,
     override val name: String,
     override val psiType: KType,
     override val parameters: List<DiagnosticParameter>,

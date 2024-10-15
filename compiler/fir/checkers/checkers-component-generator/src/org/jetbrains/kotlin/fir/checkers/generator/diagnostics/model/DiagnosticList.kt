@@ -100,7 +100,7 @@ sealed class DiagnosticBuilder(
 
     class Deprecation(
         containingObjectName: String,
-        private val featureForError: LanguageFeature,
+        private val featureForError: LanguageFeature?,
         name: String,
         psiType: KType,
         positioningStrategy: PositioningStrategy,

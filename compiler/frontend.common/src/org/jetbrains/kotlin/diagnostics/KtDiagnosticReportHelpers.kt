@@ -123,7 +123,7 @@ fun <A, B, C, D> DiagnosticReporter.reportOn(
 }
 
 fun <F : AbstractKtDiagnosticFactory> KtDiagnosticFactoryForDeprecation<F>.chooseFactory(context: DiagnosticContext): F {
-    return if (context.languageVersionSettings.supportsFeature(deprecatingFeature)) {
+    return if (deprecatingFeature == null || context.languageVersionSettings.supportsFeature(deprecatingFeature)) {
         errorFactory
     } else {
         warningFactory
