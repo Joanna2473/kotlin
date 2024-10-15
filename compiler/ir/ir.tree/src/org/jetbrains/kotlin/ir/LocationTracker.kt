@@ -17,7 +17,15 @@ object LocationTracker {
     val argumentAddedForParameterInsertedAfterCreation = ConcurrentHashMap.newKeySet<List<StackTraceElement>>()
 
     fun recordStackTrace(registry: MutableSet<List<StackTraceElement>>, framesToSkip: Int = 0) {
-        if (registry !== argumentAddedForNonExistingParameter) return
-        throw IllegalStateException("!!!!!!!!!!!!!!")
+        if (registry !== argumentAddedForNonExistingParameter && registry !== argumentAddedForParameterInsertedAfterCreation) return
+
+        val property = when {
+            registry === parameterAddedWhileThereAreAlreadyCalls -> ::parameterAddedWhileThereAreAlreadyCalls
+            registry === parameterRemovedWhileThereAreAlreadyCalls -> ::parameterRemovedWhileThereAreAlreadyCalls
+            registry === argumentAddedForNonExistingParameter -> ::argumentAddedForNonExistingParameter
+            registry === argumentAddedForParameterInsertedAfterCreation -> ::argumentAddedForParameterInsertedAfterCreation
+            else -> error("WAT?")
+        }
+        throw IllegalStateException("!!!!!!!!!!!!!!" + property.name)
     }
 }
