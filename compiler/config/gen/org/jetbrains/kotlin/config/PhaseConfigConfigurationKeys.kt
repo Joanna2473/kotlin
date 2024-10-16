@@ -55,23 +55,23 @@ object PhaseConfigConfigurationKeys {
 
 }
 
-var CompilerConfiguration.disablePhases: MutableList<String>
+var CompilerConfiguration.disablePhases: List<String>
     get() = getList(PhaseConfigConfigurationKeys.DISABLE_PHASES)
     set(value) { put(PhaseConfigConfigurationKeys.DISABLE_PHASES, value) }
 
-var CompilerConfiguration.verbosePhases: MutableList<String>
+var CompilerConfiguration.verbosePhases: List<String>
     get() = getList(PhaseConfigConfigurationKeys.VERBOSE_PHASES)
     set(value) { put(PhaseConfigConfigurationKeys.VERBOSE_PHASES, value) }
 
-var CompilerConfiguration.phasesToDumpBefore: MutableList<String>
+var CompilerConfiguration.phasesToDumpBefore: List<String>
     get() = getList(PhaseConfigConfigurationKeys.PHASES_TO_DUMP_BEFORE)
     set(value) { put(PhaseConfigConfigurationKeys.PHASES_TO_DUMP_BEFORE, value) }
 
-var CompilerConfiguration.phasesToDumpAfter: MutableList<String>
+var CompilerConfiguration.phasesToDumpAfter: List<String>
     get() = getList(PhaseConfigConfigurationKeys.PHASES_TO_DUMP_AFTER)
     set(value) { put(PhaseConfigConfigurationKeys.PHASES_TO_DUMP_AFTER, value) }
 
-var CompilerConfiguration.phasesToDump: MutableList<String>
+var CompilerConfiguration.phasesToDump: List<String>
     get() = getList(PhaseConfigConfigurationKeys.PHASES_TO_DUMP)
     set(value) { put(PhaseConfigConfigurationKeys.PHASES_TO_DUMP, value) }
 
@@ -83,15 +83,15 @@ var CompilerConfiguration.phaseDumpOnlyFqName: String?
     get() = get(PhaseConfigConfigurationKeys.PHASE_DUMP_ONLY_FQ_NAME)
     set(value) { putIfNotNull(PhaseConfigConfigurationKeys.PHASE_DUMP_ONLY_FQ_NAME, value) }
 
-var CompilerConfiguration.phasesToValidateBefore: MutableList<String>
+var CompilerConfiguration.phasesToValidateBefore: List<String>
     get() = getList(PhaseConfigConfigurationKeys.PHASES_TO_VALIDATE_BEFORE)
     set(value) { put(PhaseConfigConfigurationKeys.PHASES_TO_VALIDATE_BEFORE, value) }
 
-var CompilerConfiguration.phasesToValidateAfter: MutableList<String>
+var CompilerConfiguration.phasesToValidateAfter: List<String>
     get() = getList(PhaseConfigConfigurationKeys.PHASES_TO_VALIDATE_AFTER)
     set(value) { put(PhaseConfigConfigurationKeys.PHASES_TO_VALIDATE_AFTER, value) }
 
-var CompilerConfiguration.phasesToValidate: MutableList<String>
+var CompilerConfiguration.phasesToValidate: List<String>
     get() = getList(PhaseConfigConfigurationKeys.PHASES_TO_VALIDATE)
     set(value) { put(PhaseConfigConfigurationKeys.PHASES_TO_VALIDATE, value) }
 

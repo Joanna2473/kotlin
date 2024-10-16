@@ -39,6 +39,7 @@ import org.jetbrains.kotlin.fir.extensions.FirAnalysisHandlerExtension
 import org.jetbrains.kotlin.fir.pipeline.FirResult
 import org.jetbrains.kotlin.fir.pipeline.buildResolveAndCheckFirFromKtFiles
 import org.jetbrains.kotlin.fir.pipeline.runPlatformCheckers
+import org.jetbrains.kotlin.fir.session.environment.AbstractProjectFileSearchScope
 import org.jetbrains.kotlin.modules.Module
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.progress.ProgressIndicatorAndCompilationCanceledStatus
@@ -102,8 +103,10 @@ internal fun runFrontendAndGenerateIrForMultiModuleChunkUsingFrontendIRAndPsi(
     with(frontendContext) {
         // K2/PSI: frontend
         val firResult = compileSourceFilesToAnalyzedFirViaPsi(
-            sourceFiles, diagnosticsReporter, chunk.joinToString(separator = "+") { it.getModuleName() },
-            chunk.fold(emptyList()) { paths, m -> paths + m.getFriendPaths() }
+            ktFiles = sourceFiles,
+            diagnosticsReporter = diagnosticsReporter,
+            rootModuleName = chunk.joinToString(separator = "+") { it.getModuleName() },
+            friendPaths = chunk.fold(emptyList()) { paths, m -> paths + m.getFriendPaths() }
         ) ?: run {
             FirDiagnosticsCompilerResultsReporter.reportToMessageCollector(
                 diagnosticsReporter, messageCollector,
@@ -165,7 +168,7 @@ internal fun FrontendContext.compileSourceFilesToAnalyzedFirViaPsi(
 
     val scriptsInCommonSourcesErrors = reportCommonScriptsError(ktFiles)
 
-    val sourceScope = (projectEnvironment as VfsBasedProjectEnvironment).getSearchScopeByPsiFiles(ktFiles) +
+    val sourceScope: AbstractProjectFileSearchScope = (projectEnvironment as VfsBasedProjectEnvironment).getSearchScopeByPsiFiles(ktFiles) +
             projectEnvironment.getSearchScopeForProjectJavaSources()
 
     var librariesScope = projectEnvironment.getSearchScopeForProjectLibraries()

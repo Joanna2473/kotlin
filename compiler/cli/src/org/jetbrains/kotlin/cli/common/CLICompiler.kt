@@ -70,6 +70,13 @@ abstract class CLICompiler<A : CommonCompilerArguments> {
     }
 
     private fun execImpl(messageCollector: MessageCollector, services: Services, arguments: A): ExitCode {
+        val languageVersion = arguments.languageVersion?.let { LanguageVersion.fromVersionString(arguments.languageVersion) }
+            ?: LanguageVersion.LATEST_STABLE
+        if (languageVersion.usesK2) {
+            val code = doExecuteNew(arguments, services, messageCollector)
+            if (code != null) return code
+        }
+
         val performanceManager = createPerformanceManager(arguments, services)
         if (arguments.reportPerf || arguments.dumpPerf != null) {
             performanceManager.enableCollectingPerformanceStatistics()
@@ -138,17 +145,6 @@ abstract class CLICompiler<A : CommonCompilerArguments> {
         }
     }
 
-    private fun Throwable.hasOOMCause(): Boolean = when (cause) {
-        is OutOfMemoryError -> true
-        else -> cause?.hasOOMCause() ?: false
-    }
-
-    private fun MessageCollector.reportCompilationCancelled(e: CompilationCanceledException) {
-        if (e !is IncrementalNextRoundException) {
-            report(INFO, "Compilation was canceled", null)
-        }
-    }
-
     private fun setupCommonArguments(configuration: CompilerConfiguration, arguments: A) {
         configuration.setupCommonArguments(arguments, this::createMetadataVersion)
     }
@@ -158,6 +154,14 @@ abstract class CLICompiler<A : CommonCompilerArguments> {
     protected abstract fun setupPlatformSpecificArgumentsAndServices(
         configuration: CompilerConfiguration, arguments: A, services: Services
     )
+
+    protected open fun doExecuteNew(
+        arguments: A,
+        services: Services,
+        basicMessageCollector: MessageCollector,
+    ): ExitCode? {
+        return null
+    }
 
     protected abstract fun doExecute(
         arguments: A,
@@ -446,3 +450,13 @@ fun checkPluginsArguments(
     return !hasErrors
 }
 
+fun Throwable.hasOOMCause(): Boolean = when (cause) {
+    is OutOfMemoryError -> true
+    else -> cause?.hasOOMCause() ?: false
+}
+
+fun MessageCollector.reportCompilationCancelled(e: CompilationCanceledException) {
+    if (e !is IncrementalNextRoundException) {
+        report(INFO, "Compilation was canceled", null)
+    }
+}

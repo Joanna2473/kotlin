@@ -308,8 +308,9 @@ object KotlinToJVMBytecodeCompiler {
     }
 
     internal fun Fir2IrActualizedResult.codegenFactoryWithJvmIrBackendInput(
-        configuration: CompilerConfiguration
-    ): Pair<CodegenFactory, CodegenFactory.BackendInput> {
+        configuration: CompilerConfiguration,
+        jvmBackendExtension: FirJvmBackendExtension? = null
+    ): Pair<JvmIrCodegenFactory, JvmIrCodegenFactory.JvmIrBackendInput> {
         val phaseConfig = configuration.get(CLIConfigurationKeys.PHASE_CONFIG)
         val codegenFactory = JvmIrCodegenFactory(configuration, phaseConfig)
         return codegenFactory to JvmIrCodegenFactory.JvmIrBackendInput(
@@ -319,7 +320,7 @@ object KotlinToJVMBytecodeCompiler {
             phaseConfig,
             components.irProviders,
             JvmGeneratorExtensionsImpl(configuration),
-            JvmBackendExtension.Default,
+            jvmBackendExtension ?: JvmBackendExtension.Default,
             pluginContext,
         ) {}
     }
