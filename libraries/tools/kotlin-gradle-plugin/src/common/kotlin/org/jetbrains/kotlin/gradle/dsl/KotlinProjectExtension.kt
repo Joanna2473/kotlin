@@ -5,7 +5,6 @@
 
 package org.jetbrains.kotlin.gradle.dsl
 
-import com.gradle.scan.agent.serialization.scan.serializer.kryo.it
 import org.gradle.api.Action
 import org.gradle.api.Named
 import org.gradle.api.NamedDomainObjectContainer
@@ -16,6 +15,8 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainSpec
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.abi.AbiValidationExtension
+import org.jetbrains.kotlin.gradle.internal.abi.abiValidationJvmOrAndroidDefault
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginLifecycle.CoroutineStart.Undispatched
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
@@ -188,6 +189,8 @@ abstract class KotlinJvmProjectExtension @Inject constructor(
 
     override val compilerOptions: KotlinJvmCompilerOptions = project.objects.KotlinJvmCompilerOptionsDefault(project)
 
+    override val abiValidation: AbiValidationExtension = project.abiValidationJvmOrAndroidDefault()
+
     override fun compilerOptions(configure: Action<KotlinJvmCompilerOptions>) {
         configure.execute(compilerOptions)
     }
@@ -320,6 +323,9 @@ abstract class KotlinAndroidProjectExtension @Inject constructor(
 ) : KotlinSingleTargetExtension<KotlinAndroidTarget>(project),
     KotlinAndroidExtension {
     override val target: KotlinAndroidTarget get() = targetFuture.getOrThrow()
+
+    override val abiValidation: AbiValidationExtension = project.abiValidationJvmOrAndroidDefault()
+
     override val targetFuture = CompletableFuture<KotlinAndroidTarget>()
 
     open fun target(body: KotlinAndroidTarget.() -> Unit) = project.launch(Undispatched) {

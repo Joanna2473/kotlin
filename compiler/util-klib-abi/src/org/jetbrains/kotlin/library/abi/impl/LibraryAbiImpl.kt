@@ -47,7 +47,7 @@ internal class AbiTopLevelDeclarationsImpl(
 internal class AbiClassImpl(
     override val qualifiedName: AbiQualifiedName,
     override val signatures: AbiSignatures,
-    private val annotations: Set<AbiQualifiedName>,
+    override val annotations: Set<AbiQualifiedName>,
     modality: AbiModality,
     kind: AbiClassKind,
     isInner: Boolean,
@@ -83,7 +83,7 @@ internal class AbiClassImpl(
 internal class AbiEnumEntryImpl(
     override val qualifiedName: AbiQualifiedName,
     override val signatures: AbiSignatures,
-    private val annotations: Set<AbiQualifiedName>
+    override val annotations: Set<AbiQualifiedName>
 ) : AbiEnumEntry {
     override fun hasAnnotation(annotationClassName: AbiQualifiedName) = annotationClassName in annotations
 }
@@ -92,7 +92,7 @@ internal class AbiEnumEntryImpl(
 internal class AbiConstructorImpl(
     override val qualifiedName: AbiQualifiedName,
     override val signatures: AbiSignatures,
-    private val annotations: Set<AbiQualifiedName>,
+    override val annotations: Set<AbiQualifiedName>,
     isInline: Boolean,
     contextReceiverParametersCount: Int,
     override val valueParameters: List<AbiValueParameter>
@@ -120,7 +120,7 @@ internal class AbiConstructorImpl(
 internal class AbiFunctionImpl(
     override val qualifiedName: AbiQualifiedName,
     override val signatures: AbiSignatures,
-    private val annotations: Set<AbiQualifiedName>,
+    override val annotations: Set<AbiQualifiedName>,
     modality: AbiModality,
     isInline: Boolean,
     isSuspend: Boolean,
@@ -186,7 +186,7 @@ internal class AbiValueParameterImpl(
 internal class AbiPropertyImpl(
     override val qualifiedName: AbiQualifiedName,
     override val signatures: AbiSignatures,
-    private val annotations: Set<AbiQualifiedName>,
+    override val annotations: Set<AbiQualifiedName>,
     modality: AbiModality,
     kind: AbiPropertyKind,
     override val getter: AbiFunction?,

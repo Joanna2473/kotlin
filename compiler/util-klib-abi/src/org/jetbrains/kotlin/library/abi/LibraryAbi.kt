@@ -192,6 +192,7 @@ interface AbiAnnotatedEntity {
 sealed interface AbiDeclaration : AbiAnnotatedEntity {
     val qualifiedName: AbiQualifiedName
     val signatures: AbiSignatures
+    val annotations: Set<AbiQualifiedName>
 }
 
 /**
