@@ -21,7 +21,7 @@ import kotlin.internal.ActualizeByJvmBuiltinProvider
  * For JS and Wasm [AtomicInt] is implemented trivially and is not thread-safe since these platforms do not support multi-threading.
  */
 @ActualizeByJvmBuiltinProvider
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public expect class AtomicInt public constructor(value: Int) {
     /**
      * Atomically gets the value of the atomic.
@@ -81,37 +81,37 @@ public expect class AtomicInt public constructor(value: Int) {
 /**
  * Atomically adds the [given value][delta] to the current value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public operator fun AtomicInt.plusAssign(delta: Int): Unit { this.addAndFetch(delta) }
 
 /**
  * Atomically subtracts the [given value][delta] from the current value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public operator fun AtomicInt.minusAssign(delta: Int): Unit { this.addAndFetch(-delta) }
 
 /**
  * Atomically increments the current value by one and returns the old value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public fun AtomicInt.fetchAndIncrement(): Int = this.fetchAndAdd(1)
 
 /**
  * Atomically increments the current value by one and returns the new value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public fun AtomicInt.incrementAndFetch(): Int = this.addAndFetch(1)
 
 /**
  * Atomically decrements the current value by one and returns the new value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public fun AtomicInt.decrementAndFetch(): Int = this.addAndFetch(-1)
 
 /**
  * Atomically decrements the current value by one and returns the old value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public fun AtomicInt.fetchAndDecrement(): Int = this.fetchAndAdd(-1)
 
 /**
@@ -128,7 +128,7 @@ public fun AtomicInt.fetchAndDecrement(): Int = this.fetchAndAdd(-1)
  * For JS and Wasm [AtomicLong] is implemented trivially and is not thread-safe since these platforms do not support multi-threading.
  */
 @ActualizeByJvmBuiltinProvider
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public expect class AtomicLong public constructor(value: Long) {
     /**
      * Atomically gets the value of the atomic.
@@ -188,37 +188,37 @@ public expect class AtomicLong public constructor(value: Long) {
 /**
  * Atomically adds the [given value][delta] to the current value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public operator fun AtomicLong.plusAssign(delta: Long): Unit { this.addAndFetch(delta) }
 
 /**
  * Atomically subtracts the [given value][delta] from the current value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public operator fun AtomicLong.minusAssign(delta: Long): Unit { this.addAndFetch(-delta) }
 
 /**
  * Atomically increments the current value by one and returns the old value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public fun AtomicLong.fetchAndIncrement(): Long = this.fetchAndAdd(1)
 
 /**
  * Atomically increments the current value by one and returns the new value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public fun AtomicLong.incrementAndFetch(): Long = this.addAndFetch(1)
 
 /**
  * Atomically decrements the current value by one and returns the new value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public fun AtomicLong.decrementAndFetch(): Long = this.addAndFetch(-1)
 
 /**
  * Atomically decrements the current value by one and returns the old value.
  */
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public fun AtomicLong.fetchAndDecrement(): Long = this.fetchAndAdd(-1)
 
 /**
@@ -235,7 +235,7 @@ public fun AtomicLong.fetchAndDecrement(): Long = this.fetchAndAdd(-1)
  * For JS and Wasm [AtomicBoolean] is implemented trivially and is not thread-safe since these platforms do not support multi-threading.
  */
 @ActualizeByJvmBuiltinProvider
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public expect class AtomicBoolean public constructor(value: Boolean) {
     /**
      * Atomically gets the value of the atomic.
@@ -294,7 +294,7 @@ public expect class AtomicBoolean public constructor(value: Boolean) {
  * For JS and Wasm [AtomicReference] is implemented trivially and is not thread-safe since these platforms do not support multi-threading.
  */
 @ActualizeByJvmBuiltinProvider
-@ExperimentalStdlibApi
+@ExperimentalAtomicApi
 public expect class AtomicReference<T> public constructor(value: T) {
     /**
      * Atomically gets the value of the atomic.
