@@ -102,6 +102,8 @@ abstract class KtCodeFragment(
         return context
     }
 
+    fun isNonLocal() = context == null
+
     override fun getResolveScope() = context?.resolveScope ?: super.getResolveScope()
 
     override fun clone(): KtCodeFragment {
