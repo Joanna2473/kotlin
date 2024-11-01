@@ -13,6 +13,8 @@ import org.jetbrains.kotlin.gradle.DeprecatedTargetPresetApi
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.InternalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.PRESETS_API_IS_DEPRECATED_MESSAGE
+import org.jetbrains.kotlin.gradle.dsl.abi.AbiValidationMultiplatformExtension
+import org.jetbrains.kotlin.gradle.internal.abi.abiValidationMultiplatformDefault
 import org.jetbrains.kotlin.gradle.internal.dsl.KotlinMultiplatformSourceSetConventionsImpl
 import org.jetbrains.kotlin.gradle.internal.syncCommonMultiplatformOptions
 import org.jetbrains.kotlin.gradle.plugin.*
@@ -250,6 +252,12 @@ abstract class KotlinMultiplatformExtension
             .also {
                 syncCommonMultiplatformOptions(it)
             }
+
+    val abiValidation: AbiValidationMultiplatformExtension = project.abiValidationMultiplatformDefault()
+
+    fun abiValidation(action: Action<AbiValidationMultiplatformExtension>) {
+        action.execute(abiValidation)
+    }
 }
 
 @KotlinGradlePluginPublicDsl

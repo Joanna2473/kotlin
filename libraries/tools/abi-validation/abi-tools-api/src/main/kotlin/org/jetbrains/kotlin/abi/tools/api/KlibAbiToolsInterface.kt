@@ -7,7 +7,13 @@ package org.jetbrains.kotlin.abi.tools.api
 
 import java.io.File
 
-public class JvmAbiSuit(
+public interface KlibAbiToolsInterface {
+    public fun dumpToLegacyFile(suites: List<KlibAbiSuit>, filters: AbiFilters, outputFile: File)
+
+    public fun dumpToV2File(suites: List<KlibAbiSuit>, filters: AbiFilters, outputFile: File)
+}
+
+public class KlibAbiSuit(
     public val name: String,
-    public val classfiles: Sequence<File>,
+    public val klibFiles: Sequence<File>,
 )

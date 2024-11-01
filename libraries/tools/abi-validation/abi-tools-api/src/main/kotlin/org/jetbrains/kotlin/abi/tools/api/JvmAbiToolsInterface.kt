@@ -21,3 +21,8 @@ public interface JvmAbiToolsInterface {
         actualFile: File
     ): String?
 }
+
+public class JvmAbiSuit(
+    public val name: String,
+    public val classfiles: Sequence<File>,
+)

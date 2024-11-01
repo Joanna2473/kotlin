@@ -97,7 +97,7 @@ public class BinaryCompatibilityValidatorPlugin : Plugin<Project> {
             if (target.platformType == KotlinPlatformType.jvm) {
                 target.mainCompilationOrNull?.also {
                     project.configureKotlinCompilation(
-                        it, extension, jvmRuntimeClasspath, targetConfig, commonApiDump, commonApiCheck
+                        it, extension, jvmRuntimeClasspath, targetConfig, commonApiDump
                     )
                 }
             } else if (target.platformType == KotlinPlatformType.androidJvm) {
@@ -108,7 +108,6 @@ public class BinaryCompatibilityValidatorPlugin : Plugin<Project> {
                         jvmRuntimeClasspath,
                         targetConfig,
                         commonApiDump,
-                        commonApiCheck,
                         useOutput = true
                     )
                 }
@@ -205,7 +204,6 @@ private fun Project.configureKotlinCompilation(
     jvmRuntimeClasspath: NamedDomainObjectProvider<Configuration>,
     targetConfig: TargetConfig = TargetConfig(this, extension),
     commonApiDump: TaskProvider<Task>? = null,
-    commonApiCheck: TaskProvider<Task>? = null,
     useOutput: Boolean = false,
 ) {
     val projectName = project.name
@@ -228,7 +226,7 @@ private fun Project.configureKotlinCompilation(
         outputApiFile.fileProvider(apiBuildDir.map { it.resolve(dumpFileName) })
         runtimeClasspath.from(jvmRuntimeClasspath)
     }
-    configureCheckTasks(apiBuild, extension, targetConfig, commonApiDump, commonApiCheck)
+    configureCheckTasks(apiBuild, extension, targetConfig, commonApiDump)
 }
 
 internal val Project.sourceSets: SourceSetContainer
@@ -278,21 +276,13 @@ private fun Project.configureCheckTasks(
     apiBuild: TaskProvider<KotlinApiBuildTask>,
     extension: ApiValidationExtension,
     targetConfig: TargetConfig,
-    commonApiDump: TaskProvider<Task>? = null,
-    commonApiCheck: TaskProvider<Task>? = null,
+    commonApiDump: TaskProvider<Task>? = null
 ) {
     val projectName = project.name
     val apiCheckDir = targetConfig.apiDir.map {
         projectDir.resolve(it).also { r ->
             logger.debug("Configuring api for ${targetConfig.targetName ?: "jvm"} to $r")
         }
-    }
-    val apiCheck = task<KotlinApiCompareTask>(targetConfig.apiTaskName("Check")) {
-        isEnabled = apiCheckEnabled(projectName, extension) && apiBuild.map { it.enabled }.getOrElse(true)
-        group = "verification"
-        description = "Checks signatures of public API against the golden value in API folder for $projectName"
-        projectApiFile.fileProvider(apiCheckDir.map { it.resolve(jvmDumpFileName) })
-        generatedApiFile.set(apiBuild.flatMap { it.outputApiFile })
     }
 
     val dumpFileName = project.jvmDumpFileName
@@ -305,11 +295,6 @@ private fun Project.configureCheckTasks(
     }
 
     commonApiDump?.configure { it.dependsOn(apiDump) }
-
-    when (commonApiCheck) {
-        null -> project.tasks.named("check").configure { it.dependsOn(apiCheck) }
-        else -> commonApiCheck.configure { it.dependsOn(apiCheck) }
-    }
 }
 
 private inline fun <reified T : Task> Project.task(

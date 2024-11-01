@@ -5,6 +5,8 @@
 
 package org.jetbrains.kotlin.gradle.dsl
 
+import org.gradle.api.Action
+import org.jetbrains.kotlin.gradle.dsl.abi.AbiValidationJvmExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
@@ -29,4 +31,10 @@ interface KotlinJvmExtension : KotlinBaseExtension,
      * An instance of [KotlinTarget] for [KotlinPlatformType.jvm] platform.
      */
     val target: KotlinTarget
+
+    val abiValidation: AbiValidationJvmExtension
+
+    fun abiValidation(action: Action<AbiValidationJvmExtension>) {
+        action.execute(abiValidation)
+    }
 }
