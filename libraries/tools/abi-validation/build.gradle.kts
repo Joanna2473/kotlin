@@ -1,7 +1,3 @@
-import kotlinx.kover.gradle.plugin.dsl.MetricType
-import kotlinx.validation.build.mavenCentralMetadata
-import kotlinx.validation.build.mavenRepositoryPublishing
-import kotlinx.validation.build.signPublicationIfKeyPresent
 import org.gradle.api.attributes.TestSuiteType.FUNCTIONAL_TEST
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -9,27 +5,12 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import java.net.URL
 
 plugins {
-    kotlin("jvm")
-    `java-gradle-plugin`
+//    kotlin("jvm")
+    `kotlin-dsl`
+//    `java-gradle-plugin`
     id("com.gradle.plugin-publish")
-    kotlinx.validation.build.conventions.`java-base`
-    signing
     `maven-publish`
     `jvm-test-suite`
-    id("org.jetbrains.kotlinx.binary-compatibility-validator")
-    alias(libs.plugins.kover)
-    alias(libs.plugins.dokka)
-}
-
-group = "org.jetbrains.kotlinx"
-project.findProperty("DeployVersion")?.let {
-    version = it
-}
-
-sourceSets {
-    test {
-        java.srcDir("src/test/kotlin")
-    }
 }
 
 // While gradle testkit supports injection of the plugin classpath it doesn't allow using dependency notation
@@ -48,7 +29,7 @@ val testPluginRuntimeConfiguration = configurations.create("testPluginRuntime") 
 // The task that will create a file that stores the classpath needed for the plugin to have additional runtime dependencies
 // This file is then used in to tell TestKit which classpath to use.
 val createClasspathManifest = tasks.register("createClasspathManifest") {
-    val outputDir = buildDir.resolve("cpManifests")
+    val outputDir =layout.buildDirectory.get().asFile.resolve("cpManifests")
     inputs.files(testPluginRuntimeConfiguration)
         .withPropertyName("runtimeClasspath")
         .withNormalizer(ClasspathNormalizer::class)
@@ -63,28 +44,26 @@ val createClasspathManifest = tasks.register("createClasspathManifest") {
 }
 
 dependencies {
-    implementation(gradleApi())
-    compileOnly(libs.kotlinx.metadata)
-    compileOnly(libs.kotlin.compiler.embeddable)
-    compileOnly(libs.ow2.asm)
-    compileOnly(libs.ow2.asmTree)
-    implementation(libs.javaDiffUtils)
-    compileOnly(libs.gradlePlugin.kotlin)
+    compileOnly(gradleApi())
+    compileOnly(project(":kotlin-compiler-embeddable"))
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22")
+    implementation(project(":tools:abi-tools"))
+    implementation(project(":tools:abi-tools-api"))
 
     // Android support is not yet implemented https://github.com/Kotlin/binary-compatibility-validator/issues/94
     //compileOnly(libs.gradlePlugin.android)
 
     // The test needs the full kotlin multiplatform plugin loaded as it has no visibility of previously loaded plugins,
     // unlike the regular way gradle loads plugins.
-    testPluginRuntimeConfiguration(libs.gradlePlugin.android)
-    testPluginRuntimeConfiguration(libs.gradlePlugin.kotlin)
+    testPluginRuntimeConfiguration("com.android.tools.build:gradle:7.2.2")
+    testPluginRuntimeConfiguration("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22")
 }
 
 tasks.compileKotlin {
     compilerOptions {
         allWarningsAsErrors.set(true)
         @Suppress("DEPRECATION") // Compatibility with Gradle 7 requires Kotlin 1.4
-        languageVersion.set(KotlinVersion.KOTLIN_1_4)
+        languageVersion.set(KotlinVersion.KOTLIN_1_7)
         apiVersion.set(languageVersion)
         jvmTarget.set(JvmTarget.JVM_1_8)
         // Suppressing "w: Language version 1.4 is deprecated and its support will be removed" message
@@ -126,18 +105,8 @@ publishing {
             from(components["java"])
         }
 
-        mavenRepositoryPublishing(project)
-        mavenCentralMetadata()
     }
 
-    publications.withType<MavenPublication>().all {
-        signPublicationIfKeyPresent(this)
-    }
-
-    tasks.withType<PublishToMavenRepository>().configureEach {
-        dependsOn(tasks.withType<Sign>())
-    }
-    // a publication will be created automatically by com.gradle.plugin-publish
 }
 
 @Suppress("UnstableApiUsage")
@@ -167,18 +136,18 @@ testing {
             useJUnit()
             dependencies {
                 implementation(project())
-                implementation(libs.assertJ.core)
-                implementation(libs.kotlin.test)
+                implementation("org.assertj:assertj-core:3.18.1")
+                implementation(project(":kotlin-test"))
             }
         }
 
         val test by getting(JvmTestSuite::class) {
             description = "Regular unit tests"
             dependencies {
-                implementation(libs.kotlinx.metadata)
-                implementation(libs.kotlin.compiler.embeddable)
-                implementation(libs.ow2.asm)
-                implementation(libs.ow2.asmTree)
+                implementation(project(":kotlin-metadata-jvm"))
+                implementation(project(":kotlin-compiler-embeddable"))
+                compileOnly("org.ow2.asm:asm:9.6")
+                compileOnly("org.ow2.asm:asm-tree:9.6")
             }
         }
 
@@ -189,8 +158,8 @@ testing {
             dependencies {
                 implementation(files(createClasspathManifest))
 
-                implementation(libs.kotlinx.metadata)
-                implementation(libs.kotlin.compiler.embeddable)
+                implementation(project(":kotlin-metadata-jvm"))
+                implementation(project(":kotlin-compiler-embeddable"))
                 implementation(gradleApi())
                 implementation(gradleTestKit())
             }
@@ -214,28 +183,6 @@ tasks.withType<Sign>().configureEach {
     onlyIf("only sign if signatory is present") { signatory?.keyId != null }
 }
 
-kover {
-    koverReport {
-        filters {
-            excludes {
-                packages("kotlinx.validation.test")
-            }
-        }
-        verify {
-            rule {
-                minBound(80, MetricType.BRANCH)
-                minBound(90, MetricType.LINE)
-            }
-        }
-    }
-    // Unfortunately, we can't test both configuration cache use and the test coverage
-    // simultaneously, so the coverage collection should be enabled explicitly (and that
-    // will disable configuration cache).
-    if (!project.findProperty("kover.enabled")?.toString().toBoolean()) {
-        disable()
-    }
-}
-
 
 tasks.withType<DokkaTask>().configureEach {
     dokkaSourceSets.configureEach {
@@ -248,4 +195,9 @@ tasks.withType<DokkaTask>().configureEach {
         }
         samples.from("src/test/kotlin/samples/KlibDumpSamples.kt")
     }
+}
+
+samWithReceiver {
+    @Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+    myAnnotations.clear()
 }

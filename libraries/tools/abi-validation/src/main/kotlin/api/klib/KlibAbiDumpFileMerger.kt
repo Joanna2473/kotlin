@@ -295,7 +295,7 @@ internal class KlibAbiDumpMerger {
             return setOf(KlibTarget(configurableTargetName))
         }
         if (platformString != "NATIVE" && platformString != "WASM") {
-            val platformStringLc = platformString.toLowerCase(Locale.ROOT)
+            val platformStringLc = platformString.lowercase(Locale.ROOT)
             return if (configurableTargetName == null) {
                 setOf(KlibTarget(platformStringLc))
             } else {

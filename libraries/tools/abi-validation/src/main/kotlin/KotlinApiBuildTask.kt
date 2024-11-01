@@ -5,12 +5,11 @@
 
 package kotlinx.validation
 
-import kotlinx.validation.api.*
 import org.gradle.api.*
 import org.gradle.api.file.*
 import org.gradle.api.tasks.*
 import org.gradle.workers.WorkAction
-import org.gradle.workers.WorkerExecutor
+import org.jetbrains.kotlin.abi.tools.*
 import java.io.File
 import java.util.jar.JarFile
 import javax.inject.Inject

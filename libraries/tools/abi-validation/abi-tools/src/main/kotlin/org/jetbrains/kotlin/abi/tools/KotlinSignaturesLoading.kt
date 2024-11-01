@@ -1,12 +1,11 @@
 /*
- * Copyright 2016-2020 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package kotlinx.validation.api
+package org.jetbrains.kotlin.abi.tools
 
 import kotlin.metadata.jvm.*
-import kotlinx.validation.*
 import org.objectweb.asm.*
 import org.objectweb.asm.tree.*
 import java.io.*
@@ -372,7 +371,8 @@ private fun JarFile.classEntries() = Sequence { entries().iterator() }.filter {
 internal fun toSlashSeparatedPath(dotSeparated: String): String =
     dotSeparated.replace('.', '/') + '/'
 
-internal fun replaceDots(dotSeparated: String): String =
+@ExternalApi
+public fun replaceDots(dotSeparated: String): String =
     dotSeparated.replace('.', '/')
 
 internal fun annotations(l1: List<AnnotationNode>?, l2: List<AnnotationNode>?): List<AnnotationNode> =
