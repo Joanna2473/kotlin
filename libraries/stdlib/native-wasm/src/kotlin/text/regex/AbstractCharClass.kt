@@ -20,7 +20,7 @@
  *  limitations under the License.
  */
 
-@file:Suppress("DEPRECATION") // Char.toInt()
+@file:Suppress("DEPRECATION", "API_NOT_AVAILABLE") // Char.toInt()
 @file:OptIn(ExperimentalAtomicApi::class)
 package kotlin.text.regex
 
