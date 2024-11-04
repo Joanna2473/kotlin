@@ -158,8 +158,6 @@ fun compileWasm(
         isWasmJsTarget && useJsTag,
     )
 
-    wasmCompiledModuleFragment.createInterfaceTablesAndLinkTableSymbols()
-
     val linkedModule = wasmCompiledModuleFragment.linkWasmCompiledFragments()
 
     val sourceMapGeneratorForBinary = runIf(generateSourceMaps) {
