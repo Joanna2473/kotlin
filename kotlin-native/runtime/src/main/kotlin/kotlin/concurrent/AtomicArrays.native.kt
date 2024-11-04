@@ -24,7 +24,6 @@ import kotlin.internal.RequireKotlinVersionKind
  */
 @SinceKotlin("1.9")
 @RequireKotlin(version = "1.9.20", versionKind = RequireKotlinVersionKind.COMPILER_VERSION)
-@ExperimentalStdlibApi
 public actual class AtomicIntArray {
     private val array: IntArray
 
@@ -315,7 +314,6 @@ public actual class AtomicIntArray {
  */
 @SinceKotlin("1.9")
 @RequireKotlin(version = "1.9.20", versionKind = RequireKotlinVersionKind.COMPILER_VERSION)
-@ExperimentalStdlibApi
 public actual class AtomicLongArray {
     private val array: LongArray
 
@@ -606,7 +604,6 @@ public actual class AtomicLongArray {
  */
 @SinceKotlin("1.9")
 @RequireKotlin(version = "1.9.20", versionKind = RequireKotlinVersionKind.COMPILER_VERSION)
-@ExperimentalStdlibApi
 public actual class AtomicArray<T> {
     private val array: Array<T>
 
