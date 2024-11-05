@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.ir.generator.IrSymbolTree.functionSymbol
 import org.jetbrains.kotlin.ir.generator.IrSymbolTree.localDelegatedPropertySymbol
 import org.jetbrains.kotlin.ir.generator.IrSymbolTree.packageFragmentSymbol
 import org.jetbrains.kotlin.ir.generator.IrSymbolTree.propertySymbol
+import org.jetbrains.kotlin.ir.generator.IrSymbolTree.replSnippetSymbol
 import org.jetbrains.kotlin.ir.generator.IrSymbolTree.returnTargetSymbol
 import org.jetbrains.kotlin.ir.generator.IrSymbolTree.returnableBlockSymbol
 import org.jetbrains.kotlin.ir.generator.IrSymbolTree.scriptSymbol
@@ -534,6 +535,19 @@ object IrTree : AbstractTreeBuilder() {
         +field("constructor", constructor, nullable = true, isChild = false) {
             deepCopyExcludeFromApply = true
         } // K1
+    }
+    val replSnippet: Element by element(Declaration) {
+        parent(declarationBase)
+        parent(declarationWithName)
+        parent(declarationParent)
+        parent(metadataSourceOwner)
+
+        +declaredSymbol(replSnippetSymbol)
+        +descriptor("ReplSnippetDescriptor")
+        +listField("receiversParameters", valueParameter, mutability = Var)
+        +field("body", body)
+        +field("returnType", irTypeType, nullable = true)
+        +referencedSymbol("targetClass", classSymbol, nullable = true)
     }
     val simpleFunction: Element by element(Declaration) {
         parent(function)

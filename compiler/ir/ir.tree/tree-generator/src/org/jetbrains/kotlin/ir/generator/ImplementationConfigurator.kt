@@ -131,6 +131,14 @@ object ImplementationConfigurator : AbstractIrTreeImplementationConfigurator() {
             default("origin", "SCRIPT_ORIGIN")
         }
 
+        impl(replSnippet) {
+            implementation.putImplementationOptInInConstructor = false
+            implementation.constructorParameterOrderOverride = listOf("symbol", "name", "factory", "startOffset", "endOffset")
+            defaultNull("returnType", "targetClass")
+            isLateinit("receiversParameters", "body")
+            default("origin", "REPL_SNIPPET_ORIGIN")
+        }
+
         impl(moduleFragment) {
             implementation.putImplementationOptInInConstructor = false
             default("startOffset", undefinedOffset(), withGetter = true)
