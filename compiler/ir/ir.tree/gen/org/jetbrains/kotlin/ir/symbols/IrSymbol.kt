@@ -101,6 +101,7 @@ sealed interface IrClassifierSymbol : IrSymbol, TypeConstructorMarker {
  *
  * @see IrClass.sealedSubclasses
  * @see IrScript.targetClass
+ * @see IrReplSnippet.targetClass
  * @see IrGetObjectValue.symbol
  * @see IrCall.superQualifierSymbol
  * @see IrInstanceInitializerCall.classSymbol
@@ -116,6 +117,13 @@ interface IrClassSymbol : IrClassifierSymbol, IrBindableSymbol<ClassDescriptor, 
  * @see IrScript.earlierScripts
  */
 interface IrScriptSymbol : IrClassifierSymbol, IrBindableSymbol<ScriptDescriptor, IrScript>
+
+/**
+ * A symbol whose [owner] is [IrReplSnippet].
+ *
+ * Generated from: [org.jetbrains.kotlin.ir.generator.IrSymbolTree.replSnippetSymbol]
+ */
+interface IrReplSnippetSymbol : IrBindableSymbol<ReplSnippetDescriptor, IrReplSnippet>, TypeConstructorMarker
 
 /**
  * A symbol whose [owner] is [IrTypeParameter].
