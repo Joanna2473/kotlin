@@ -4008,6 +4008,12 @@ public class FirLightTreeDiagnosticsWithLatestLanguageVersionTestGenerated exten
       }
 
       @Test
+      @TestMetadata("innerOnTopLevelTypeAlias.kt")
+      public void testInnerOnTopLevelTypeAlias() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/nestedInnerTypeAliases/innerOnTopLevelTypeAlias.kt");
+      }
+
+      @Test
       @TestMetadata("simple.kt")
       public void testSimple() {
         runTest("compiler/fir/analysis-tests/testData/resolve/nestedTypeAliases/simple.kt");
