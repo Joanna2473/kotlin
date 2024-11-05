@@ -18,7 +18,9 @@ import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManager
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManagerForWasm
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.*
 import org.jetbrains.kotlin.gradle.tasks.registerTask
@@ -35,18 +37,29 @@ abstract class KotlinPackageJsonTask :
     // Only in configuration phase
     // Not part of configuration caching
 
-    private val nodeJs: NodeJsRootExtension
-        get() = project.rootProject.kotlinNodeJsRootExtension
+//    private val nodeJs: NodeJsRootExtension
+//        get() = project.rootProject.kotlinNodeJsRootExtension
+
+    @get:Internal
+    abstract val getWasm: Property<Boolean>
 
     private val rootResolver: KotlinRootNpmResolver
-        get() = nodeJs.resolver
+        get() = if (getWasm.get()) {
+            project.rootProject.kotlinNodeJsForWasmRootExtension.resolver
+        } else {
+            project.rootProject.kotlinNodeJsRootExtension.resolver
+        }
 
     private val compilationResolver: KotlinCompilationNpmResolver
         get() = rootResolver[projectPath][compilationDisambiguatedName.get()]
 
     private fun findDependentTasks(): Collection<Any> =
         compilationResolver.compilationNpmResolution.internalDependencies.map { dependency ->
-            nodeJs.resolver[dependency.projectPath][dependency.compilationName].npmProject.packageJsonTaskPath
+            if (getWasm.get()) {
+                project.rootProject.kotlinNodeJsForWasmRootExtension.resolver[dependency.projectPath][dependency.compilationName].npmProject.packageJsonTaskPath
+            } else {
+                project.rootProject.kotlinNodeJsRootExtension.resolver[dependency.projectPath][dependency.compilationName].npmProject.packageJsonTaskPath
+            }
         } + compilationResolver.compilationNpmResolution.internalCompositeDependencies.map { dependency ->
             dependency.includedBuild?.task(":$PACKAGE_JSON_UMBRELLA_TASK_NAME") ?: error("includedBuild instance is not available")
             dependency.includedBuild.task(":${RootPackageJsonTask.NAME}")
@@ -77,10 +90,19 @@ abstract class KotlinPackageJsonTask :
 
     @get:Input
     internal val toolsNpmDependencies: List<String> by lazy {
-        nodeJs.taskRequirements
-            .getCompilationNpmRequirements(projectPath, compilationDisambiguatedName.get())
-            .map { it.toString() }
-            .sorted()
+        if (getWasm.get()) {
+            project.rootProject.kotlinNodeJsForWasmRootExtension
+                .taskRequirements
+                .getCompilationNpmRequirements(projectPath, compilationDisambiguatedName.get())
+                .map { it.toString() }
+                .sorted()
+        } else {
+            project.rootProject.kotlinNodeJsRootExtension
+                .taskRequirements
+                .getCompilationNpmRequirements(projectPath, compilationDisambiguatedName.get())
+                .map { it.toString() }
+                .sorted()
+        }
     }
 
     @get:IgnoreEmptyDirectories
@@ -131,14 +153,23 @@ abstract class KotlinPackageJsonTask :
             val target = compilation.target
             val project = target.project
             val npmProject = compilation.npmProject
-            val nodeJsTaskProviders = project.rootProject.kotlinNodeJsRootExtension
+//            val nodeJsTaskProviders = project.rootProject.kotlinNodeJsRootExtension
 
-            val npmCachesSetupTask = nodeJsTaskProviders.npmCachesSetupTaskProvider
+//            val npmCachesSetupTask = nodeJsTaskProviders.npmCachesSetupTaskProvider
             val packageJsonTaskName = npmProject.packageJsonTaskName
-            val packageJsonUmbrella = nodeJsTaskProviders.packageJsonUmbrellaTaskProvider
-            val npmResolutionManager = project.kotlinNpmResolutionManager
-            val gradleNodeModules = GradleNodeModulesCache.registerIfAbsent(project, null, null)
+//            val packageJsonUmbrella = nodeJsTaskProviders.packageJsonUmbrellaTaskProvider
+            val npmResolutionManager = if (compilation.wasmTarget == null) {
+                project.kotlinNpmResolutionManager
+            } else {
+                project.kotlinNpmResolutionManagerForWasm
+            }
+            val gradleNodeModules = if (compilation.wasmTarget == null) {
+                GradleNodeModulesCache.registerIfAbsent(project, null, null, "Js")
+            } else {
+                GradleNodeModulesCache.registerIfAbsent(project, null, null, "Wasm")
+            }
             val packageJsonTask = project.registerTask<KotlinPackageJsonTask>(packageJsonTaskName) { task ->
+                task.getWasm.set(compilation.wasmTarget != null)
                 task.compilationDisambiguatedName.set(compilation.disambiguatedName)
                 task.packageJsonHandlers.set(compilation.packageJsonHandlers)
                 task.description = "Create package.json file for $compilation"
@@ -160,14 +191,38 @@ abstract class KotlinPackageJsonTask :
                 }
 
                 task.dependsOn(target.project.provider { task.findDependentTasks() })
-                task.dependsOn(npmCachesSetupTask)
+                if (compilation.wasmTarget == null) {
+                    println("${task.name} npmCachesSetupTaskProvider Js")
+
+                    task.dependsOn(project.rootProject.kotlinNodeJsRootExtension.npmCachesSetupTaskProvider)
+                } else {
+                    println("${task.name} npmCachesSetupTaskProvider Wasm")
+
+                    task.dependsOn(project.rootProject.kotlinNodeJsForWasmRootExtension.npmCachesSetupTaskProvider)
+                }
             }
 
-            packageJsonUmbrella.configure { task ->
-                task.inputs.file(packageJsonTask.map { it.packageJson })
+            if (compilation.wasmTarget == null) {
+                println("${compilation.wasmTarget} packageJsonUmbrellaTaskProvider Js")
+                project.rootProject.kotlinNodeJsRootExtension.packageJsonUmbrellaTaskProvider.configure { task ->
+                    task.inputs.file(packageJsonTask.map { it.packageJson })
+                }
+            } else {
+                println("${compilation.wasmTarget} packageJsonUmbrellaTaskProvider Wasm")
+                project.rootProject.kotlinNodeJsForWasmRootExtension.packageJsonUmbrellaTaskProvider.configure { task ->
+                    task.inputs.file(packageJsonTask.map { it.packageJson })
+                }
             }
 
-            nodeJsTaskProviders.rootPackageJsonTaskProvider.configure { it.mustRunAfter(packageJsonTask) }
+            if (compilation.wasmTarget == null) {
+                println("${compilation.wasmTarget} rootPackageJsonTaskProvider Js")
+
+                project.rootProject.kotlinNodeJsRootExtension.rootPackageJsonTaskProvider.configure { it.mustRunAfter(packageJsonTask) }
+            } else {
+                println("${compilation.wasmTarget} rootPackageJsonTaskProvider Wasm")
+
+                project.rootProject.kotlinNodeJsForWasmRootExtension.rootPackageJsonTaskProvider.configure { it.mustRunAfter(packageJsonTask) }
+            }
 
             return packageJsonTask
         }

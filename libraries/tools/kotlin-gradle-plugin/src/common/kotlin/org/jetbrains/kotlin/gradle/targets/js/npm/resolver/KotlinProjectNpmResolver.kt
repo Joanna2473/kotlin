@@ -65,8 +65,7 @@ class KotlinProjectNpmResolver(
     private fun addTargetListeners(target: KotlinJsIrTarget) {
         check(resolution == null) { resolver.alreadyResolvedMessage("add target $target") }
 
-        if (target.platformType == KotlinPlatformType.js ||
-            target.platformType == KotlinPlatformType.wasm && target.wasmTargetType != KotlinWasmTargetType.WASI
+        if (target.platformType == resolver.platfrom && target.wasmTargetType != KotlinWasmTargetType.WASI
         ) {
             target.compilations.all { compilation ->
                 if (compilation is KotlinJsIrCompilation) {

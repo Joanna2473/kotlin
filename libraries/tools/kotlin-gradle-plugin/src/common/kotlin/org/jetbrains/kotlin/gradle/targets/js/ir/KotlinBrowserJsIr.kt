@@ -22,8 +22,10 @@ import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDceDsl
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsBinaryMode
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsBrowserDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsWasmEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.testing.karma.KotlinKarma
@@ -44,8 +46,8 @@ abstract class KotlinBrowserJsIr @Inject constructor(target: KotlinJsIrTarget) :
     KotlinJsIrSubTarget(target, "browser"),
     KotlinJsBrowserDsl {
 
-    private val nodeJsRoot = project.rootProject.kotlinNodeJsRootExtension
-    private val nodeJs = project.kotlinNodeJsEnvSpec
+//    private val nodeJsRoot = project.rootProject.kotlinNodeJsRootExtension
+//    private val nodeJs = project.kotlinNodeJsEnvSpec
 
     private val webpackTaskConfigurations = project.objects.domainObjectSet<Action<KotlinWebpack>>()
     private val runTaskConfigurations = project.objects.domainObjectSet<Action<KotlinWebpack>>()
@@ -54,13 +56,23 @@ abstract class KotlinBrowserJsIr @Inject constructor(target: KotlinJsIrTarget) :
         get() = "Run all ${target.name} tests inside browser using karma and webpack"
 
     override fun configureTestDependencies(test: KotlinJsTest) {
-        test.dependsOn(
-            nodeJsRoot.npmInstallTaskProvider,
-        )
-        with(nodeJs) {
-            test.dependsOn(project.nodeJsSetupTaskProvider)
+        if (target.wasmTargetType == null) {
+            with(project.kotlinNodeJsEnvSpec) {
+                test.dependsOn(project.nodeJsSetupTaskProvider)
+            }
+            test.dependsOn(project.rootProject.kotlinNodeJsRootExtension.packageManagerExtension.map { it.postInstallTasks })
+            test.dependsOn(
+                project.rootProject.kotlinNodeJsRootExtension.npmInstallTaskProvider,
+            )
+        } else {
+            with(project.kotlinNodeJsWasmEnvSpec) {
+                test.dependsOn(project.nodeJsSetupTaskProvider)
+            }
+            test.dependsOn(project.rootProject.kotlinNodeJsForWasmRootExtension.packageManagerExtension.map { it.postInstallTasks })
+            test.dependsOn(
+                project.rootProject.kotlinNodeJsForWasmRootExtension.npmInstallTaskProvider,
+            )
         }
-        test.dependsOn(nodeJsRoot.packageManagerExtension.map { it.postInstallTasks })
     }
 
     override fun configureDefaultTestFramework(test: KotlinJsTest) {
@@ -71,7 +83,11 @@ abstract class KotlinBrowserJsIr @Inject constructor(target: KotlinJsIrTarget) :
         }
 
         if (test.enabled) {
-            nodeJsRoot.taskRequirements.addTaskRequirements(test)
+            if (target.wasmTargetType == null) {
+                project.rootProject.kotlinNodeJsRootExtension.taskRequirements.addTaskRequirements(test)
+            } else {
+                project.rootProject.kotlinNodeJsForWasmRootExtension.taskRequirements.addTaskRequirements(test)
+            }
         }
     }
 
@@ -169,7 +185,7 @@ abstract class KotlinBrowserJsIr @Inject constructor(target: KotlinJsIrTarget) :
                         ),
                         entryModuleName = binary.linkTask.flatMap { it.compilerOptions.moduleName },
                         configurationActions = runTaskConfigurations,
-                        nodeJs = nodeJsRoot,
+//                        nodeJs = nodeJsRoot,
                         defaultArchivesName = archivesName,
                     )
                 }
@@ -224,7 +240,7 @@ abstract class KotlinBrowserJsIr @Inject constructor(target: KotlinJsIrTarget) :
                         ),
                         entryModuleName = binary.linkTask.flatMap { it.compilerOptions.moduleName },
                         configurationActions = webpackTaskConfigurations,
-                        nodeJs = nodeJsRoot,
+//                        nodeJs = nodeJsRoot,
                         defaultArchivesName = archivesName,
                     )
                 }
@@ -259,15 +275,24 @@ abstract class KotlinBrowserJsIr @Inject constructor(target: KotlinJsIrTarget) :
         inputFilesDirectory: Provider<Directory>,
         entryModuleName: Provider<String>,
         configurationActions: DomainObjectSet<Action<KotlinWebpack>>,
-        nodeJs: NodeJsRootExtension,
+//        nodeJs: NodeJsRootExtension,
         defaultArchivesName: Property<String>,
     ) {
-        dependsOn(
-            nodeJs.npmInstallTaskProvider,
-            target.project.tasks.named(compilation.processResourcesTaskName)
-        )
+        if (target.wasmTargetType == null) {
+            dependsOn(
+                project.rootProject.kotlinNodeJsRootExtension.npmInstallTaskProvider,
+                target.project.tasks.named(compilation.processResourcesTaskName)
+            )
 
-        dependsOn(nodeJs.packageManagerExtension.map { it.postInstallTasks })
+            dependsOn(project.rootProject.kotlinNodeJsRootExtension.packageManagerExtension.map { it.postInstallTasks })
+        } else {
+            dependsOn(
+                project.rootProject.kotlinNodeJsForWasmRootExtension.npmInstallTaskProvider,
+                target.project.tasks.named(compilation.processResourcesTaskName)
+            )
+
+            dependsOn(project.rootProject.kotlinNodeJsForWasmRootExtension.packageManagerExtension.map { it.postInstallTasks })
+        }
 
         configureOptimization(mode)
 

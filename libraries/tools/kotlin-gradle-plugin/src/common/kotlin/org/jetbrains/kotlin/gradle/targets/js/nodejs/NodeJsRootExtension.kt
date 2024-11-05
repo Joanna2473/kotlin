@@ -25,7 +25,7 @@ open class NodeJsRootExtension(
     val project: Project,
     private val nodeJs: () -> NodeJsEnvSpec,
     rootDir: String,
-    private val platformDisambiguate: String? = null,
+    internal val platformDisambiguate: String? = null,
 ) {
 
     init {
@@ -124,14 +124,14 @@ open class NodeJsRootExtension(
 
     val npmInstallTaskProvider: TaskProvider<out KotlinNpmInstallTask>
         get() = project.tasks.withType(KotlinNpmInstallTask::class.java)
-            .named(platformDisambiguate?.let { KotlinNpmInstallTask.NAME } ?: KotlinNpmInstallTask.NAME)
+            .named(platformDisambiguate?.let { KotlinNpmInstallTask.NAME + it } ?: KotlinNpmInstallTask.NAME)
 
     val rootPackageJsonTaskProvider: TaskProvider<RootPackageJsonTask>
         get() = project.tasks.withType(RootPackageJsonTask::class.java)
-            .named(platformDisambiguate?.let { RootPackageJsonTask.NAME } ?: RootPackageJsonTask.NAME)
+            .named(platformDisambiguate?.let { RootPackageJsonTask.NAME + it } ?: RootPackageJsonTask.NAME)
 
     val packageJsonUmbrellaTaskProvider: TaskProvider<Task>
-        get() = project.tasks.named(platformDisambiguate?.let { PACKAGE_JSON_UMBRELLA_TASK_NAME } ?: PACKAGE_JSON_UMBRELLA_TASK_NAME)
+        get() = project.tasks.named(platformDisambiguate?.let { PACKAGE_JSON_UMBRELLA_TASK_NAME + it } ?: PACKAGE_JSON_UMBRELLA_TASK_NAME)
 
     val npmCachesSetupTaskProvider: TaskProvider<out KotlinNpmCachesSetup>
         get() = project.tasks.withType(KotlinNpmCachesSetup::class.java)

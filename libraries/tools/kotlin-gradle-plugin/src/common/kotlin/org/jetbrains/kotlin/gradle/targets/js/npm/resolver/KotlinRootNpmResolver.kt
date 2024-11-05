@@ -26,6 +26,7 @@ class KotlinRootNpmResolver internal constructor(
     val versions: NpmVersions,
     val projectPackagesDir: Provider<Directory>,
     val rootProjectDir: File,
+    val platfrom: KotlinPlatformType,
 ) : Serializable {
 
     internal var resolution: KotlinRootNpmResolution? = null

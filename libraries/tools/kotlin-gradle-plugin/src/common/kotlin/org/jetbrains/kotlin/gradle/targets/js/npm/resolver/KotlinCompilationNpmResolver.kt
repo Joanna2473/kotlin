@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTarget
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManager
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNpmResolutionManager as kotlinNpmResolutionManagerForWasm
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinPackageJsonTask
 import org.jetbrains.kotlin.gradle.tasks.registerTask
@@ -63,7 +64,11 @@ class KotlinCompilationNpmResolver(
         KotlinPackageJsonTask.create(compilation)
 
     val publicPackageJsonTaskHolder: TaskProvider<PublicPackageJsonTask> = run {
-        val npmResolutionManager = project.kotlinNpmResolutionManager
+        val npmResolutionManager = if (compilation.wasmTarget == null) {
+            project.kotlinNpmResolutionManager
+        } else {
+            project.kotlinNpmResolutionManagerForWasm
+        }
         val nodeJsTaskProviders = project.rootProject.kotlinNodeJsRootExtension
         project.registerTask<PublicPackageJsonTask>(
             npmProject.publicPackageJsonTaskName

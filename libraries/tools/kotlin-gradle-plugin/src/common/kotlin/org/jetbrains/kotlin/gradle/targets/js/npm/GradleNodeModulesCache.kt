@@ -55,9 +55,10 @@ abstract class GradleNodeModulesCache : AbstractNodeModulesCache() {
         private fun registerIfAbsentImpl(
             project: Project,
             rootProjectDir: File?,
-            cacheDir: Provider<Directory>?
+            cacheDir: Provider<Directory>?,
+            name: String
         ): Provider<GradleNodeModulesCache> {
-            project.gradle.sharedServices.registrations.findByName(serviceName)?.let {
+            project.gradle.sharedServices.registrations.findByName(serviceName + name)?.let {
                 @Suppress("UNCHECKED_CAST")
                 return it.service as Provider<GradleNodeModulesCache>
             }
@@ -69,7 +70,7 @@ abstract class GradleNodeModulesCache : AbstractNodeModulesCache() {
             requireNotNull(rootProjectDir, message)
             requireNotNull(cacheDir, message)
 
-            return project.gradle.sharedServices.registerIfAbsent(serviceName, serviceClass) {
+            return project.gradle.sharedServices.registerIfAbsent(serviceName + name, serviceClass) {
                 it.parameters.rootProjectDir.set(rootProjectDir)
                 it.parameters.cacheDir.set(cacheDir)
             }
@@ -78,8 +79,9 @@ abstract class GradleNodeModulesCache : AbstractNodeModulesCache() {
         fun registerIfAbsent(
             project: Project,
             rootProjectDir: File?,
-            cacheDir: Provider<Directory>?
-        ) = registerIfAbsentImpl(project, rootProjectDir, cacheDir).also { serviceProvider ->
+            cacheDir: Provider<Directory>?,
+            name: String
+        ) = registerIfAbsentImpl(project, rootProjectDir, cacheDir, name).also { serviceProvider ->
             SingleActionPerProject.run(project, UsesGradleNodeModulesCache::class.java.name) {
                 project.tasks.withType<UsesGradleNodeModulesCache>().configureEach { task ->
                     task.usesService(serviceProvider)

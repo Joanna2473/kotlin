@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.gradle.internal.testing.TCServiceMessagesTestExecuti
 import org.jetbrains.kotlin.gradle.targets.js.RequiredKotlinJsDependency
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsForWasmEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.npm.RequiresNpmDependencies
 import org.jetbrains.kotlin.gradle.targets.js.testing.karma.KotlinKarma
 import org.jetbrains.kotlin.gradle.targets.js.testing.mocha.KotlinMocha
@@ -34,10 +35,14 @@ constructor(
     override var compilation: KotlinJsIrCompilation,
 ) : KotlinTest(),
     RequiresNpmDependencies {
-    @Transient
-    private val nodeJs = project.kotlinNodeJsEnvSpec
+//    @Transient
+//    private val nodeJs = project.kotlinNodeJsEnvSpec
 
-    private val nodeExecutable = nodeJs.produceEnv(project.providers).map { it.executable }
+    private val nodeExecutable = if (compilation.wasmTarget == null) {
+        project.kotlinNodeJsEnvSpec.produceEnv(project.providers).map { it.executable }
+    } else {
+        project.kotlinNodeJsForWasmEnvSpec.produceEnv(project.providers).map { it.executable }
+    }
 
     @Input
     var environment = mutableMapOf<String, String>()

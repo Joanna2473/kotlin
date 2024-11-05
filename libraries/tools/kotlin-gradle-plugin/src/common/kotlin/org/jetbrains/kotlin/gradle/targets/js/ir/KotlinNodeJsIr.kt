@@ -13,7 +13,9 @@ import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsBinaryMode
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsNodeDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsForWasmEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinWasmNode
 import org.jetbrains.kotlin.gradle.tasks.dependsOn
@@ -25,7 +27,7 @@ abstract class KotlinNodeJsIr @Inject constructor(target: KotlinJsIrTarget) :
     KotlinJsIrSubTargetBase(target, "node"),
     KotlinJsNodeDsl {
 
-    private val nodeJs = project.kotlinNodeJsEnvSpec
+//    private val nodeJs = project.kotlinNodeJsEnvSpec
 
     override val testTaskDescription: String
         get() = "Run all ${target.name} tests inside nodejs using the builtin test framework"
@@ -66,26 +68,43 @@ abstract class KotlinNodeJsIr @Inject constructor(target: KotlinJsIrTarget) :
     }
 
     override fun configureTestDependencies(test: KotlinJsTest) {
-        with(nodeJs) {
-            test.dependsOn(project.nodeJsSetupTaskProvider)
+        if (target.wasmTargetType == null) {
+            with(project.kotlinNodeJsEnvSpec) {
+                test.dependsOn(project.nodeJsSetupTaskProvider)
+            }
+        } else {
+            with(project.kotlinNodeJsForWasmEnvSpec) {
+                test.dependsOn(project.nodeJsSetupTaskProvider)
+            }
         }
         if (target.wasmTargetType != KotlinWasmTargetType.WASI) {
-            val nodeJsRoot = project.rootProject.kotlinNodeJsRootExtension
-            test.dependsOn(
-                nodeJsRoot.npmInstallTaskProvider,
-            )
-            test.dependsOn(nodeJsRoot.packageManagerExtension.map { it.postInstallTasks })
+//            val nodeJsRoot = project.rootProject.kotlinNodeJsRootExtension
+            if (target.wasmTargetType == null) {
+                test.dependsOn(
+                    project.rootProject.kotlinNodeJsRootExtension.npmInstallTaskProvider,
+                )
+                test.dependsOn(project.rootProject.kotlinNodeJsRootExtension.packageManagerExtension.map { it.postInstallTasks })
+            } else {
+                test.dependsOn(
+                    project.rootProject.kotlinNodeJsForWasmRootExtension.npmInstallTaskProvider,
+                )
+                test.dependsOn(project.rootProject.kotlinNodeJsForWasmRootExtension.packageManagerExtension.map { it.postInstallTasks })
+            }
         }
     }
 
     override fun configureDefaultTestFramework(test: KotlinJsTest) {
         if (target.platformType != KotlinPlatformType.wasm) {
-            val nodeJsRoot = project.rootProject.kotlinNodeJsRootExtension
+//            val nodeJsRoot = project.rootProject.kotlinNodeJsRootExtension
             if (test.testFramework == null) {
                 test.useMocha { }
             }
             if (test.enabled) {
-                nodeJsRoot.taskRequirements.addTaskRequirements(test)
+                if (target.wasmTargetType == null) {
+                    project.rootProject.kotlinNodeJsRootExtension.taskRequirements.addTaskRequirements(test)
+                } else {
+                    project.rootProject.kotlinNodeJsForWasmRootExtension.taskRequirements.addTaskRequirements(test)
+                }
             }
         } else {
             test.testFramework = KotlinWasmNode(test)

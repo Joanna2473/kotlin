@@ -8,12 +8,15 @@ package org.jetbrains.kotlin.gradle.targets.js.npm.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsForWasmEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmProject
 import org.jetbrains.kotlin.gradle.targets.js.npm.UsesKotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.asNodeJsEnvironment
@@ -32,32 +35,77 @@ abstract class RootPackageJsonTask :
     // Only in configuration phase
     // Not part of configuration caching
 
-    private val nodeJsRoot
-        get() = project.rootProject.kotlinNodeJsRootExtension
+    @get:Internal
+    abstract val getWasm: Property<Boolean>
 
-    private val nodeJs
-        get() = project.rootProject.kotlinNodeJsEnvSpec
+//    private val nodeJsRoot
+//        get() = project.rootProject.kotlinNodeJsRootExtension
+
+//    private val nodeJs
+//        get() = project.rootProject.kotlinNodeJsEnvSpec
 
     private val rootResolver: KotlinRootNpmResolver
-        get() = nodeJsRoot.resolver
+        get() = if (getWasm.get()) {
+            println("$name rootResolver Wasm")
+
+            project.rootProject.kotlinNodeJsForWasmRootExtension.resolver
+        } else {
+            println("$name rootResolver js")
+
+            project.rootProject.kotlinNodeJsRootExtension.resolver
+        }
 
     private val packagesDir: Provider<Directory>
-        get() = nodeJsRoot.projectPackagesDirectory
+        get() = if (getWasm.get()) {
+            println("$name packagesDir Wasm")
+            project.rootProject.kotlinNodeJsForWasmRootExtension.projectPackagesDirectory
+        } else {
+            println("$name packagesDir js")
+            project.rootProject.kotlinNodeJsRootExtension.projectPackagesDirectory
+        }
 
     // -----
 
     private val nodeJsEnvironment by lazy {
-        asNodeJsEnvironment(nodeJsRoot, nodeJs.produceEnv(project.providers).get())
+        if (getWasm.get()) {
+            println("$name nodeJsEnvironment Wasm")
+            asNodeJsEnvironment(
+                project.rootProject.kotlinNodeJsForWasmRootExtension,
+                project.rootProject.kotlinNodeJsForWasmEnvSpec.produceEnv(project.providers).get()
+            )
+        } else {
+            println("$name nodeJsEnvironment js")
+            asNodeJsEnvironment(
+                project.rootProject.kotlinNodeJsRootExtension,
+                project.rootProject.kotlinNodeJsEnvSpec.produceEnv(project.providers).get()
+            )
+        }
     }
 
     private val packageManagerEnv by lazy {
-        nodeJsRoot.packageManagerExtension.get().environment
+        if (getWasm.get()) {
+            println("$name packageManagerEnv Wasm")
+            project.rootProject.kotlinNodeJsForWasmRootExtension.packageManagerExtension.get().environment
+        } else {
+            println("$name packageManagerEnv js")
+            project.rootProject.kotlinNodeJsRootExtension.packageManagerExtension.get().environment
+        }
     }
 
-    @get:OutputFile
-    val rootPackageJsonFile: Provider<RegularFile> =
-        nodeJsRoot.rootPackageDirectory.map { it.file(NpmProject.PACKAGE_JSON) }
+    private val wasmPackageDir by lazy { project.rootProject.kotlinNodeJsForWasmRootExtension.rootPackageDirectory }
+    private val jsPackageDir by lazy { project.rootProject.kotlinNodeJsRootExtension.rootPackageDirectory }
 
+    @get:OutputFile
+    val rootPackageJsonFile: Provider<RegularFile> = getWasm.flatMap {
+        if (it) {
+            println("$name rootPackageJsonFile Wasm")
+            wasmPackageDir.map { it.file(NpmProject.PACKAGE_JSON) }
+        } else {
+            println("$name rootPackageJsonFile js")
+
+            jsPackageDir.map { it.file(NpmProject.PACKAGE_JSON) }
+        }
+    }
 
     @Deprecated(
         "This property is deprecated and will be removed in future. Use rootPackageJsonFile instead",

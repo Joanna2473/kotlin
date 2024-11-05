@@ -13,6 +13,7 @@ import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.internal.unameExecResult
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
@@ -71,7 +72,8 @@ open class NodeJsRootForWasmPlugin : Plugin<Project> {
         val gradleNodeModulesProvider: Provider<GradleNodeModulesCache> = GradleNodeModulesCache.registerIfAbsent(
             project,
             project.projectDir,
-            nodeJsRoot.nodeModulesGradleCacheDirectory
+            nodeJsRoot.nodeModulesGradleCacheDirectory,
+            "Wasm"
         )
 
         val setupFileHasherTask = project.registerTask<KotlinNpmCachesSetup>(extensionName(KotlinNpmCachesSetup.NAME)) {
@@ -81,6 +83,7 @@ open class NodeJsRootForWasmPlugin : Plugin<Project> {
         }
 
         val npmInstall = project.registerTask<KotlinNpmInstallTask>(extensionName(KotlinNpmInstallTask.NAME)) { npmInstall ->
+            npmInstall.getWasm.set(true)
             with(nodeJs) {
                 npmInstall.dependsOn(project.nodeJsSetupTaskProvider)
             }
@@ -109,6 +112,7 @@ open class NodeJsRootForWasmPlugin : Plugin<Project> {
             nodeJsRoot.versions,
             nodeJsRoot.projectPackagesDirectory,
             nodeJsRoot.rootProjectDir,
+            KotlinPlatformType.wasm
         )
 
         val objectFactory = project.objects
@@ -119,7 +123,8 @@ open class NodeJsRootForWasmPlugin : Plugin<Project> {
                 nodeJsRoot.resolver.close()
             },
             gradleNodeModulesProvider,
-            nodeJsRoot.projectPackagesDirectory
+            nodeJsRoot.projectPackagesDirectory,
+            "Wasm"
         )
 
         val rootPackageJson = project.tasks.register(extensionName(RootPackageJsonTask.NAME), RootPackageJsonTask::class.java) { task ->
@@ -129,6 +134,8 @@ open class NodeJsRootForWasmPlugin : Plugin<Project> {
 
             task.npmResolutionManager.value(npmResolutionManager)
                 .disallowChanges()
+
+            task.getWasm.set(true)
 
             task.onlyIfCompat("Prepare NPM project only in configuring state") {
                 it as RootPackageJsonTask
@@ -304,7 +311,7 @@ open class NodeJsRootForWasmPlugin : Plugin<Project> {
         val Project.kotlinNpmResolutionManager: Provider<KotlinNpmResolutionManager>
             get() {
                 return project.gradle.sharedServices.registerIfAbsent(
-                    KotlinNpmResolutionManager::class.java.name,
+                    KotlinNpmResolutionManager::class.java.name + "Wasm",
                     KotlinNpmResolutionManager::class.java
                 ) {
                     error("Must be already registered")

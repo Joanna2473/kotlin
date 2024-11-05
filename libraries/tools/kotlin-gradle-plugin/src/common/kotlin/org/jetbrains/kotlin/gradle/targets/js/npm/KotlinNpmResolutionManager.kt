@@ -163,9 +163,10 @@ abstract class KotlinNpmResolutionManager : BuildService<KotlinNpmResolutionMana
             project: Project,
             resolution: Provider<KotlinRootNpmResolution>?,
             gradleNodeModulesProvider: Provider<GradleNodeModulesCache>?,
-            packagesDir: Provider<Directory>
+            packagesDir: Provider<Directory>,
+            name: String
         ): Provider<KotlinNpmResolutionManager> {
-            project.gradle.sharedServices.registrations.findByName(serviceName)?.let {
+            project.gradle.sharedServices.registrations.findByName(serviceName + name)?.let {
                 @Suppress("UNCHECKED_CAST")
                 return it.service as Provider<KotlinNpmResolutionManager>
             }
@@ -177,7 +178,7 @@ abstract class KotlinNpmResolutionManager : BuildService<KotlinNpmResolutionMana
             requireNotNull(resolution, message)
             requireNotNull(gradleNodeModulesProvider, message)
 
-            return project.gradle.sharedServices.registerIfAbsent(serviceName, serviceClass) {
+            return project.gradle.sharedServices.registerIfAbsent(serviceName + name, serviceClass) {
                 it.parameters.resolution.set(
                     resolution
                 )
@@ -190,8 +191,9 @@ abstract class KotlinNpmResolutionManager : BuildService<KotlinNpmResolutionMana
             project: Project,
             resolution: Provider<KotlinRootNpmResolution>?,
             gradleNodeModulesProvider: Provider<GradleNodeModulesCache>?,
-            packagesDir: Provider<Directory>
-        ) = registerIfAbsentImpl(project, resolution, gradleNodeModulesProvider, packagesDir).also { serviceProvider ->
+            packagesDir: Provider<Directory>,
+            name: String
+        ) = registerIfAbsentImpl(project, resolution, gradleNodeModulesProvider, packagesDir, name).also { serviceProvider ->
             SingleActionPerProject.run(project, UsesKotlinNpmResolutionManager::class.java.name) {
                 project.tasks.withType<UsesKotlinNpmResolutionManager>().configureEach { task ->
                     task.usesService(serviceProvider)

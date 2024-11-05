@@ -81,10 +81,10 @@ open class NodeJsForWasmPlugin : Plugin<Project> {
 
         fun apply(project: Project): NodeJsEnvSpec {
             project.plugins.apply(NodeJsForWasmPlugin::class.java)
-            return project.extensions.getByName(NodeJsEnvSpec.EXTENSION_NAME) as NodeJsEnvSpec
+            return project.extensions.getByName(NodeJsEnvSpec.EXTENSION_NAME + "Wasm") as NodeJsEnvSpec
         }
 
         val Project.kotlinNodeJsEnvSpec: NodeJsEnvSpec
-            get() = extensions.getByName(NodeJsEnvSpec.EXTENSION_NAME).castIsolatedKotlinPluginClassLoaderAware()
+            get() = extensions.getByName(NodeJsEnvSpec.EXTENSION_NAME + "Wasm").castIsolatedKotlinPluginClassLoaderAware()
     }
 }

@@ -13,6 +13,7 @@ import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.internal.unameExecResult
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
@@ -70,7 +71,8 @@ open class NodeJsRootPlugin : Plugin<Project> {
         val gradleNodeModulesProvider: Provider<GradleNodeModulesCache> = GradleNodeModulesCache.registerIfAbsent(
             project,
             project.projectDir,
-            nodeJsRoot.nodeModulesGradleCacheDirectory
+            nodeJsRoot.nodeModulesGradleCacheDirectory,
+            "Js"
         )
 
         val setupFileHasherTask = project.registerTask<KotlinNpmCachesSetup>(KotlinNpmCachesSetup.NAME) {
@@ -80,6 +82,7 @@ open class NodeJsRootPlugin : Plugin<Project> {
         }
 
         val npmInstall = project.registerTask<KotlinNpmInstallTask>(KotlinNpmInstallTask.NAME) { npmInstall ->
+            npmInstall.getWasm.set(false)
             with(nodeJs) {
                 npmInstall.dependsOn(project.nodeJsSetupTaskProvider)
             }
@@ -108,6 +111,7 @@ open class NodeJsRootPlugin : Plugin<Project> {
             nodeJsRoot.versions,
             nodeJsRoot.projectPackagesDirectory,
             nodeJsRoot.rootProjectDir,
+            KotlinPlatformType.js
         )
 
         val objectFactory = project.objects
@@ -118,13 +122,16 @@ open class NodeJsRootPlugin : Plugin<Project> {
                 nodeJsRoot.resolver.close()
             },
             gradleNodeModulesProvider,
-            nodeJsRoot.projectPackagesDirectory
+            nodeJsRoot.projectPackagesDirectory,
+            "Js"
         )
 
         val rootPackageJson = project.tasks.register(RootPackageJsonTask.NAME, RootPackageJsonTask::class.java) { task ->
             task.dependsOn(nodeJsRoot.npmCachesSetupTaskProvider)
             task.group = TASKS_GROUP_NAME
             task.description = "Create root package.json"
+
+            task.getWasm.set(false)
 
             task.npmResolutionManager.value(npmResolutionManager)
                 .disallowChanges()
@@ -300,7 +307,17 @@ open class NodeJsRootPlugin : Plugin<Project> {
         val Project.kotlinNpmResolutionManager: Provider<KotlinNpmResolutionManager>
             get() {
                 return project.gradle.sharedServices.registerIfAbsent(
-                    KotlinNpmResolutionManager::class.java.name,
+                    KotlinNpmResolutionManager::class.java.name + "Js",
+                    KotlinNpmResolutionManager::class.java
+                ) {
+                    error("Must be already registered")
+                }
+            }
+
+        val Project.kotlinNpmResolutionManagerForWasm: Provider<KotlinNpmResolutionManager>
+            get() {
+                return project.gradle.sharedServices.registerIfAbsent(
+                    KotlinNpmResolutionManager::class.java.name + "Wasm",
                     KotlinNpmResolutionManager::class.java
                 ) {
                     error("Must be already registered")
