@@ -503,6 +503,11 @@ class Fir2IrConverter(
                     }
                 }
             }
+            is FirReplSnippet -> {
+                require(parent is IrFile)
+                val irSnippet = declarationStorage.createIrReplSnippet(declaration)
+                addDeclarationToParentIfNeeded(irSnippet)
+            }
             is FirSimpleFunction -> {
                 declarationStorage.createAndCacheIrFunction(declaration, parent, isLocal = isInLocalClass)
             }
