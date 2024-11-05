@@ -37,6 +37,7 @@ import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
+import org.jetbrains.kotlin.ir.declarations.impl.IrReplSnippetImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrScriptImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrVariableImpl
 import org.jetbrains.kotlin.ir.declarations.impl.SCRIPT_K2_ORIGIN
@@ -904,6 +905,15 @@ class Fir2IrCallableDeclarationsGenerator(private val c: Fir2IrComponents) : Fir
             irScript.providedPropertiesParameters = emptyList()
         }
     }
+
+    // ------------------------------------ REPL snippets ------------------------------------
+
+    fun createIrReplSnippet(snippet: FirReplSnippet, symbol: IrReplSnippetSymbol): IrReplSnippet =
+        snippet.convertWithOffsets { startOffset, endOffset ->
+            IrReplSnippetImpl(symbol, snippet.name, IrFactoryImpl, startOffset, endOffset).also { irSnippet ->
+                irSnippet.metadata = FirMetadataSource.ReplSnippet(snippet)
+            }
+        }
 
     // ------------------------------------ utilities ------------------------------------
 

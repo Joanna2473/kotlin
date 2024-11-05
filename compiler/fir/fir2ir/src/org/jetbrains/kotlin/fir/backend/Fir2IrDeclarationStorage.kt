@@ -79,6 +79,8 @@ class Fir2IrDeclarationStorage(
 
     private val scriptCache: ConcurrentHashMap<FirScript, IrScript> = ConcurrentHashMap()
 
+    private val replSnippetCache: ConcurrentHashMap<FirReplSnippet, IrReplSnippet> = ConcurrentHashMap()
+
     class DataClassGeneratedFunctionsStorage {
         var hashCodeSymbol: IrSimpleFunctionSymbol? = null
         var toStringSymbol: IrSimpleFunctionSymbol? = null
@@ -1250,6 +1252,20 @@ class Fir2IrDeclarationStorage(
         val symbol = IrScriptSymbolImpl()
         return callablesGenerator.createIrScript(script, symbol).also {
             scriptCache[script] = it
+        }
+    }
+
+    // ------------------------------------ REPL snippets ------------------------------------
+
+    fun getCachedIrReplSnippet(snippet: FirReplSnippet): IrReplSnippet? {
+        return replSnippetCache[snippet]
+    }
+
+    fun createIrReplSnippet(snippet: FirReplSnippet): IrReplSnippet {
+        getCachedIrReplSnippet(snippet)?.let { error("IrReplSnippet already created: ${snippet.render()}") }
+        val symbol = IrReplSnippetSymbolImpl()
+        return callablesGenerator.createIrReplSnippet(snippet, symbol).also {
+            replSnippetCache[snippet] = it
         }
     }
 
