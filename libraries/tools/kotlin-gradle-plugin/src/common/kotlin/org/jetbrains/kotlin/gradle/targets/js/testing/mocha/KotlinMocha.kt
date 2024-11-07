@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.gradle.targets.js.RequiredKotlinJsDependency
 import org.jetbrains.kotlin.gradle.targets.js.internal.parseNodeJsStackTraceAsJvm
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTestFramework
@@ -29,7 +30,10 @@ class KotlinMocha(@Transient override val compilation: KotlinJsIrCompilation, pr
     private val project: Project = compilation.target.project
     private val npmProject = compilation.npmProject
     private val versions = project.rootProject.kotlinNodeJsRootExtension.versions
+    private val versionsWasm = project.rootProject.kotlinNodeJsForWasmRootExtension.versions
     private val npmProjectDir by project.provider { npmProject.dir }
+
+    private val isWasm = compilation.wasmTarget != null
 
     override val workingDir: Provider<Directory>
         get() = npmProjectDir
@@ -38,11 +42,19 @@ class KotlinMocha(@Transient override val compilation: KotlinJsIrCompilation, pr
         get() = "mocha"
 
     override val requiredNpmDependencies: Set<RequiredKotlinJsDependency>
-        get() = setOf(
-            versions.mocha,
-            versions.sourceMapSupport,
-            versions.kotlinWebHelpers,
-        )
+        get() = if (isWasm) {
+            setOf(
+                versionsWasm.mocha,
+                versionsWasm.sourceMapSupport,
+                versionsWasm.kotlinWebHelpers,
+            )
+        } else {
+            setOf(
+                versions.mocha,
+                versions.sourceMapSupport,
+                versions.kotlinWebHelpers,
+            )
+        }
 
     override fun getPath() = "$basePath:kotlinMocha"
 

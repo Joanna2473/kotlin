@@ -28,6 +28,7 @@ import org.jetbrains.kotlin.gradle.plugin.usesPlatformOf
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTarget
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNpmResolutionManager as kotlinNpmResolutionManagerForWasm
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
@@ -69,7 +70,7 @@ class KotlinCompilationNpmResolver(
         } else {
             project.kotlinNpmResolutionManagerForWasm
         }
-        val nodeJsTaskProviders = project.rootProject.kotlinNodeJsRootExtension
+//        val nodeJsTaskProviders = project.rootProject.kotlinNodeJsRootExtension
         project.registerTask<PublicPackageJsonTask>(
             npmProject.publicPackageJsonTaskName
         ) {
@@ -90,8 +91,14 @@ class KotlinCompilationNpmResolver(
                 it.attribute(publicPackageJsonAttribute)
             }
 
-            nodeJsTaskProviders.packageJsonUmbrellaTaskProvider.configure {
-                it.dependsOn(packageJsonTask)
+            if (compilation.wasmTarget == null) {
+                project.rootProject.kotlinNodeJsRootExtension.packageJsonUmbrellaTaskProvider.configure {
+                    it.dependsOn(packageJsonTask)
+                }
+            } else {
+                project.rootProject.kotlinNodeJsForWasmRootExtension.packageJsonUmbrellaTaskProvider.configure {
+                    it.dependsOn(packageJsonTask)
+                }
             }
 
             if (compilation.isMain()) {

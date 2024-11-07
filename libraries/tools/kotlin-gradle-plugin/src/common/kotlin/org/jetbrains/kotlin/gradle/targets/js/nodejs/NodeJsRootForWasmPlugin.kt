@@ -69,6 +69,10 @@ open class NodeJsRootForWasmPlugin : Plugin<Project> {
             npm
         )
 
+        npm.lockFileDirectory.convention(
+            project.layout.projectDirectory.dir("wasm").dir(LockCopyTask.KOTLIN_JS_STORE)
+        )
+
         val gradleNodeModulesProvider: Provider<GradleNodeModulesCache> = GradleNodeModulesCache.registerIfAbsent(
             project,
             project.projectDir,

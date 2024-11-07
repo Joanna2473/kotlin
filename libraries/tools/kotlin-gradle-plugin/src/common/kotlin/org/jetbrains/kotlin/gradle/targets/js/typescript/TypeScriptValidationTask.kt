@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.gradle.targets.js.RequiredKotlinJsDependency
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinIrJsGeneratedTSValidationStrategy
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.RequiresNpmDependencies
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 import javax.inject.Inject
@@ -30,15 +31,14 @@ constructor(
 ) : DefaultTask(), RequiresNpmDependencies {
     private val npmProject = compilation.npmProject
 
-    @get:Internal
-    @Transient
-    protected val nodeJs = project.rootProject.kotlinNodeJsRootExtension
+    private val versions = project.rootProject.kotlinNodeJsRootExtension.versions
+    private val versionsWasm = project.rootProject.kotlinNodeJsForWasmRootExtension.versions
 
-    private val versions = nodeJs.versions
+    private val getWasm: Boolean = compilation.wasmTarget != null
 
     @get:Internal
     override val requiredNpmDependencies: Set<RequiredKotlinJsDependency>
-        get() = setOf(versions.typescript)
+        get() = if (getWasm) setOf(versionsWasm.typescript) else setOf(versions.typescript)
 
     @get:SkipWhenEmpty
     @get:NormalizeLineEndings

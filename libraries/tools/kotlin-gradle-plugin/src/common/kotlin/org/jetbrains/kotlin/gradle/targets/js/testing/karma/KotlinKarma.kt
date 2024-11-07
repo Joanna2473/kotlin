@@ -42,6 +42,7 @@ import org.jetbrains.kotlin.gradle.utils.property
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 import org.slf4j.Logger
 import java.io.File
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 
 class KotlinKarma(
     @Transient override val compilation: KotlinJsIrCompilation,
@@ -54,10 +55,20 @@ class KotlinKarma(
 
     private val platformType = compilation.platformType
 
-    @Transient
-    private val nodeJs = project.rootProject.kotlinNodeJsRootExtension
-    private val nodeRootPackageDir by lazy { nodeJs.rootPackageDirectory }
-    private val versions = nodeJs.versions
+    private val isWasm = compilation.wasmTarget != null
+
+//    @Transient
+//    private val nodeJs = project.rootProject.kotlinNodeJsRootExtension
+    private val nodeRootPackageDir by lazy {
+        if (isWasm)
+            project.rootProject.kotlinNodeJsForWasmRootExtension.rootPackageDirectory
+        else
+            project.rootProject.kotlinNodeJsRootExtension.rootPackageDirectory
+    }
+    private val versions = if (isWasm)
+        project.rootProject.kotlinNodeJsForWasmRootExtension.versions
+    else
+        project.rootProject.kotlinNodeJsRootExtension.versions
 
     private val config: KarmaConfig = KarmaConfig()
     private val requiredDependencies = mutableSetOf<RequiredKotlinJsDependency>()

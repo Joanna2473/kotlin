@@ -83,6 +83,8 @@ open class YarnForWasmPlugin : Plugin<Project> {
             it.description = "Clean unused local yarn version"
         }
 
+        yarnRootExtension.lockFileDirectory = project.rootDir.resolve("wasm").resolve(LockCopyTask.KOTLIN_JS_STORE)
+
         tasks.register(extensionName(STORE_YARN_LOCK_NAME), YarnLockStoreTask::class.java) { task ->
             task.dependsOn(kotlinNpmInstall)
             task.inputFile.set(nodeJsRoot.rootPackageDirectory.map { it.file(LockCopyTask.YARN_LOCK) })
