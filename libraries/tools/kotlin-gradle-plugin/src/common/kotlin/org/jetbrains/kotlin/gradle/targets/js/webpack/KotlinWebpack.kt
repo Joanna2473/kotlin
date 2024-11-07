@@ -53,8 +53,12 @@ constructor(
 ) : DefaultTask(), RequiresNpmDependencies, WebpackRulesDsl, UsesBuildMetricsService {
     private val isWasm = compilation.wasmTarget != null
 
-    private val versions = project.rootProject.kotlinNodeJsRootExtension.versions
-    private val versionsWasm = project.rootProject.kotlinNodeJsForWasmRootExtension.versions
+    private val versions by lazy {
+        project.rootProject.kotlinNodeJsRootExtension.versions
+    }
+    private val versionsWasm by lazy {
+        project.rootProject.kotlinNodeJsForWasmRootExtension.versions
+    }
 
     private val rootPackageDir by lazy { project.rootProject.kotlinNodeJsRootExtension.rootPackageDirectory }
     private val rootPackageDirWasm by lazy { project.rootProject.kotlinNodeJsForWasmRootExtension.rootPackageDirectory }

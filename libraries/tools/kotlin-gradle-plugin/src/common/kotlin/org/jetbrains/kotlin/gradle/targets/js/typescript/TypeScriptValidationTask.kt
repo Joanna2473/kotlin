@@ -31,8 +31,8 @@ constructor(
 ) : DefaultTask(), RequiresNpmDependencies {
     private val npmProject = compilation.npmProject
 
-    private val versions = project.rootProject.kotlinNodeJsRootExtension.versions
-    private val versionsWasm = project.rootProject.kotlinNodeJsForWasmRootExtension.versions
+    private val versions by lazy { project.rootProject.kotlinNodeJsRootExtension.versions }
+    private val versionsWasm by lazy { project.rootProject.kotlinNodeJsForWasmRootExtension.versions }
 
     private val getWasm: Boolean = compilation.wasmTarget != null
 

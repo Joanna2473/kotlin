@@ -29,8 +29,12 @@ class KotlinMocha(@Transient override val compilation: KotlinJsIrCompilation, pr
     @Transient
     private val project: Project = compilation.target.project
     private val npmProject = compilation.npmProject
-    private val versions = project.rootProject.kotlinNodeJsRootExtension.versions
-    private val versionsWasm = project.rootProject.kotlinNodeJsForWasmRootExtension.versions
+    private val versions by lazy {
+        project.rootProject.kotlinNodeJsRootExtension.versions
+    }
+    private val versionsWasm by lazy {
+        project.rootProject.kotlinNodeJsForWasmRootExtension.versions
+    }
     private val npmProjectDir by project.provider { npmProject.dir }
 
     private val isWasm = compilation.wasmTarget != null

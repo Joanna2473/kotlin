@@ -75,9 +75,9 @@ abstract class KotlinNpmInstallTask :
 
     private val packageManagerEnv by lazy {
         if (getWasm.get()) {
-            project.rootProject.kotlinNodeJsRootExtension.packageManagerExtension.get().environment
-        } else {
             project.rootProject.kotlinNodeJsForWasmRootExtension.packageManagerExtension.get().environment
+        } else {
+            project.rootProject.kotlinNodeJsRootExtension.packageManagerExtension.get().environment
         }
     }
 
