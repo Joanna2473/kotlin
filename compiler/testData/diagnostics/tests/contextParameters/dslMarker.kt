@@ -14,12 +14,12 @@ class DslReceiver {
 @Dsl
 class Other
 
-<!CONFLICTING_OVERLOADS!>context(_: <!DEBUG_INFO_MISSING_UNRESOLVED!>DslReceiver<!>)
+<!CONFLICTING_OVERLOADS!><!CONTEXT_PARAMETERS_UNSUPPORTED!>context(_: <!DEBUG_INFO_MISSING_UNRESOLVED!>DslReceiver<!>)<!>
 fun contextFun()<!> {}
 
 class C
 
-<!CONFLICTING_OVERLOADS!>context(_: <!DEBUG_INFO_MISSING_UNRESOLVED!>C<!>)
+<!CONFLICTING_OVERLOADS!><!CONTEXT_PARAMETERS_UNSUPPORTED!>context(_: <!DEBUG_INFO_MISSING_UNRESOLVED!>C<!>)<!>
 fun contextFun()<!> {}
 
 fun annotatedFunctionTypeReceiver(f: (@Dsl C).() -> Unit) {}
@@ -73,7 +73,7 @@ fun test() {
     }
 }
 
-context(dsl: <!DEBUG_INFO_MISSING_UNRESOLVED!>DslReceiver<!>)
+<!CONTEXT_PARAMETERS_UNSUPPORTED!>context(dsl: <!DEBUG_INFO_MISSING_UNRESOLVED!>DslReceiver<!>)<!>
 fun testWithContext() {
     <!UNRESOLVED_REFERENCE!>dsl<!>.<!DEBUG_INFO_MISSING_UNRESOLVED!>memberFun<!>()
     with(Other()) {
