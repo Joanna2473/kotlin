@@ -82,13 +82,50 @@ open class NodeJsRootPlugin : Plugin<Project> {
         }
 
         val npmInstall = project.registerTask<KotlinNpmInstallTask>(KotlinNpmInstallTask.NAME) { npmInstall ->
-            npmInstall.getWasm.set(false)
             with(nodeJs) {
                 npmInstall.dependsOn(project.nodeJsSetupTaskProvider)
             }
             npmInstall.dependsOn(setupFileHasherTask)
             npmInstall.group = TASKS_GROUP_NAME
             npmInstall.description = "Find, download and link NPM dependencies and projects"
+
+            npmInstall.packageJsonFiles.value(
+                project.provider {
+                    nodeJsRoot.resolver
+                        .projectResolvers.values
+                        .flatMap { it.compilationResolvers }
+                        .map { it.compilationNpmResolution }
+                        .map { resolution ->
+                            val name = resolution.npmProjectName
+                            nodeJsRoot.projectPackagesDirectory.map { it.dir(name).file(NpmProject.PACKAGE_JSON) }.get()
+                        }
+                }
+            ).disallowChanges()
+
+            npmInstall.nodeJsEnvironment.value(
+                nodeJs.produceEnv(project.providers)
+                    .map {
+                        asNodeJsEnvironment(nodeJsRoot, it)
+                    }
+            ).disallowChanges()
+
+            npmInstall.packageManagerEnv.value(
+                nodeJsRoot.packageManagerExtension.map { it.environment }
+            ).disallowChanges()
+
+            npmInstall.nodeModules.value(
+                nodeJsRoot.rootPackageDirectory.map { it.dir("node_modules") }
+            ).disallowChanges()
+
+            npmInstall.additionalFiles.from(
+                nodeJsRoot.packageManagerExtension.map { it.additionalInstallOutput }
+            ).disallowChanges()
+
+            npmInstall.preparedFiles.from(
+                nodeJsRoot.packageManagerExtension.zip(npmInstall.nodeJsEnvironment) { npmApiExt, nodeJsEnvironment ->
+                    npmApiExt.packageManager.preparedFiles(nodeJsEnvironment)
+                }
+            ).disallowChanges()
 
             npmInstall.onlyIfCompat("No package.json files for install") { task ->
                 task as KotlinNpmInstallTask
@@ -131,10 +168,36 @@ open class NodeJsRootPlugin : Plugin<Project> {
             task.group = TASKS_GROUP_NAME
             task.description = "Create root package.json"
 
-            task.getWasm.set(false)
-
             task.npmResolutionManager.value(npmResolutionManager)
                 .disallowChanges()
+
+            task.packageJsonFiles.value(
+                project.provider {
+                    nodeJsRoot.resolver
+                        .projectResolvers.values
+                        .flatMap { it.compilationResolvers }
+                        .map { it.compilationNpmResolution }
+                        .map { resolution ->
+                            val name = resolution.npmProjectName
+                            nodeJsRoot.projectPackagesDirectory.map { it.dir(name).file(NpmProject.PACKAGE_JSON) }.get()
+                        }
+                }
+            ).disallowChanges()
+
+            task.nodeJsEnvironment.value(
+                nodeJs.produceEnv(project.providers)
+                    .map {
+                        asNodeJsEnvironment(nodeJsRoot, it)
+                    }
+            ).disallowChanges()
+
+            task.rootPackageJsonFile.value(
+                nodeJsRoot.rootPackageDirectory.map { it.file(NpmProject.PACKAGE_JSON) }
+            ).disallowChanges()
+
+            task.packageManagerEnv.value(
+                nodeJsRoot.packageManagerExtension.map { it.environment }
+            ).disallowChanges()
 
             task.onlyIfCompat("Prepare NPM project only in configuring state") {
                 it as RootPackageJsonTask
