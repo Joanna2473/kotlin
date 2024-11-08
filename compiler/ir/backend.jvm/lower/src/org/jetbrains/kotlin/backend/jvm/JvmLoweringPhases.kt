@@ -135,6 +135,7 @@ val jvmLoweringPhases = SameTypeNamedCompilerPhase(
         ::ConstEvaluationLowering,
         ::SerializeIrPhase,
         ::ScriptsToClassesLowering,
+        ::ReplSnippetsToClassesLowering,
         ::FileClassLowering,
         ::JvmStaticInObjectLowering,
         ::RepeatedAnnotationLowering,
