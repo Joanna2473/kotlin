@@ -6,7 +6,7 @@
 package tests
 
 import kotlinx.validation.ExperimentalBCVApi
-import kotlinx.validation.api.klib.*
+import org.jetbrains.kotlin.abi.tools.klib.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder

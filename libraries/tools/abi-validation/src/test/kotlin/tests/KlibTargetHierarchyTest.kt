@@ -5,12 +5,13 @@
 
 package kotlinx.validation.api.klib
 
+import org.jetbrains.kotlin.abi.tools.klib.TargetHierarchy
+import org.jetbrains.kotlin.abi.tools.klib.konanTargetNameMapping
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.junit.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 class KlibTargetHierarchyTest {
     @Test
@@ -40,7 +41,8 @@ class KlibTargetHierarchyTest {
     @Test
     fun testEveryMappedTargetIsWithinTheHierarchy() {
         konanTargetNameMapping.forEach { (underlyingTarget, name) ->
-            assertNotNull(TargetHierarchy.parent(name),
+            assertNotNull(
+                TargetHierarchy.parent(name),
                 "Target $name.$underlyingTarget is missing from the hierarchy.")
         }
     }

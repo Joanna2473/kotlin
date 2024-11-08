@@ -5,9 +5,6 @@
 
 package kotlinx.validation
 
-import kotlinx.validation.api.klib.*
-import kotlinx.validation.api.klib.TargetHierarchy
-import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -15,6 +12,7 @@ import org.gradle.api.tasks.*
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
+import org.jetbrains.kotlin.abi.tools.klib.*
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
 

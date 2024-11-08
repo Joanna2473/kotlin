@@ -5,17 +5,14 @@
 
 package kotlinx.validation
 
-import kotlinx.validation.api.klib.KlibDump
-import kotlinx.validation.api.klib.KlibTarget
-import kotlinx.validation.api.klib.saveTo
+import org.jetbrains.kotlin.abi.tools.klib.KlibDump
+import org.jetbrains.kotlin.abi.tools.klib.saveTo
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
-import java.io.File
-import java.io.Serializable
 import javax.inject.Inject
 
 /**

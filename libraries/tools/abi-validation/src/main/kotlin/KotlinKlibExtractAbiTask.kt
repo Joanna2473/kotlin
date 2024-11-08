@@ -5,9 +5,9 @@
 
 package kotlinx.validation
 
-import kotlinx.validation.api.klib.KlibDump
-import kotlinx.validation.api.klib.KlibTarget
-import kotlinx.validation.api.klib.saveTo
+import org.jetbrains.kotlin.abi.tools.klib.KlibDump
+import org.jetbrains.kotlin.abi.tools.klib.KlibTarget
+import org.jetbrains.kotlin.abi.tools.klib.saveTo
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property

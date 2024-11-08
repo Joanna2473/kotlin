@@ -5,7 +5,7 @@
 
 package kotlinx.validation
 
-import kotlinx.validation.api.klib.KlibTarget
+import org.jetbrains.kotlin.abi.tools.klib.KlibTarget
 import org.gradle.api.*
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.*
@@ -17,7 +17,6 @@ import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.library.abi.ExperimentalLibraryAbiReader
-import org.jetbrains.kotlin.library.abi.LibraryAbiReader
 import java.io.*
 import java.util.*
 

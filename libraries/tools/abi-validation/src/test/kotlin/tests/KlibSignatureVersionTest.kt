@@ -5,7 +5,6 @@
 
 package tests
 
-import kotlinx.validation.api.klib.KlibSignatureVersion
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

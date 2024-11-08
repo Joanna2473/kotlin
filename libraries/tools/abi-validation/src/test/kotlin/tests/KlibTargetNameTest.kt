@@ -5,10 +5,9 @@
 
 package tests
 
-import kotlinx.validation.api.klib.KlibTarget
+import org.jetbrains.kotlin.abi.tools.klib.KlibTarget
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 

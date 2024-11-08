@@ -6,9 +6,9 @@
 package samples
 
 import kotlinx.validation.ExperimentalBCVApi
-import kotlinx.validation.api.klib.KlibDump
-import kotlinx.validation.api.klib.KlibTarget
-import kotlinx.validation.api.klib.inferAbi
+import org.jetbrains.kotlin.abi.tools.klib.KlibDump
+import org.jetbrains.kotlin.abi.tools.klib.KlibTarget
+import org.jetbrains.kotlin.abi.tools.klib.inferAbi
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder

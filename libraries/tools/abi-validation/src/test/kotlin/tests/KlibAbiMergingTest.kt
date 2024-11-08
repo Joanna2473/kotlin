@@ -5,9 +5,9 @@
 
 package tests
 
-import kotlinx.validation.api.klib.DeclarationType
-import kotlinx.validation.api.klib.KlibAbiDumpMerger
-import kotlinx.validation.api.klib.KlibTarget
+import org.jetbrains.kotlin.abi.tools.klib.DeclarationType
+import org.jetbrains.kotlin.abi.tools.klib.KlibAbiDumpMerger
+import org.jetbrains.kotlin.abi.tools.klib.KlibTarget
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import java.io.File

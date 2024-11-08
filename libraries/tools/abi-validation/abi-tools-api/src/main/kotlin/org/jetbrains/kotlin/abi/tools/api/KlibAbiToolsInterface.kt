@@ -9,11 +9,10 @@ import java.io.File
 
 public interface KlibAbiToolsInterface {
     public fun dumpToLegacyFile(suites: List<KlibAbiSuit>, filters: AbiFilters, outputFile: File)
-
-    public fun dumpToV2File(suites: List<KlibAbiSuit>, filters: AbiFilters, outputFile: File)
 }
 
 public class KlibAbiSuit(
     public val name: String,
+    public val type: String,
     public val klibFiles: Sequence<File>,
 )

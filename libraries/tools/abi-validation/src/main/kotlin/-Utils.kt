@@ -5,8 +5,8 @@
 
 package kotlinx.validation
 
-import kotlinx.validation.api.klib.KlibTarget
-import kotlinx.validation.api.klib.konanTargetNameMapping
+import org.jetbrains.kotlin.abi.tools.klib.KlibTarget
+import org.jetbrains.kotlin.abi.tools.klib.konanTargetNameMapping
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType

@@ -5,12 +5,15 @@
 
 package kotlinx.validation
 
-import kotlinx.validation.api.klib.*
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.workers.WorkAction
+import org.jetbrains.kotlin.abi.tools.klib.KlibDump
+import org.jetbrains.kotlin.abi.tools.klib.KlibDumpFilters
+import org.jetbrains.kotlin.abi.tools.klib.KlibTarget
+import org.jetbrains.kotlin.abi.tools.klib.saveTo
 import org.jetbrains.kotlin.library.abi.ExperimentalLibraryAbiReader
 import org.jetbrains.kotlin.library.abi.LibraryAbiReader
 
@@ -35,14 +38,6 @@ public abstract class KotlinKlibAbiBuildTask : BuildTaskBase() {
     public abstract val klibFile: ConfigurableFileCollection
 
     /**
-     * Refer to [KlibValidationSettings.signatureVersion] for details.
-     */
-    @get:Input
-    public val signatureVersion: Property<KlibSignatureVersion> =
-        project.objects.property(KlibSignatureVersion::class.java)
-            .convention(KlibSignatureVersion.LATEST)
-
-    /**
      * A target [klibFile] was compiled for.
      */
     @get:Input
@@ -64,7 +59,6 @@ public abstract class KotlinKlibAbiBuildTask : BuildTaskBase() {
 
             params.klibFile.from(klibFile)
             params.target.set(target)
-            params.signatureVersion.set(signatureVersion)
             params.outputAbiFile.set(outputAbiFile)
         }
     }
@@ -72,7 +66,6 @@ public abstract class KotlinKlibAbiBuildTask : BuildTaskBase() {
 
 internal interface KlibAbiBuildParameters : BuildParametersBase {
     val klibFile: ConfigurableFileCollection
-    val signatureVersion: Property<KlibSignatureVersion>
     val target: Property<KlibTarget>
     val outputAbiFile: RegularFileProperty
 }
@@ -95,11 +88,10 @@ internal abstract class KlibAbiBuildWorker : WorkAction<KlibAbiBuildParameters> 
         outputFile.parentFile.mkdirs()
 
         val dump = KlibDump.fromKlib(parameters.klibFile.singleFile, parameters.target.get().configurableName,
-            KlibDumpFilters {
+                                     KlibDumpFilters {
                 ignoredClasses.addAll(parameters.ignoredClasses.get())
                 ignoredPackages.addAll(parameters.ignoredPackages.get())
                 nonPublicMarkers.addAll(parameters.nonPublicMarkers.get())
-                signatureVersion = parameters.signatureVersion.get()
             })
 
         dump.saveTo(outputFile)

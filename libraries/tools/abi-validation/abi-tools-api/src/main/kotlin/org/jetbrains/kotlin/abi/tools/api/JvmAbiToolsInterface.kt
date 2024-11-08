@@ -11,8 +11,6 @@ public interface JvmAbiToolsInterface {
 
     public fun dumpToLegacyFile(suites: List<JvmAbiSuit>, filters: AbiFilters, outputFile: File)
 
-    public fun dumpToV2File(suites: List<JvmAbiSuit>, filters: AbiFilters, outputFile: File)
-
     /**
      * ! files should exist !
      */

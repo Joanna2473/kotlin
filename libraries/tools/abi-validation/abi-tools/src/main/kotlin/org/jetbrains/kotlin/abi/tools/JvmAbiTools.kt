@@ -26,10 +26,6 @@ public class JvmAbiTools : JvmAbiToolsInterface {
         }
     }
 
-    override fun dumpToV2File(suites: List<JvmAbiSuit>, filters: AbiFilters, outputFile: File) {
-        dumpToLegacyFile(suites, filters, outputFile)
-    }
-
     /**
      * ! files should exist !
      */
