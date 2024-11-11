@@ -197,7 +197,6 @@ class FirCallResolver(
             name,
             explicitReceiver,
             argumentList,
-            isImplicitInvoke = qualifiedAccess is FirImplicitInvokeCall,
             isUsedAsGetClassReceiver = isUsedAsGetClassReceiver,
             typeArguments,
             session,
@@ -205,6 +204,7 @@ class FirCallResolver(
             containingDeclarations,
             origin = origin,
             resolutionMode = resolutionMode,
+            implicitInvokeMode = if (qualifiedAccess is FirImplicitInvokeCall) ImplicitInvokeMode.Regular else ImplicitInvokeMode.None,
         )
         towerResolver.reset()
 
@@ -546,7 +546,6 @@ class FirCallResolver(
             name,
             explicitReceiver = null,
             delegatedConstructorCall.argumentList,
-            isImplicitInvoke = false,
             isUsedAsGetClassReceiver = false,
             typeArguments = typeArguments,
             session,
@@ -676,7 +675,6 @@ class FirCallResolver(
         name = reference.name,
         explicitReceiver = null,
         annotation.argumentList,
-        isImplicitInvoke = false,
         isUsedAsGetClassReceiver = false,
         typeArguments = annotation.typeArguments,
         session,

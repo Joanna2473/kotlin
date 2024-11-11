@@ -52,7 +52,6 @@ abstract class AbstractCandidateInfoProvider(
             typeArguments = typeArgumentList,
             containingDeclarations = emptyList(), // TODO - maybe we should pass declarations from context here (no visible differences atm)
             containingFile = firFile,
-            isImplicitInvoke = false,
             resolutionMode = ResolutionMode.ContextIndependent,
             isUsedAsGetClassReceiver = false,
             session = firSession,
