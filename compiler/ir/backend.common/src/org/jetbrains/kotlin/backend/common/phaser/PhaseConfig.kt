@@ -30,6 +30,8 @@ class PhaseConfig(
     override val checkStickyConditions: Boolean = false
 ) : PhaseConfigurationService {
     private val disabledMut = disabledPhases.toMutableSet()
+    val disabledPhases: Set<AnyNamedPhase>
+        get() = disabledMut
 
     override fun isEnabled(phase: AnyNamedPhase): Boolean =
         phase !in disabledMut
