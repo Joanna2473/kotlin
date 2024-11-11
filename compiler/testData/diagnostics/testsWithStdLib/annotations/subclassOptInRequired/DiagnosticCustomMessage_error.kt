@@ -2,16 +2,69 @@
 @file:OptIn(ExperimentalSubclassOptIn::class)
 
 @RequiresOptIn(message = "API Unstable!")
-annotation class ApiMarker
+annotation class ApiMarkerA
 
-@SubclassOptInRequired(ApiMarker::class)
-open class OpenKlass
+@RequiresOptIn(message = "API Unstable.")
+annotation class ApiMarkerB
 
-@ApiMarker
-open class OpenApiKlass
+@RequiresOptIn(message = "API Unstable?")
+annotation class ApiMarkerC
 
-open class OpenKlassInheritor :
-    <!OPT_IN_TO_INHERITANCE_ERROR("ApiMarker; This class or interface requires opt-in to be implemented: API Unstable!")!>OpenKlass<!>()
-open class OpenApiKlassInheritor : <!OPT_IN_USAGE_ERROR("ApiMarker; API Unstable!")!>OpenApiKlass<!>()
+@RequiresOptIn(message = "API Unstable")
+annotation class ApiMarkerD
 
-fun check(klass: <!OPT_IN_USAGE_ERROR("ApiMarker; API Unstable!")!>OpenApiKlass<!>){}
+@RequiresOptIn(message = "")
+annotation class ApiMarkerE
+
+@SubclassOptInRequired(ApiMarkerA::class)
+open class OpenKlassA
+
+@ApiMarkerA
+open class OpenApiKlassA
+
+@SubclassOptInRequired(ApiMarkerB::class)
+open class OpenKlassB
+
+@ApiMarkerB
+open class OpenApiKlassB
+
+@SubclassOptInRequired(ApiMarkerC::class)
+open class OpenKlassC
+
+@ApiMarkerC
+open class OpenApiKlassC
+
+@SubclassOptInRequired(ApiMarkerD::class)
+open class OpenKlassD
+
+@ApiMarkerD
+open class OpenApiKlassD
+
+@SubclassOptInRequired(ApiMarkerE::class)
+open class OpenKlassE
+
+@ApiMarkerE
+open class OpenApiKlassE
+
+open class OpenKlassInheritorA :
+    <!OPT_IN_TO_INHERITANCE_ERROR("ApiMarkerA; This class or interface requires opt-in to be implemented: API Unstable! Its usage must be marked with '@ApiMarkerA', '@OptIn(ApiMarkerA::class)' or '@SubclassOptInRequired(ApiMarkerA::class)'")!>OpenKlassA<!>()
+open class OpenApiKlassInheritorA : <!OPT_IN_USAGE_ERROR("ApiMarkerA; This declaration requires opt-in: API Unstable! Its usage must be marked with '@ApiMarkerA' or '@OptIn(ApiMarkerA::class)'")!>OpenApiKlassA<!>()
+
+fun check(klass: <!OPT_IN_USAGE_ERROR("ApiMarkerA; This declaration requires opt-in: API Unstable! Its usage must be marked with '@ApiMarkerA' or '@OptIn(ApiMarkerA::class)'")!>OpenApiKlassA<!>){}
+
+open class OpenKlassInheritorB :
+    <!OPT_IN_TO_INHERITANCE_ERROR("ApiMarkerB; This class or interface requires opt-in to be implemented: API Unstable. Its usage must be marked with '@ApiMarkerB', '@OptIn(ApiMarkerB::class)' or '@SubclassOptInRequired(ApiMarkerB::class)'")!>OpenKlassB<!>()
+open class OpenApiKlassInheritorB : <!OPT_IN_USAGE_ERROR("ApiMarkerB; This declaration requires opt-in: API Unstable. Its usage must be marked with '@ApiMarkerB' or '@OptIn(ApiMarkerB::class)'")!>OpenApiKlassB<!>()
+
+
+open class OpenKlassInheritorС :
+    <!OPT_IN_TO_INHERITANCE_ERROR("ApiMarkerC; This class or interface requires opt-in to be implemented: API Unstable? Its usage must be marked with '@ApiMarkerC', '@OptIn(ApiMarkerC::class)' or '@SubclassOptInRequired(ApiMarkerC::class)'")!>OpenKlassC<!>()
+open class OpenApiKlassInheritorС : <!OPT_IN_USAGE_ERROR("ApiMarkerC; This declaration requires opt-in: API Unstable? Its usage must be marked with '@ApiMarkerC' or '@OptIn(ApiMarkerC::class)'")!>OpenApiKlassC<!>()
+
+open class OpenKlassInheritorD:
+    <!OPT_IN_TO_INHERITANCE_ERROR("ApiMarkerD; This class or interface requires opt-in to be implemented: API Unstable. Its usage must be marked with '@ApiMarkerD', '@OptIn(ApiMarkerD::class)' or '@SubclassOptInRequired(ApiMarkerD::class)'")!>OpenKlassD<!>()
+open class OpenApiKlassInheritorD : <!OPT_IN_USAGE_ERROR("ApiMarkerD; This declaration requires opt-in: API Unstable. Its usage must be marked with '@ApiMarkerD' or '@OptIn(ApiMarkerD::class)'")!>OpenApiKlassD<!>()
+
+open class OpenKlassInheritorE:
+    <!OPT_IN_TO_INHERITANCE_ERROR("ApiMarkerE; This class or interface requires opt-in to be implemented. Its usage must be marked with '@ApiMarkerE', '@OptIn(ApiMarkerE::class)' or '@SubclassOptInRequired(ApiMarkerE::class)'")!>OpenKlassE<!>()
+open class OpenApiKlassInheritorE : <!OPT_IN_USAGE_ERROR("ApiMarkerE; This declaration requires opt-in. Its usage must be marked with '@ApiMarkerE' or '@OptIn(ApiMarkerE::class)'")!>OpenApiKlassE<!>()

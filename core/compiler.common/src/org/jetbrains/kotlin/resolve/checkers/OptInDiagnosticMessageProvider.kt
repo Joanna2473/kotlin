@@ -7,37 +7,47 @@ package org.jetbrains.kotlin.resolve.checkers
 
 
 abstract class OptInDiagnosticMessageProvider {
-
-    abstract fun buildDefaultDiagnosticMessage(markerName: String, verb: String = ""): String
-    open fun buildCustomDiagnosticMessage(message: String): String = message
+    abstract fun buildDiagnosticMessage(markerName: String, verb: String = "", customMessage: String? = null): String
 }
 
 object OptInUsagesDiagnosticMessageProvider : OptInDiagnosticMessageProvider() {
-    override fun buildDefaultDiagnosticMessage(markerName: String, verb: String): String =
-        OptInNames.buildDefaultDiagnosticMessage("This declaration needs opt-in. Its usage $verb be marked", markerName)
-
+    override fun buildDiagnosticMessage(markerName: String, verb: String, customMessage: String?): String {
+        val prefix = "This declaration requires opt-in"
+        val prefixWithCustomMessage = buildPrefixWithCustomMessage(prefix, customMessage)
+        return OptInNames.buildDefaultDiagnosticMessage("$prefixWithCustomMessage Its usage $verb be marked", markerName)
+    }
 }
 
 object OptInUsagesInFutureDiagnosticMessageProvider : OptInDiagnosticMessageProvider() {
-    override fun buildDefaultDiagnosticMessage(markerName: String, verb: String): String =
+    override fun buildDiagnosticMessage(markerName: String, verb: String, customMessage: String?): String =
         OptInNames.buildDefaultDiagnosticMessage(
             "This declaration is experimental due to signature types and its usage $verb be marked (will become an error in future releases)",
             markerName
         )
+
+    fun buildCustomDiagnosticMessage(message: String): String = message
 }
 
 object OptInInheritanceDiagnosticMessageProvider : OptInDiagnosticMessageProvider() {
-    private const val DEFAULT_PREFIX = "This class or interface requires opt-in to be implemented"
-
-    override fun buildDefaultDiagnosticMessage(markerName: String, verb: String): String =
-        OptInNames.buildDefaultDiagnosticMessage("$DEFAULT_PREFIX. Its usage $verb be marked", markerName, isSubclassOptInApplicable = true)
-
-    override fun buildCustomDiagnosticMessage(message: String): String = "$DEFAULT_PREFIX: $message"
-
+    override fun buildDiagnosticMessage(markerName: String, verb: String, customMessage: String?): String {
+        val prefix = "This class or interface requires opt-in to be implemented"
+        val prefixWithCustomMessage = buildPrefixWithCustomMessage(prefix, customMessage)
+        return OptInNames.buildDefaultDiagnosticMessage(
+            "$prefixWithCustomMessage Its usage $verb be marked",
+            markerName,
+            isSubclassOptInApplicable = true
+        )
+    }
 }
 
 object ExperimentalUnsignedLiteralsDiagnosticMessageProvider : OptInDiagnosticMessageProvider() {
-    override fun buildDefaultDiagnosticMessage(markerName: String, verb: String): String =
+    override fun buildDiagnosticMessage(markerName: String, verb: String, customMessage: String?): String =
         OptInNames.buildDefaultDiagnosticMessage("Unsigned literals are experimental and their usages $verb be marked", markerName)
+}
 
+fun String.endsWithSentenceTerminator(): Boolean = this.trim().matches(Regex(".*[.!?]$"))
+
+fun buildPrefixWithCustomMessage(prefix: String, customMessage: String?): String {
+    val customMessagePart = if (customMessage.isNullOrBlank()) prefix else "$prefix: $customMessage".trim()
+    return if (customMessagePart.endsWithSentenceTerminator()) customMessagePart else "$customMessagePart."
 }

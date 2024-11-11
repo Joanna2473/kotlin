@@ -333,11 +333,11 @@ object FirOptInUsageBaseChecker {
                     else -> error("Unexpected $severity type")
                 }
 
-                val reportedMessage =
-                    if (!message.isNullOrBlank()) messageProvider.buildCustomDiagnosticMessage(message) else messageProvider.buildDefaultDiagnosticMessage(
-                        annotationClassId.asFqNameString(),
-                        verb
-                    )
+                val reportedMessage = messageProvider.buildDiagnosticMessage(
+                    annotationClassId.asFqNameString(),
+                    verb,
+                    message
+                )
 
                 reporter.reportOn(source, diagnostic, annotationClassId, reportedMessage, context)
             }

@@ -61,12 +61,12 @@ class OptInUsageChecker : CallChecker {
 
     class OptInFactoryBasedReporter(
         val factory: DiagnosticFactory2<PsiElement, FqName, String>,
-        val getCustomMessage: (String) -> String,
+        val getCustomMessage: (FqName, String) -> String,
         val getDefaultMessage: (FqName) -> String,
     ) : OptInDiagnosticReporter {
         override fun report(trace: BindingTrace, element: PsiElement, fqName: FqName, message: String?) {
             val diagnosticMessage = when {
-                !message.isNullOrBlank() -> getCustomMessage(message)
+                !message.isNullOrBlank() -> getCustomMessage(fqName, message)
                 else -> getDefaultMessage(fqName)
             }
             trace.reportDiagnosticOnce(factory.on(element, fqName, diagnosticMessage))
@@ -127,9 +127,12 @@ class OptInUsageChecker : CallChecker {
         private val WARNING_LEVEL = Name.identifier("WARNING")
         private val ERROR_LEVEL = Name.identifier("ERROR")
 
-        internal fun getDefaultDiagnosticMessage(messageProvider: OptInDiagnosticMessageProvider, verb: String): (FqName) -> String =
+        private fun getDiagnosticMessage(
+            messageProvider: OptInDiagnosticMessageProvider,
+            verb: String,
+        ): (FqName) -> String =
             { fqName: FqName ->
-                messageProvider.buildDefaultDiagnosticMessage(fqName.asString(), verb)
+                messageProvider.buildDiagnosticMessage(fqName.asString(), verb)
             }
 
         private fun getMessageProvider(subclassesOnly: Boolean) =
@@ -140,22 +143,34 @@ class OptInUsageChecker : CallChecker {
                 val messageProvider = getMessageProvider(subclassesOnly)
                 OptInFactoryBasedReporter(
                     if (subclassesOnly) Errors.OPT_IN_TO_INHERITANCE else Errors.OPT_IN_USAGE,
-                    getCustomMessage = messageProvider::buildCustomDiagnosticMessage,
-                    getDefaultMessage = getDefaultDiagnosticMessage(messageProvider, "should")
+                    getCustomMessage = { fqName, customMessage ->
+                        messageProvider.buildDiagnosticMessage(
+                            fqName.asString(),
+                            "should",
+                            customMessage
+                        )
+                    },
+                    getDefaultMessage = getDiagnosticMessage(messageProvider, "should")
                 )
             },
             error = { subclassesOnly ->
                 val messageProvider = getMessageProvider(subclassesOnly)
                 OptInFactoryBasedReporter(
                     if (subclassesOnly) Errors.OPT_IN_TO_INHERITANCE_ERROR else Errors.OPT_IN_USAGE_ERROR,
-                    getCustomMessage = messageProvider::buildCustomDiagnosticMessage,
-                    getDefaultMessage = getDefaultDiagnosticMessage(messageProvider, "must")
+                    getCustomMessage = { fqName, customMessage ->
+                        messageProvider.buildDiagnosticMessage(
+                            fqName.asString(),
+                            "must",
+                            customMessage
+                        )
+                    },
+                    getDefaultMessage = getDiagnosticMessage(messageProvider, "must")
                 )
             },
             futureError = OptInFactoryBasedReporter(
                 Errors.OPT_IN_USAGE_FUTURE_ERROR,
-                getCustomMessage = OptInUsagesInFutureDiagnosticMessageProvider::buildCustomDiagnosticMessage,
-                getDefaultMessage = getDefaultDiagnosticMessage(OptInUsagesInFutureDiagnosticMessageProvider, "must")
+                getCustomMessage = { _, message -> OptInUsagesInFutureDiagnosticMessageProvider.buildCustomDiagnosticMessage(message) },
+                getDefaultMessage = getDiagnosticMessage(OptInUsagesInFutureDiagnosticMessageProvider, "must")
             ),
         )
 

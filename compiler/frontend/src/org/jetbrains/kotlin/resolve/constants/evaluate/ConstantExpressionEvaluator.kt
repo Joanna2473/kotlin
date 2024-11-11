@@ -335,11 +335,9 @@ class ConstantExpressionEvaluator(
             val verb: String,
         ) : OptInUsageChecker.OptInDiagnosticReporter {
             override fun report(trace: BindingTrace, element: PsiElement, fqName: FqName, message: String?) {
-                val defaultMessage = OptInUsageChecker.getDefaultDiagnosticMessage(
-                    ExperimentalUnsignedLiteralsDiagnosticMessageProvider,
-                    verb
-                )
-                trace.reportDiagnosticOnce(factory.on(element, defaultMessage(fqName)))
+                val buildMessage =
+                    ExperimentalUnsignedLiteralsDiagnosticMessageProvider.buildDiagnosticMessage(fqName.asString(), verb, message)
+                trace.reportDiagnosticOnce(factory.on(element, buildMessage))
             }
         }
 
