@@ -16,17 +16,44 @@ import org.jetbrains.kotlin.ir.backend.js.compile
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.CompilationOutputsBuilt
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.JsCodeGenerator
+import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.JsGenerationGranularity
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImplForJsIC
 import org.jetbrains.kotlin.js.config.RuntimeDiagnostic
 
-class Ir2JsTransformer(
-    val arguments: K2JSCompilerArguments,
+class Ir2JsTransformer private constructor(
     val module: ModulesStructure,
     val phaseConfig: PhaseConfig,
     val messageCollector: MessageCollector,
     val mainCallArguments: List<String>?,
+    val keep: Set<String>,
+    val dceRuntimeDiagnostic: String?,
+    val safeExternalBoolean: Boolean,
+    val safeExternalBooleanDiagnostic: String?,
+    val granularity: JsGenerationGranularity,
+    val dce: Boolean,
+    val minimizedMemberNames: Boolean,
 ) {
+    constructor(
+        arguments: K2JSCompilerArguments,
+        module: ModulesStructure,
+        phaseConfig: PhaseConfig,
+        messageCollector: MessageCollector,
+        mainCallArguments: List<String>?,
+    ) : this(
+        module,
+        phaseConfig,
+        messageCollector,
+        mainCallArguments,
+        keep = arguments.irKeep?.split(",")?.toSet() ?: emptySet(),
+        dceRuntimeDiagnostic = arguments.irDceRuntimeDiagnostic,
+        safeExternalBoolean = arguments.irSafeExternalBoolean,
+        safeExternalBooleanDiagnostic = arguments.irSafeExternalBooleanDiagnostic,
+        granularity = arguments.granularity,
+        dce = arguments.irDce,
+        minimizedMemberNames = arguments.irMinimizedMemberNames,
+    )
+
     private val performanceManager = module.compilerConfiguration[CLIConfigurationKeys.PERF_MANAGER]
 
     private fun lowerIr(): LoweredIr {
@@ -35,20 +62,17 @@ class Ir2JsTransformer(
             module,
             phaseConfig,
             IrFactoryImplForJsIC(WholeWorldStageController()),
-            keep = arguments.irKeep?.split(",")
-                ?.filterNot { it.isEmpty() }
-                ?.toSet()
-                ?: emptySet(),
+            keep = keep,
             dceRuntimeDiagnostic = RuntimeDiagnostic.resolve(
-                arguments.irDceRuntimeDiagnostic,
+                dceRuntimeDiagnostic,
                 messageCollector
             ),
-            safeExternalBoolean = arguments.irSafeExternalBoolean,
+            safeExternalBoolean = safeExternalBoolean,
             safeExternalBooleanDiagnostic = RuntimeDiagnostic.resolve(
-                arguments.irSafeExternalBooleanDiagnostic,
+                safeExternalBooleanDiagnostic,
                 messageCollector
             ),
-            granularity = arguments.granularity,
+            granularity = granularity,
         )
     }
 
@@ -56,7 +80,7 @@ class Ir2JsTransformer(
         val ir = lowerIr()
         val transformer = IrModuleToJsTransformer(ir.context, ir.moduleFragmentToUniqueName, mainCallArguments != null)
 
-        val mode = TranslationMode.fromFlags(arguments.irDce, arguments.granularity, arguments.irMinimizedMemberNames)
+        val mode = TranslationMode.fromFlags(dce, granularity, minimizedMemberNames)
         return transformer
             .also { performanceManager?.notifyIRGenerationStarted() }
             .makeJsCodeGenerator(ir.allModules, mode)
