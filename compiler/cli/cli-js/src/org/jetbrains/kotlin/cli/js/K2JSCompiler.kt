@@ -81,7 +81,7 @@ import java.io.File
 import java.io.IOException
 import kotlin.math.min
 
-private val K2JSCompilerArguments.granularity: JsGenerationGranularity
+val K2JSCompilerArguments.granularity: JsGenerationGranularity
     get() = when {
         this.irPerFile -> JsGenerationGranularity.PER_FILE
         this.irPerModule -> JsGenerationGranularity.PER_MODULE
@@ -113,59 +113,6 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
     override fun createArguments(): K2JSCompilerArguments {
         return K2JSCompilerArguments()
     }
-
-    private class Ir2JsTransformer(
-        val arguments: K2JSCompilerArguments,
-        val module: ModulesStructure,
-        val phaseConfig: PhaseConfig,
-        val messageCollector: MessageCollector,
-        val mainCallArguments: List<String>?,
-    ) {
-        private val performanceManager = module.compilerConfiguration[CLIConfigurationKeys.PERF_MANAGER]
-
-        private fun lowerIr(): LoweredIr {
-            return compile(
-                mainCallArguments,
-                module,
-                phaseConfig,
-                IrFactoryImplForJsIC(WholeWorldStageController()),
-                keep = arguments.irKeep?.split(",")
-                    ?.filterNot { it.isEmpty() }
-                    ?.toSet()
-                    ?: emptySet(),
-                dceRuntimeDiagnostic = RuntimeDiagnostic.resolve(
-                    arguments.irDceRuntimeDiagnostic,
-                    messageCollector
-                ),
-                safeExternalBoolean = arguments.irSafeExternalBoolean,
-                safeExternalBooleanDiagnostic = RuntimeDiagnostic.resolve(
-                    arguments.irSafeExternalBooleanDiagnostic,
-                    messageCollector
-                ),
-                granularity = arguments.granularity,
-            )
-        }
-
-        private fun makeJsCodeGenerator(): JsCodeGenerator {
-            val ir = lowerIr()
-            val transformer = IrModuleToJsTransformer(ir.context, ir.moduleFragmentToUniqueName, mainCallArguments != null)
-
-            val mode = TranslationMode.fromFlags(arguments.irDce, arguments.granularity, arguments.irMinimizedMemberNames)
-            return transformer
-                .also { performanceManager?.notifyIRGenerationStarted() }
-                .makeJsCodeGenerator(ir.allModules, mode)
-        }
-
-        fun compileAndTransformIrNew(): CompilationOutputsBuilt {
-            return makeJsCodeGenerator()
-                .generateJsCode(relativeRequirePath = true, outJsProgram = false)
-                .also {
-                    performanceManager?.notifyIRGenerationFinished()
-                    performanceManager?.notifyGenerationFinished()
-                }
-        }
-    }
-
 
     private val K2JSCompilerArguments.targetVersion: EcmaVersion?
         get() {
