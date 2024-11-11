@@ -1618,6 +1618,10 @@ sealed interface KaFirDiagnostic<PSI : PsiElement> : KaDiagnosticWithPsi<PSI> {
         val symbol: KaClassLikeSymbol
     }
 
+    interface InconsistentContextArguments : KaFirDiagnostic<PsiElement> {
+        override val diagnosticClass get() = InconsistentContextArguments::class
+    }
+
     interface OverloadResolutionAmbiguity : KaFirDiagnostic<PsiElement> {
         override val diagnosticClass get() = OverloadResolutionAmbiguity::class
         val candidates: List<KaSymbol>

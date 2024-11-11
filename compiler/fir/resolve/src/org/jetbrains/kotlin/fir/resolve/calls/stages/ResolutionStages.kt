@@ -546,11 +546,71 @@ internal object MapArguments : ResolutionStage() {
             candidate.originScope,
             callSiteIsOperatorCall = (callInfo.callSite as? FirFunctionCall)?.origin == FirFunctionCallOrigin.Operator
         )
-        candidate.initializeArgumentMapping(
+
+        if (mapping.diagnostics.isNotEmpty() &&
+            candidate.tryMappingWithContextArguments(callInfo, arguments, function, context, sink)
+        ) {
+            return
+        }
+
+        // We enforce the following invariant:
+        // If the call-site is an implicit invoke-call with receiver,
+        // and the function type has both, context parameters and a receiver,
+        // then we MUST pass context arguments implicitly.
+        // Otherwise, we would allow calling `f: context(String, Int) Boolean.() -> Unit` with `"".f(1, true)`.
+        // See compiler/fir/analysis-tests/testData/resolve/contextParameters/invoke.kt
+        if (callInfo.implicitInvokeMode == ImplicitInvokeMode.ReceiverAsArgument &&
+            candidate.dispatchReceiver?.expression?.resolvedType?.hasContextReceivers == true
+        ) {
+            sink.reportDiagnostic(InconsistentContextArguments)
+        }
+
+        candidate.initializeMapping(arguments, mapping, function, sink)
+    }
+
+    private suspend fun Candidate.tryMappingWithContextArguments(
+        callInfo: CallInfo,
+        arguments: List<ConeResolutionAtom>,
+        function: FirFunction,
+        context: ResolutionContext,
+        sink: CheckerSink,
+    ): Boolean {
+        if (!callInfo.isImplicitInvoke) return false
+        if (arguments.size == function.valueParameters.size) return false
+        if (!context.session.languageVersionSettings.supportsFeature(LanguageFeature.ContextParameters)) return false
+
+        val dispatchReceiverType = dispatchReceiver?.expression?.resolvedType?.fullyExpandedType(callInfo.session)
+        val contextReceiverExpectedTypes = dispatchReceiverType?.contextReceiversTypes(context.session)
+        if (contextReceiverExpectedTypes.isNullOrEmpty()) return false
+
+        val contextArguments = mapContextArgumentsOrNull(contextReceiverExpectedTypes, context.bodyResolveComponents.towerDataContext, sink)
+            ?: return false
+
+        val combinedArguments = contextArguments + arguments
+        val mappingWithContextArguments = context.bodyResolveComponents.mapArguments(
+            combinedArguments,
+            function,
+            originScope,
+            callSiteIsOperatorCall = (callInfo.callSite as? FirFunctionCall)?.origin == FirFunctionCallOrigin.Operator
+        )
+
+        if (mappingWithContextArguments.diagnostics.isNotEmpty()) return false
+
+        initializeMapping(combinedArguments, mappingWithContextArguments, function, sink)
+        return true
+    }
+
+    private suspend fun Candidate.initializeMapping(
+        arguments: List<ConeResolutionAtom>,
+        mapping: ArgumentMapping,
+        function: FirFunction,
+        sink: CheckerSink,
+    ) {
+        initializeArgumentMapping(
             arguments.unwrapNamedArgumentsForDynamicCall(function),
             mapping.toArgumentToParameterMapping()
         )
-        candidate.numDefaults = mapping.numDefaults()
+        numDefaults = mapping.numDefaults()
         mapping.diagnostics.forEach(sink::reportDiagnostic)
         sink.yieldIfNeed()
     }

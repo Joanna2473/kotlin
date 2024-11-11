@@ -385,6 +385,8 @@ private fun mapInapplicableCandidateError(
                 rootCause.argument.source ?: source
             )
 
+            InconsistentContextArguments -> FirErrors.INCONSISTENT_CONTEXT_ARGUMENTS.createOn(source)
+
             is InapplicableNullableReceiver -> mapInapplicableNullableReceiver(diagnostic.candidate, rootCause, source, qualifiedAccessSource)
             is ManyLambdaExpressionArguments -> FirErrors.MANY_LAMBDA_EXPRESSION_ARGUMENTS.createOn(rootCause.argument.source ?: source)
             is InfixCallOfNonInfixFunction -> FirErrors.INFIX_MODIFIER_REQUIRED.createOn(source, rootCause.function)

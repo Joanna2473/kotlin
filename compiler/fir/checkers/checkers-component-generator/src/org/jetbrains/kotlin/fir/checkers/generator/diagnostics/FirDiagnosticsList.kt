@@ -725,6 +725,8 @@ object DIAGNOSTICS_LIST : DiagnosticList("FirErrors") {
         val NESTED_CLASS_ACCESSED_VIA_INSTANCE_REFERENCE by error<PsiElement> {
             parameter<FirClassLikeSymbol<*>>("symbol")
         }
+
+        val INCONSISTENT_CONTEXT_ARGUMENTS by error<PsiElement>()
     }
 
     val AMBIGUITY by object : DiagnosticGroup("Ambiguity") {

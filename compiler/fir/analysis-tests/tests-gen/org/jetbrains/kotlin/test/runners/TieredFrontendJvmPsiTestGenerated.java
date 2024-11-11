@@ -4477,6 +4477,12 @@ public class TieredFrontendJvmPsiTestGenerated extends AbstractTieredFrontendJvm
       }
 
       @Test
+      @TestMetadata("invoke.kt")
+      public void testInvoke() {
+        runTest("compiler/testData/diagnostics/tests/contextParameters/invoke.kt");
+      }
+
+      @Test
       @TestMetadata("overloadAmbiguity.kt")
       public void testOverloadAmbiguity() {
         runTest("compiler/testData/diagnostics/tests/contextParameters/overloadAmbiguity.kt");
