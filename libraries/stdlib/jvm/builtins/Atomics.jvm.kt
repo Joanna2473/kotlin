@@ -12,6 +12,7 @@ package kotlin.concurrent
  * Instances of [AtomicInt] are represented by [java.util.concurrent.atomic.AtomicInteger] and provide the the same atomicity guarantees.
  */
 @SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicInt(value: Int) {
     /**
      * Atomically gets the value of the atomic.
@@ -86,6 +87,7 @@ public actual class AtomicInt(value: Int) {
  * Instances of [AtomicLong] are represented by [java.util.concurrent.atomic.AtomicLong] and provide the the same atomicity guarantees.
  */
 @SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicLong(value: Long) {
     /**
      * Atomically gets the value of the atomic.
@@ -160,6 +162,7 @@ public actual class AtomicLong(value: Long) {
  * Instances of [AtomicBoolean] are represented by [java.util.concurrent.atomic.AtomicBoolean] and provide the the same atomicity guarantees.
  */
 @SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicBoolean (value: Boolean) {
     /**
      * Atomically gets the value of the atomic.
@@ -220,6 +223,7 @@ public actual class AtomicBoolean (value: Boolean) {
  * Instances of [AtomicReference] are represented by [java.util.concurrent.atomic.AtomicReference] and provide the the same atomicity guarantees.
  */
 @SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicReference<T> (value: T) {
     /**
      * Atomically gets the value of the atomic.

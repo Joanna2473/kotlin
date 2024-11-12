@@ -24,6 +24,7 @@ import kotlin.internal.RequireKotlinVersionKind
  */
 @SinceKotlin("1.9")
 @RequireKotlin(version = "1.9.20", versionKind = RequireKotlinVersionKind.COMPILER_VERSION)
+@ExperimentalStdlibApi
 public actual class AtomicIntArray {
     private val array: IntArray
 
@@ -46,19 +47,15 @@ public actual class AtomicIntArray {
     /**
      * Returns the number of elements in the array.
      */
+    @SinceKotlin("2.1")
     public actual val size: Int get() = array.size
-
-    /**
-     * Returns the number of elements in the array.
-     */
-    @Deprecated("Use size instead.", ReplaceWith("this.size"))
-    public val length: Int get() = array.size
 
     /**
      * Atomically gets the value of the element at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun loadAt(index: Int): Int {
         checkBounds(index)
         return array.atomicGet(index)
@@ -69,6 +66,7 @@ public actual class AtomicIntArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun storeAt(index: Int, newValue: Int): Unit {
         checkBounds(index)
         array.atomicSet(index, newValue)
@@ -80,6 +78,7 @@ public actual class AtomicIntArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun exchangeAt(index: Int, newValue: Int): Int {
         checkBounds(index)
         return array.getAndSet(index, newValue)
@@ -97,6 +96,7 @@ public actual class AtomicIntArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun compareAndSetAt(index: Int, expectedValue: Int, newValue: Int): Boolean {
         checkBounds(index)
         return array.compareAndSet(index, expectedValue, newValue)
@@ -113,6 +113,7 @@ public actual class AtomicIntArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun compareAndExchangeAt(index: Int, expectedValue: Int, newValue: Int): Int {
         checkBounds(index)
         return array.compareAndExchange(index, expectedValue, newValue)
@@ -123,6 +124,7 @@ public actual class AtomicIntArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun fetchAndAddAt(index: Int, delta: Int): Int {
         checkBounds(index)
         return array.getAndAdd(index, delta)
@@ -133,10 +135,17 @@ public actual class AtomicIntArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun addAndFetchAt(index: Int, delta: Int): Int {
         checkBounds(index)
         return array.getAndAdd(index, delta) + delta
     }
+
+    /**
+     * Returns the number of elements in the array.
+     */
+    @Deprecated("Use size instead.", ReplaceWith("this.size"))
+    public val length: Int get() = array.size
 
     /**
      * Atomically gets the value of the element at the given [index].
@@ -293,6 +302,7 @@ public actual class AtomicIntArray {
     public actual override fun toString(): String = array.toString()
 
     // See KT-71459
+    @Suppress("NOTHING_TO_INLINE")
     private inline fun checkBounds(index: Int) {
         if (index < 0 || index >= array.size) checkBoundsSlowPath(index)
     }
@@ -314,6 +324,7 @@ public actual class AtomicIntArray {
  */
 @SinceKotlin("1.9")
 @RequireKotlin(version = "1.9.20", versionKind = RequireKotlinVersionKind.COMPILER_VERSION)
+@ExperimentalStdlibApi
 public actual class AtomicLongArray {
     private val array: LongArray
 
@@ -336,6 +347,7 @@ public actual class AtomicLongArray {
     /**
      * Returns the number of elements in the array.
      */
+    @SinceKotlin("2.1")
     public actual val size: Int get() = array.size
 
     /**
@@ -343,6 +355,7 @@ public actual class AtomicLongArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun loadAt(index: Int): Long {
         checkBounds(index)
         return array.atomicGet(index)
@@ -353,6 +366,7 @@ public actual class AtomicLongArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun storeAt(index: Int, newValue: Long): Unit {
         checkBounds(index)
         array.atomicSet(index, newValue)
@@ -364,6 +378,7 @@ public actual class AtomicLongArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun exchangeAt(index: Int, newValue: Long): Long {
         checkBounds(index)
         return array.getAndSet(index, newValue)
@@ -381,6 +396,7 @@ public actual class AtomicLongArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun compareAndSetAt(index: Int, expectedValue: Long, newValue: Long): Boolean {
         checkBounds(index)
         return array.compareAndSet(index, expectedValue, newValue)
@@ -397,6 +413,7 @@ public actual class AtomicLongArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun compareAndExchangeAt(index: Int, expectedValue: Long, newValue: Long): Long {
         checkBounds(index)
         return array.compareAndExchange(index, expectedValue, newValue)
@@ -407,6 +424,7 @@ public actual class AtomicLongArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun fetchAndAddAt(index: Int, delta: Long): Long {
         checkBounds(index)
         return array.getAndAdd(index, delta)
@@ -417,6 +435,7 @@ public actual class AtomicLongArray {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun addAndFetchAt(index: Int, delta: Long): Long {
         checkBounds(index)
         return array.getAndAdd(index, delta) + delta
@@ -583,6 +602,7 @@ public actual class AtomicLongArray {
     public actual override fun toString(): String = array.toString()
 
     // See KT-71459
+    @Suppress("NOTHING_TO_INLINE")
     private inline fun checkBounds(index: Int) {
         if (index < 0 || index >= array.size) checkBoundsSlowPath(index)
     }
@@ -604,6 +624,7 @@ public actual class AtomicLongArray {
  */
 @SinceKotlin("1.9")
 @RequireKotlin(version = "1.9.20", versionKind = RequireKotlinVersionKind.COMPILER_VERSION)
+@ExperimentalStdlibApi
 public actual class AtomicArray<T> {
     private val array: Array<T>
 
@@ -617,6 +638,7 @@ public actual class AtomicArray<T> {
     /**
      * Returns the number of elements in the array.
      */
+    @SinceKotlin("2.1")
     public actual val size: Int get() = array.size
 
     /**
@@ -624,6 +646,7 @@ public actual class AtomicArray<T> {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun loadAt(index: Int): T {
         checkBounds(index)
         return array.atomicGet(index)
@@ -634,6 +657,7 @@ public actual class AtomicArray<T> {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun storeAt(index: Int, newValue: T): Unit {
         checkBounds(index)
         array.atomicSet(index, newValue)
@@ -645,6 +669,7 @@ public actual class AtomicArray<T> {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun exchangeAt(index: Int, newValue: T): T {
         checkBounds(index)
         return array.getAndSet(index, newValue)
@@ -662,6 +687,7 @@ public actual class AtomicArray<T> {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun compareAndSetAt(index: Int, expectedValue: T, newValue: T): Boolean {
         checkBounds(index)
         return array.compareAndSet(index, expectedValue, newValue)
@@ -678,6 +704,7 @@ public actual class AtomicArray<T> {
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
+    @SinceKotlin("2.1")
     public actual fun compareAndExchangeAt(index: Int, expectedValue: T, newValue: T): T {
         checkBounds(index)
         return array.compareAndExchange(index, expectedValue, newValue)
@@ -766,6 +793,7 @@ public actual class AtomicArray<T> {
     public actual override fun toString(): String = array.toString()
 
     // See KT-71459
+    @Suppress("NOTHING_TO_INLINE")
     private inline fun checkBounds(index: Int) {
         if (index < 0 || index >= array.size) checkBoundsSlowPath(index)
     }

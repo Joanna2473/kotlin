@@ -2,11 +2,11 @@
  * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
  * that can be found in the LICENSE file.
  */
-
 package kotlin.native.concurrent
 
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.concurrent.AtomicInt
+import kotlin.concurrent.*
 
 @ThreadLocal
 private object CurrentThread {
@@ -19,6 +19,7 @@ internal class Lock {
     private val reenterCount_ = AtomicInt(0)
 
     // TODO: make it properly reschedule instead of spinning.
+    @OptIn(ExperimentalStdlibApi::class)
     fun lock() {
         val lockData = CurrentThread.id.hashCode()
         loop@ do {
@@ -38,6 +39,7 @@ internal class Lock {
         } while (true)
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     fun unlock() {
         if (reenterCount_.load() > 0) {
             reenterCount_.decrementAndFetch()

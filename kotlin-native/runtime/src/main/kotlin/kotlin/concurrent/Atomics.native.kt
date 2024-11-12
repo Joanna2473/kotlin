@@ -32,16 +32,22 @@ public actual class AtomicInt public actual constructor(
     /**
      * Atomically gets the value of the atomic.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun load(): Int = this::value.atomicGetField()
 
     /**
      * Atomically sets the value of the atomic to the [new value][newValue].
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun store(newValue: Int) { this::value.atomicSetField(value) }
 
     /**
      * Atomically sets the value to the given [new value][newValue] and returns the old value.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun exchange(newValue: Int): Int = this::value.getAndSetField(newValue)
 
     /**
@@ -69,11 +75,15 @@ public actual class AtomicInt public actual constructor(
     /**
      * Atomically adds the [given value][delta] to the current value and returns the old value.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun fetchAndAdd(delta: Int): Int = this::value.getAndAddField(delta)
 
     /**
      * Atomically adds the [given value][delta] to the current value and returns the new value.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun addAndFetch(delta: Int): Int = this::value.getAndAddField(delta) + delta
 
     /**
@@ -146,16 +156,22 @@ public actual class AtomicLong public actual constructor(
     /**
      * Atomically gets the value of the atomic.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun load(): Long = this::value.atomicGetField()
 
     /**
      * Atomically sets the value of the atomic to the [new value][newValue].
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun store(newValue: Long) { this::value.atomicSetField(value) }
 
     /**
      * Atomically sets the value to the given [new value][newValue] and returns the old value.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun exchange(newValue: Long): Long = this::value.getAndSetField(newValue)
 
     /**
@@ -183,11 +199,15 @@ public actual class AtomicLong public actual constructor(
     /**
      * Atomically adds the [given value][delta] to the current value and returns the old value.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun fetchAndAdd(delta: Long): Long = this::value.getAndAddField(delta)
 
     /**
      * Atomically adds the [given value][delta] to the current value and returns the new value.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun addAndFetch(delta: Long): Long = this::value.getAndAddField(delta) + delta
 
     /**
@@ -255,16 +275,22 @@ public actual class AtomicBoolean actual constructor(private var value: Boolean)
     /**
      * Atomically gets the value of the atomic.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun load(): Boolean = this::value.atomicGetField()
 
     /**
      * Atomically sets the value of the atomic to the [new value][newValue].
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun store(newValue: Boolean) { this::value.atomicSetField(newValue) }
 
     /**
      * Atomically sets the value to the given [new value][newValue] and returns the old value.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun exchange(newValue: Boolean): Boolean = this::value.getAndSetField(newValue)
 
     /**
@@ -318,16 +344,22 @@ public actual class AtomicReference<T> actual constructor(
     /**
      * Atomically gets the value of the atomic.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun load(): T = this::value.atomicGetField()
 
     /**
      * Atomically sets the value of the atomic to the [new value][newValue].
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun store(newValue: T) { this::value.atomicSetField(newValue) }
 
     /**
      * Atomically sets the value to the given [new value][newValue] and returns the old value.
      */
+    @SinceKotlin("2.1")
+    @ExperimentalStdlibApi
     public actual fun exchange(newValue: T): T = this::value.getAndSetField(newValue)
 
     /**

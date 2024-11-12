@@ -11,6 +11,8 @@ package kotlin.concurrent
  * Since the Wasm platform does not support multi-threading,
  * the implementation is trivial and has no atomic synchronizations.
  */
+@SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicIntArray {
     private val array: IntArray
 
@@ -140,6 +142,8 @@ public actual class AtomicIntArray {
  * Since the Wasm platform does not support multi-threading,
  * the implementation is trivial and has no atomic synchronizations.
  */
+@SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicLongArray {
     private val array: LongArray
 
@@ -269,6 +273,8 @@ public actual class AtomicLongArray {
  * Since the Wasm platform does not support multi-threading,
  * the implementation is trivial and has no atomic synchronizations.
  */
+@SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicArray<T> {
     private val array: Array<T>
 

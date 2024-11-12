@@ -21,13 +21,13 @@
  */
 
 @file:Suppress("DEPRECATION", "API_NOT_AVAILABLE") // Char.toInt()
-@file:OptIn(ExperimentalAtomicApi::class)
+@file:OptIn(ExperimentalStdlibApi::class)
+
 package kotlin.text.regex
 
 import kotlin.experimental.ExperimentalNativeApi
 import kotlin.collections.associate
 import kotlin.concurrent.AtomicReference
-import kotlin.concurrent.ExperimentalAtomicApi
 import kotlin.native.BitSet
 import kotlin.native.ObsoleteNativeApi
 

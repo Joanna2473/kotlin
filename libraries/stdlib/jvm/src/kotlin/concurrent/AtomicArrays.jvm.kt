@@ -4,7 +4,7 @@
  */
 
 @file:Suppress("NEWER_VERSION_IN_SINCE_KOTLIN", "API_NOT_AVAILABLE")
-@file:OptIn(ExperimentalAtomicApi::class)
+@file:OptIn(ExperimentalStdlibApi::class)
 
 package kotlin.concurrent
 

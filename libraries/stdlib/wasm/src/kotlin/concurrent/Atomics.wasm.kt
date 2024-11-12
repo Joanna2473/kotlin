@@ -11,6 +11,8 @@ package kotlin.concurrent
  * Since the Wasm platform does not support multi-threading,
  * the implementation is trivial and has no atomic synchronizations.
  */
+@SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicInt public actual constructor(private var value: Int) {
 
     /**
@@ -87,6 +89,8 @@ public actual class AtomicInt public actual constructor(private var value: Int) 
  * Since the Wasm platform does not support multi-threading,
  * the implementation is trivial and has no atomic synchronizations.
  */
+@SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicLong public actual constructor(private var value: Long) {
     /**
      * Atomically gets the value of the atomic.
@@ -162,6 +166,8 @@ public actual class AtomicLong public actual constructor(private var value: Long
  * Since the Wasm platform does not support multi-threading,
  * the implementation is trivial and has no atomic synchronizations.
  */
+@SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicBoolean public actual constructor(private var value: Boolean) {
 
     /**
@@ -221,6 +227,8 @@ public actual class AtomicBoolean public actual constructor(private var value: B
  * Since the Wasm platform does not support multi-threading,
  * the implementation is trivial and has no atomic synchronizations.
  */
+@SinceKotlin("2.1")
+@ExperimentalStdlibApi
 public actual class AtomicReference<T> public actual constructor(private var value: T) {
     /**
      * Atomically gets the value of the atomic.
