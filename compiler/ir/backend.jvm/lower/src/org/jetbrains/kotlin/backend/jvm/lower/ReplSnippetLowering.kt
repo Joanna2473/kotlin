@@ -17,25 +17,25 @@ import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
+import org.jetbrains.kotlin.ir.builders.declarations.IrFunctionBuilder
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.irBlockBody
+import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
 import org.jetbrains.kotlin.ir.expressions.IrComposite
 import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
+import org.jetbrains.kotlin.ir.symbols.impl.IrConstructorSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrFieldSymbolImpl
+import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
-import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
-import org.jetbrains.kotlin.ir.util.SimpleTypeRemapper
-import org.jetbrains.kotlin.ir.util.SymbolRemapper
-import org.jetbrains.kotlin.ir.util.TypeRemapper
-import org.jetbrains.kotlin.ir.util.patchDeclarationParents
-import org.jetbrains.kotlin.ir.util.statements
+import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.NameUtils
+import org.jetbrains.kotlin.name.SpecialNames
 
 @PhaseDescription(name = "ReplSnippetsToClasses")
 internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : ModuleLoweringPass {
@@ -105,6 +105,7 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
         patchDeclarationsDispatchReceiver(irSnippet.body.statements, context, scriptTransformer.targetClassReceiver.type)
 
         irSnippetClass.thisReceiver = scriptTransformer.targetClassReceiver
+        irSnippetClass.declarations.add(createConstructor(irSnippetClass, irSnippet))
 
         fun <E : IrElement> E.patchStatementForClass(): IrElement {
             val rootContext =
@@ -136,6 +137,36 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
 
         irSnippetClass.annotations += (irSnippetClass.parent as IrFile).annotations
     }
+
+    private fun createConstructor(
+        irSnippetClass: IrClass,
+        irSnippet: IrReplSnippet,
+    ): IrConstructor =
+        with(IrFunctionBuilder().apply {
+            isPrimary = true
+            returnType = irSnippetClass.thisReceiver!!.type as IrSimpleType
+        }) {
+            irSnippetClass.factory.createConstructor(
+                startOffset = startOffset,
+                endOffset = endOffset,
+                origin = origin,
+                name = SpecialNames.INIT,
+                visibility = visibility,
+                isInline = isInline,
+                isExpect = isExpect,
+                returnType = returnType,
+                symbol = IrConstructorSymbolImpl(),
+                isPrimary = isPrimary,
+                isExternal = isExternal,
+                containerSource = containerSource,
+            )
+        }.also { irConstructor ->
+            irConstructor.body =  context.createIrBuilder(irConstructor.symbol).irBlockBody {
+                +irDelegatingConstructorCall(context.irBuiltIns.anyClass.owner.constructors.single())
+            }
+            irConstructor.parent = irSnippetClass
+        }
+
 }
 
 private class ReplSnippetsToClassesSymbolRemapper : SymbolRemapper.Empty() {
