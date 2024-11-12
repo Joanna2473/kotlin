@@ -17,7 +17,10 @@ import org.jetbrains.kotlin.fir.backend.utils.ConversionTypeOrigin
 import org.jetbrains.kotlin.fir.backend.utils.contextParametersForFunctionOrContainingProperty
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.declarations.synthetic.FirSyntheticProperty
-import org.jetbrains.kotlin.fir.declarations.utils.*
+import org.jetbrains.kotlin.fir.declarations.utils.isExpect
+import org.jetbrains.kotlin.fir.declarations.utils.isStatic
+import org.jetbrains.kotlin.fir.declarations.utils.nameOrSpecialName
+import org.jetbrains.kotlin.fir.declarations.utils.visibility
 import org.jetbrains.kotlin.fir.descriptors.FirBuiltInsPackageFragment
 import org.jetbrains.kotlin.fir.descriptors.FirModuleDescriptor
 import org.jetbrains.kotlin.fir.lazy.Fir2IrLazyConstructor
@@ -31,7 +34,10 @@ import org.jetbrains.kotlin.fir.resolve.toRegularClassSymbol
 import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.*
 import org.jetbrains.kotlin.fir.symbols.lazyResolveToPhase
-import org.jetbrains.kotlin.fir.types.*
+import org.jetbrains.kotlin.fir.types.ConeClassLikeLookupTag
+import org.jetbrains.kotlin.fir.types.classLikeLookupTagIfAny
+import org.jetbrains.kotlin.fir.types.coneType
+import org.jetbrains.kotlin.fir.types.resolvedType
 import org.jetbrains.kotlin.fir.utils.exceptions.withFirEntry
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.declarations.*
@@ -1285,7 +1291,8 @@ class Fir2IrDeclarationStorage(
             symbol is IrAnonymousInitializerSymbol ||
             symbol is IrPropertySymbol ||
             symbol is IrEnumEntrySymbol ||
-            symbol is IrScriptSymbol
+            symbol is IrScriptSymbol ||
+            symbol is IrReplSnippetSymbol
         ) {
             localStorage.enterCallable()
         }
@@ -1297,7 +1304,8 @@ class Fir2IrDeclarationStorage(
             symbol is IrAnonymousInitializerSymbol ||
             symbol is IrPropertySymbol ||
             symbol is IrEnumEntrySymbol ||
-            symbol is IrScriptSymbol
+            symbol is IrScriptSymbol ||
+            symbol is IrReplSnippetSymbol
         ) {
             if (configuration.allowNonCachedDeclarations) {
                 // See KDoc to `fillUnboundSymbols` function
