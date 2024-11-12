@@ -1417,7 +1417,7 @@ open class PsiRawFirBuilder(
             fileName: String,
             setup: FirReplSnippetBuilder.() -> Unit = {},
         ): FirReplSnippet {
-            val snippetName = Name.special("<snippet-$fileName>")
+            val snippetName = Name.special("<$fileName>")
             val snippetSymbol = FirReplSnippetSymbol(snippetName)
 
             return buildReplSnippet {
