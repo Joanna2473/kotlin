@@ -82,24 +82,6 @@ internal fun <T : PhaseContext> PhaseEngine<T>.runK2SpecialBackendChecks(fir2IrO
     runPhase(K2SpecialBackendChecksPhase, fir2IrOutput)
 }
 
-private object NativePreSerializationLoweringPhasesProvider : PreSerializationLoweringPhasesProvider<PreSerializationLoweringContext>() {
-
-    override val klibAssertionWrapperLowering: ((PreSerializationLoweringContext) -> FileLoweringPass)?
-        get() = null // TODO(KT-71415): Return the actual lowering here
-
-    override fun inlineFunctionResolver(context: PreSerializationLoweringContext, inlineMode: InlineMode): InlineFunctionResolver =
-            TODO("Refactor NativeInlineFunctionResolver to support PreSerializationLoweringContext")
-}
-
-internal fun <T : PhaseContext> PhaseEngine<T>.runIrInliner(fir2IrOutput: Fir2IrOutput, environment: KotlinCoreEnvironment): Fir2IrOutput =
-        fir2IrOutput.copy(
-                fir2irActualizedResult = runPreSerializationLoweringPhases(
-                        fir2IrOutput.fir2irActualizedResult,
-                        NativePreSerializationLoweringPhasesProvider,
-                        environment.configuration
-                )
-        )
-
 internal val EntryPointPhase = createSimpleNamedCompilerPhase<NativeGenerationState, IrModuleFragment>(
         name = "addEntryPoint",
         preactions = getDefaultIrActions(),
