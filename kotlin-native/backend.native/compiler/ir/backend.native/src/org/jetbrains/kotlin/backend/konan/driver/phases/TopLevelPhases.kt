@@ -132,6 +132,8 @@ internal fun <C : PhaseContext> PhaseEngine<C>.runBackend(backendContext: Contex
             val phaseEngines = this.map { fragment -> createLoweringPhaseEngine(fragment) }
             val fragmentWithState = this.map { it.irModule }.zip(phaseEngines)
 
+            fragmentWithState.runLoweringsOfTheFirstStage()
+
             // In Kotlin/Native, lowerings are run not over modules, but over individual files.
             // This means that there is no guarantee that after running a lowering in file A, the same lowering has already been run in file B,
             // and vice versa.
@@ -160,6 +162,7 @@ internal fun <C : PhaseContext> PhaseEngine<C>.runBackend(backendContext: Contex
                     fragmentWithState.forEach { (fragment, state) -> state.runSpecifiedLowerings(fragment, dumpSyntheticAccessorsPhase) }
                 }
             }
+            // TODO KT-72439 move lowering above into `runLoweringsOfTheFirstStage`
 
             fragmentWithState.forEach { (fragment, state) -> state.runSpecifiedLowerings(fragment, validateIrAfterInliningAllFunctions) }
             fragmentWithState.forEach { (fragment, state) -> state.runSpecifiedLowerings(fragment, listOf(constEvaluationPhase)) }

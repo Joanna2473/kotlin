@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.backend.common.phaser.*
 import org.jetbrains.kotlin.backend.common.runOnFilePostfix
 import org.jetbrains.kotlin.backend.jvm.ir.isReifiedTypeParameter
 import org.jetbrains.kotlin.backend.konan.*
+import org.jetbrains.kotlin.backend.konan.driver.PreSerializationPhaseContext
 import org.jetbrains.kotlin.backend.konan.driver.utilities.getDefaultIrActions
 import org.jetbrains.kotlin.backend.konan.ir.FunctionsWithoutBoundCheckGenerator
 import org.jetbrains.kotlin.backend.konan.lower.*
@@ -41,6 +42,9 @@ import org.jetbrains.kotlin.ir.interpreter.IrInterpreterConfiguration
 internal typealias LoweringList = List<NamedCompilerPhase<NativeGenerationState, IrFile, IrFile>>
 internal typealias ModuleLowering = SimpleNamedCompilerPhase<NativeGenerationState, IrModuleFragment, Unit>
 
+internal typealias FirstPhaseLoweringList = List<NamedCompilerPhase<PreSerializationPhaseContext, IrFile, IrFile>>
+internal typealias FirstPhaseModuleLowering = SimpleNamedCompilerPhase<PreSerializationPhaseContext, IrModuleFragment, Unit>
+
 internal fun PhaseEngine<NativeGenerationState>.runLowerings(lowerings: LoweringList, modules: List<IrModuleFragment>) {
     for (module in modules) {
         for (file in module.files) {
@@ -59,6 +63,18 @@ internal fun PhaseEngine<NativeGenerationState>.runModuleWisePhase(
     for (module in modules) {
         runPhase(lowering, module)
     }
+}
+
+internal fun <T : PreSerializationPhaseContext> PhaseEngine<T>.runLowerings(lowerings: FirstPhaseLoweringList, module: IrModuleFragment) {
+    for (file in module.files) {
+        lowerings.fold(file) { loweredFile, lowering ->
+            runPhase(lowering, loweredFile)
+        }
+    }
+}
+
+internal fun <T : PreSerializationPhaseContext> PhaseEngine<T>.runModuleWisePhase(lowering: FirstPhaseModuleLowering, module: IrModuleFragment) {
+    runPhase(lowering, module)
 }
 
 internal val validateIrBeforeLowering = createSimpleNamedCompilerPhase<NativeGenerationState, IrModuleFragment>(

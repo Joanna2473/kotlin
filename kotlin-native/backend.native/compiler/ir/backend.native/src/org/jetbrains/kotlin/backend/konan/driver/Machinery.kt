@@ -16,6 +16,8 @@ import org.jetbrains.kotlin.backend.konan.ConfigChecks
 import org.jetbrains.kotlin.backend.konan.KonanConfig
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
+import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.ir.IrBuiltIns
 
 /**
  * Context is a set of resources that is shared between different phases. PhaseContext is a "minimal context",
@@ -48,6 +50,11 @@ internal open class BasicPhaseContext(
     override fun dispose() {
 
     }
+}
+
+internal open class PreSerializationPhaseContext(config: KonanConfig, val irBuiltIns: IrBuiltIns) : BasicPhaseContext(config) {
+    val configuration: CompilerConfiguration
+        get() = config.configuration
 }
 
 internal fun PhaseEngine.Companion.startTopLevel(config: KonanConfig, body: (PhaseEngine<PhaseContext>) -> Unit) {

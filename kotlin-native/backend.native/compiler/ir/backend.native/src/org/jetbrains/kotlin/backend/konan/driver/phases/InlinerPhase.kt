@@ -5,30 +5,55 @@
 
 package org.jetbrains.kotlin.backend.konan.driver.phases
 
-import org.jetbrains.kotlin.backend.common.FileLoweringPass
-import org.jetbrains.kotlin.backend.common.PreSerializationLoweringContext
 import org.jetbrains.kotlin.backend.common.phaser.PhaseEngine
 import org.jetbrains.kotlin.backend.konan.driver.PhaseContext
-import org.jetbrains.kotlin.cli.common.runPreSerializationLoweringPhases
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.ir.inline.InlineFunctionResolver
-import org.jetbrains.kotlin.ir.inline.InlineMode
-import org.jetbrains.kotlin.ir.inline.PreSerializationLoweringPhasesProvider
+import org.jetbrains.kotlin.backend.konan.driver.PreSerializationPhaseContext
+import org.jetbrains.kotlin.backend.konan.performanceManager
+import org.jetbrains.kotlin.backend.konan.trackIRLowering
+import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 
-private object NativePreSerializationLoweringPhasesProvider : PreSerializationLoweringPhasesProvider<PreSerializationLoweringContext>() {
-
-    override val klibAssertionWrapperLowering: ((PreSerializationLoweringContext) -> FileLoweringPass)?
-        get() = null // TODO(KT-71415): Return the actual lowering here
-
-    override fun inlineFunctionResolver(context: PreSerializationLoweringContext, inlineMode: InlineMode): InlineFunctionResolver =
-            TODO("Refactor NativeInlineFunctionResolver to support PreSerializationLoweringContext")
+internal fun <T : PhaseContext> PhaseEngine<T>.runIrInliner(fir2IrOutput: Fir2IrOutput) {
+    // TODO KT-72915 create and pass bacend context
+    useContext(PreSerializationPhaseContext(this.context.config, fir2IrOutput.fir2irActualizedResult.irBuiltIns)) { inlinerEngine ->
+        val irModule = fir2IrOutput.fir2irActualizedResult.irModuleFragment
+        listOf(irModule to inlinerEngine).runLoweringsOfTheFirstStage()
+    }
 }
 
-internal fun <T : PhaseContext> PhaseEngine<T>.runIrInliner(fir2IrOutput: Fir2IrOutput, environment: KotlinCoreEnvironment): Fir2IrOutput =
-        fir2IrOutput.copy(
-                fir2irActualizedResult = runPreSerializationLoweringPhases(
-                        fir2IrOutput.fir2irActualizedResult,
-                        NativePreSerializationLoweringPhasesProvider,
-                        environment.configuration
-                )
-        )
+private fun <T : PreSerializationPhaseContext> PhaseEngine<T>.runEngineForFirstPhaseLowerings(block: PhaseEngine<T>.() -> Unit) {
+    try {
+        context.configuration.performanceManager.trackIRLowering {
+            this.block()
+        }
+    } catch (t: Throwable) {
+        this.context.dispose()
+        throw t
+    }
+}
+
+@Suppress("unused")
+private fun <T : PreSerializationPhaseContext> PhaseEngine<T>.runSpecifiedLowerings(irModule: IrModuleFragment, loweringsToLaunch: FirstPhaseLoweringList) {
+    runEngineForFirstPhaseLowerings {
+        partiallyLowerModuleWithDependencies(irModule, loweringsToLaunch)
+    }
+}
+
+@Suppress("unused")
+private fun <T : PreSerializationPhaseContext> PhaseEngine<T>.runSpecifiedLowerings(irModule: IrModuleFragment, moduleLowering: FirstPhaseModuleLowering) {
+    runEngineForFirstPhaseLowerings {
+        partiallyLowerModuleWithDependencies(irModule, moduleLowering)
+    }
+}
+
+@Suppress("UnusedReceiverParameter")
+internal fun <T : PreSerializationPhaseContext> List<Pair<IrModuleFragment, PhaseEngine<T>>>.runLoweringsOfTheFirstStage() {
+    // TODO KT-72439 move lowering here
+}
+
+internal fun <T : PreSerializationPhaseContext> PhaseEngine<T>.partiallyLowerModuleWithDependencies(module: IrModuleFragment, loweringList: FirstPhaseLoweringList) {
+    runLowerings(loweringList, module)
+}
+
+internal fun <T : PreSerializationPhaseContext> PhaseEngine<T>.partiallyLowerModuleWithDependencies(module: IrModuleFragment, lowering: FirstPhaseModuleLowering) {
+    runModuleWisePhase(lowering, module)
+}
