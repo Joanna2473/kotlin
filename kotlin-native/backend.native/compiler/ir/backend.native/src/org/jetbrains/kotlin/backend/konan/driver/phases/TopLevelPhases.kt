@@ -111,31 +111,28 @@ internal fun <C : PhaseContext> PhaseEngine<C>.runBackend(backendContext: Contex
             }
         }
 
-        fun NativeGenerationState.runSpecifiedLowerings(fragment: BackendJobFragment, loweringsToLaunch: LoweringList) {
+        fun NativeGenerationState.runSpecifiedLowerings(irModule: IrModuleFragment, loweringsToLaunch: LoweringList) {
             runEngineForLowerings {
-                val module = fragment.irModule
-                partiallyLowerModuleWithDependencies(module, loweringsToLaunch)
+                partiallyLowerModuleWithDependencies(irModule, loweringsToLaunch)
             }
         }
 
-        fun NativeGenerationState.runSpecifiedLowerings(fragment: BackendJobFragment, moduleLowering: ModuleLowering) {
+        fun NativeGenerationState.runSpecifiedLowerings(irModule: IrModuleFragment, moduleLowering: ModuleLowering) {
             runEngineForLowerings {
-                val module = fragment.irModule
-                partiallyLowerModuleWithDependencies(module, moduleLowering)
+                partiallyLowerModuleWithDependencies(irModule, moduleLowering)
             }
         }
 
-        fun NativeGenerationState.finalizeLowerings(fragment: BackendJobFragment) {
+        fun NativeGenerationState.finalizeLowerings(irModule: IrModuleFragment) {
             runEngineForLowerings {
-                val module = fragment.irModule
                 val dependenciesToCompile = findDependenciesToCompile()
-                mergeDependencies(module, dependenciesToCompile)
+                mergeDependencies(irModule, dependenciesToCompile)
             }
         }
 
         fun List<BackendJobFragment>.runAllLowerings(): List<NativeGenerationState> {
             val generationStates = this.map { fragment -> createGenerationState(fragment) }
-            val fragmentWithState = this.zip(generationStates)
+            val fragmentWithState = this.map { it.irModule }.zip(generationStates)
 
             // In Kotlin/Native, lowerings are run not over modules, but over individual files.
             // This means that there is no guarantee that after running a lowering in file A, the same lowering has already been run in file B,
