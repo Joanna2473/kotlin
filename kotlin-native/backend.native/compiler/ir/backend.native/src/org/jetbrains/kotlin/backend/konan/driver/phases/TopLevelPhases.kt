@@ -73,7 +73,7 @@ internal fun <C : PhaseContext> PhaseEngine<C>.runBackend(backendContext: Contex
     useContext(backendContext) { backendEngine ->
         backendEngine.runPhase(functionsWithoutBoundCheck)
 
-        fun createGenerationState(fragment: BackendJobFragment): NativeGenerationState {
+        fun createLoweringPhaseEngine(fragment: BackendJobFragment): PhaseEngine<NativeGenerationState> {
             val outputPath = config.cacheSupport.tryGetImplicitOutput(fragment.cacheDeserializationStrategy) ?: config.outputPath
             val outputFiles = OutputFiles(outputPath, config.target, config.produce)
             val generationState = NativeGenerationState(context.config, backendContext,
@@ -82,57 +82,55 @@ internal fun <C : PhaseContext> PhaseEngine<C>.runBackend(backendContext: Contex
             )
             try {
                 val module = fragment.irModule
-                newEngine(generationState) { generationStateEngine ->
+                return newEngine(generationState) { generationStateEngine ->
                     if (context.config.produce.isCache) {
                         generationStateEngine.runPhase(BuildAdditionalCacheInfoPhase, module)
-                        if (context.config.produce.isHeaderCache) return@newEngine
+                        if (context.config.produce.isHeaderCache) return@newEngine generationStateEngine
                     }
                     if (context.config.produce == CompilerOutputKind.PROGRAM) {
                         generationStateEngine.runPhase(EntryPointPhase, module)
                     }
+                    return@newEngine generationStateEngine
                 }
-                return generationState
             } catch (t: Throwable) {
                 generationState.dispose()
                 throw t
             }
         }
 
-        fun NativeGenerationState.runEngineForLowerings(block: PhaseEngine<NativeGenerationState>.() -> Unit) {
+        fun PhaseEngine<NativeGenerationState>.runEngineForLowerings(block: PhaseEngine<NativeGenerationState>.() -> Unit) {
             try {
-                newEngine(this) { generationStateEngine ->
-                    rootPerformanceManager.trackIRLowering {
-                        generationStateEngine.block()
-                    }
+                rootPerformanceManager.trackIRLowering {
+                    this.block()
                 }
             } catch (t: Throwable) {
-                this.dispose()
+                this.context.dispose()
                 throw t
             }
         }
 
-        fun NativeGenerationState.runSpecifiedLowerings(irModule: IrModuleFragment, loweringsToLaunch: LoweringList) {
+        fun PhaseEngine<NativeGenerationState>.runSpecifiedLowerings(irModule: IrModuleFragment, loweringsToLaunch: LoweringList) {
             runEngineForLowerings {
                 partiallyLowerModuleWithDependencies(irModule, loweringsToLaunch)
             }
         }
 
-        fun NativeGenerationState.runSpecifiedLowerings(irModule: IrModuleFragment, moduleLowering: ModuleLowering) {
+        fun PhaseEngine<NativeGenerationState>.runSpecifiedLowerings(irModule: IrModuleFragment, moduleLowering: ModuleLowering) {
             runEngineForLowerings {
                 partiallyLowerModuleWithDependencies(irModule, moduleLowering)
             }
         }
 
-        fun NativeGenerationState.finalizeLowerings(irModule: IrModuleFragment) {
+        fun PhaseEngine<NativeGenerationState>.finalizeLowerings(irModule: IrModuleFragment) {
             runEngineForLowerings {
                 val dependenciesToCompile = findDependenciesToCompile()
                 mergeDependencies(irModule, dependenciesToCompile)
             }
         }
 
-        fun List<BackendJobFragment>.runAllLowerings(): List<NativeGenerationState> {
-            val generationStates = this.map { fragment -> createGenerationState(fragment) }
-            val fragmentWithState = this.map { it.irModule }.zip(generationStates)
+        fun List<BackendJobFragment>.runAllLowerings(): List<PhaseEngine<NativeGenerationState>> {
+            val phaseEngines = this.map { fragment -> createLoweringPhaseEngine(fragment) }
+            val fragmentWithState = this.map { it.irModule }.zip(phaseEngines)
 
             // In Kotlin/Native, lowerings are run not over modules, but over individual files.
             // This means that there is no guarantee that after running a lowering in file A, the same lowering has already been run in file B,
@@ -170,43 +168,39 @@ internal fun <C : PhaseContext> PhaseEngine<C>.runBackend(backendContext: Contex
 
             fragmentWithState.forEach { (fragment, state) -> state.finalizeLowerings(fragment) }
 
-            return generationStates
+            return phaseEngines
         }
 
-        fun runAfterLowerings(fragment: BackendJobFragment, generationState: NativeGenerationState) {
+        fun runAfterLowerings(fragment: BackendJobFragment, generationStateEngine: PhaseEngine<NativeGenerationState>) {
             val tempFiles = createTempFiles(config, fragment.cacheDeserializationStrategy)
-            val outputFiles = generationState.outputFiles
+            val outputFiles = generationStateEngine.context.outputFiles
             if (context.config.produce.isHeaderCache) {
-                newEngine(generationState) { generationStateEngine ->
-                    generationStateEngine.runPhase(SaveAdditionalCacheInfoPhase)
-                    File(outputFiles.nativeBinaryFile).createNew()
-                    generationStateEngine.runPhase(FinalizeCachePhase, outputFiles)
-                }
+                generationStateEngine.runPhase(SaveAdditionalCacheInfoPhase)
+                File(outputFiles.nativeBinaryFile).createNew()
+                generationStateEngine.runPhase(FinalizeCachePhase, outputFiles)
                 return
             }
             try {
                 fragment.performanceManager?.notifyIRGenerationStarted()
-                backendEngine.useContext(generationState) { generationStateEngine ->
-                    val bitcodeFile = tempFiles.create(generationState.llvmModuleName, ".bc").javaFile()
-                    val cExportFiles = if (config.produceCInterface) {
-                        CExportFiles(
-                                cppAdapter = tempFiles.create("api", ".cpp").javaFile(),
-                                bitcodeAdapter = tempFiles.create("api", ".bc").javaFile(),
-                                header = outputFiles.cAdapterHeader.javaFile(),
-                                def = if (config.target.family == Family.MINGW) outputFiles.cAdapterDef.javaFile() else null,
-                        )
-                    } else null
-                    // TODO: Make this work if we first compile all the fragments and only after that run the link phases.
-                    generationStateEngine.compileModule(fragment.irModule, backendContext.irBuiltIns, bitcodeFile, cExportFiles)
-                    // Split here
-                    val dependenciesTrackingResult = generationState.dependenciesTracker.collectResult()
-                    val depsFilePath = config.writeSerializedDependencies
-                    if (!depsFilePath.isNullOrEmpty()) {
-                        depsFilePath.File().writeLines(DependenciesTrackingResult.serialize(dependenciesTrackingResult))
-                    }
-                    val moduleCompilationOutput = ModuleCompilationOutput(bitcodeFile, dependenciesTrackingResult)
-                    compileAndLink(moduleCompilationOutput, outputFiles.mainFileName, outputFiles, tempFiles)
+                val bitcodeFile = tempFiles.create(generationStateEngine.context.llvmModuleName, ".bc").javaFile()
+                val cExportFiles = if (config.produceCInterface) {
+                    CExportFiles(
+                            cppAdapter = tempFiles.create("api", ".cpp").javaFile(),
+                            bitcodeAdapter = tempFiles.create("api", ".bc").javaFile(),
+                            header = outputFiles.cAdapterHeader.javaFile(),
+                            def = if (config.target.family == Family.MINGW) outputFiles.cAdapterDef.javaFile() else null,
+                    )
+                } else null
+                // TODO: Make this work if we first compile all the fragments and only after that run the link phases.
+                generationStateEngine.compileModule(fragment.irModule, backendContext.irBuiltIns, bitcodeFile, cExportFiles)
+                // Split here
+                val dependenciesTrackingResult = generationStateEngine.context.dependenciesTracker.collectResult()
+                val depsFilePath = config.writeSerializedDependencies
+                if (!depsFilePath.isNullOrEmpty()) {
+                    depsFilePath.File().writeLines(DependenciesTrackingResult.serialize(dependenciesTrackingResult))
                 }
+                val moduleCompilationOutput = ModuleCompilationOutput(bitcodeFile, dependenciesTrackingResult)
+                compileAndLink(moduleCompilationOutput, outputFiles.mainFileName, outputFiles, tempFiles)
             } finally {
                 tempFiles.dispose()
                 fragment.performanceManager?.notifyIRGenerationFinished()
