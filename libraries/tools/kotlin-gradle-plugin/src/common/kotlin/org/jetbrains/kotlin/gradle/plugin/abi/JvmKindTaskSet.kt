@@ -20,7 +20,7 @@ import org.jetbrains.kotlin.gradle.tasks.abi.KotlinJvmAbiDumpTask
 
 private const val ACTUAL_DUMP_PATH = "abi/jvm.abi"
 
-internal fun Project.taskSetForKotlinJvmOrAndroid(extension: AbiValidationJvmExtension, toolClasspath: Configuration): JvmKindTaskSet {
+internal fun Project.jvmTaskSet(extension: AbiValidationJvmExtension, toolClasspath: Configuration): JvmKindTaskSet {
     val referenceDumpFileName = extension.referenceDumpFileName
     val referenceDump = extension.referenceDumpDir.map { dir -> dir.file(referenceDumpFileName.get()) }
     val useLegacyFormat = extension.useLegacyFormat
@@ -38,7 +38,7 @@ internal fun Project.taskSetForKotlinJvmOrAndroid(extension: AbiValidationJvmExt
     )
 }
 
-internal fun Project.taskSetForKotlinMultiplatform(
+internal fun Project.jvmTaskSet(
     extension: AbiValidationMultiplatformExtension,
     toolClasspath: Configuration,
 ): JvmKindTaskSet {

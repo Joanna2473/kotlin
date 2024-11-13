@@ -19,18 +19,23 @@ internal fun Project.abiValidationJvmOrAndroidDefault(): AbiValidationJvmExtensi
 }
 
 private const val DEFAULT_REFERENCE_DIR_PATH = "abi"
-private const val DEFAULT_REFERENCE_DUMP_NAME = "jvm.abi"
+private const val DEFAULT_JVM_REFERENCE_DUMP_NAME = "jvm.abi"
+private const val DEFAULT_KLIB_REFERENCE_DUMP_NAME = "klib.abi"
 
 private fun AbiValidationMultiplatformExtensionImpl.configureAbiValidation(project: Project): AbiValidationMultiplatformExtensionImpl {
     referenceDumpDir.convention(project.layout.projectDirectory.dir(DEFAULT_REFERENCE_DIR_PATH))
-    jvm.referenceDumpFileName.convention(DEFAULT_REFERENCE_DUMP_NAME)
+    jvm.referenceDumpFileName.convention(DEFAULT_JVM_REFERENCE_DUMP_NAME)
+
+    klib.referenceDumpFileName.convention(DEFAULT_KLIB_REFERENCE_DUMP_NAME)
+    klib.skipUnsupportedTargets.convention(false)
+
     useLegacyFormat.convention(false)
     return this
 }
 
 private fun AbiValidationJvmExtensionImpl.configureAbiValidation(project: Project): AbiValidationJvmExtensionImpl {
     referenceDumpDir.convention(project.layout.projectDirectory.dir(DEFAULT_REFERENCE_DIR_PATH))
-    referenceDumpFileName.convention(DEFAULT_REFERENCE_DUMP_NAME)
+    referenceDumpFileName.convention(DEFAULT_JVM_REFERENCE_DUMP_NAME)
     useLegacyFormat.convention(false)
     return this
 }

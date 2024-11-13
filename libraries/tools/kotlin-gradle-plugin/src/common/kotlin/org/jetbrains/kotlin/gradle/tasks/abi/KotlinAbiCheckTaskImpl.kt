@@ -12,7 +12,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.kotlin.abi.tools.api.JvmAbiToolsInterface
+import org.jetbrains.kotlin.abi.tools.api.AbiToolsInterface
 
 @DisableCachingByDefault(because = "No output")
 internal abstract class KotlinAbiCheckTaskImpl : AbiToolsTask(), KotlinAbiCheckTask {
@@ -41,7 +41,7 @@ internal abstract class KotlinAbiCheckTaskImpl : AbiToolsTask(), KotlinAbiCheckT
     private val rootDir = project.rootDir
 
 
-    override fun runTools(tools: JvmAbiToolsInterface) {
+    override fun runTools(tools: AbiToolsInterface) {
         val referenceDumpFile = referenceDump.get().asFile
         val actualDumpFile = actualDump.get().asFile
 

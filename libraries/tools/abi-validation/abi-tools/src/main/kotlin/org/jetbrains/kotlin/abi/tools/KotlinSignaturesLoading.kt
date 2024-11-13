@@ -19,8 +19,7 @@ import kotlin.metadata.visibility
 public fun JarFile.loadApiFromJvmClasses(visibilityFilter: (String) -> Boolean = { true }): List<ClassBinarySignature> =
     classEntries().map { entry -> getInputStream(entry) }.loadApiFromJvmClasses(visibilityFilter)
 
-@ExternalApi
-public fun Sequence<InputStream>.loadApiFromJvmClasses(visibilityFilter: (String) -> Boolean = { true }): List<ClassBinarySignature> {
+internal fun Sequence<InputStream>.loadApiFromJvmClasses(visibilityFilter: (String) -> Boolean = { true }): List<ClassBinarySignature> {
     val classNodes = mapNotNull {
         val node = it.use { stream ->
             val classNode = ClassNode()
@@ -210,8 +209,7 @@ private fun List<FieldNode>.annotationsFor(fieldSignature: JvmFieldSignature?): 
         } ?: emptyList()
 }
 
-@ExternalApi
-public fun List<ClassBinarySignature>.filterOutAnnotated(targetAnnotations: Set<String>): List<ClassBinarySignature> {
+internal fun List<ClassBinarySignature>.filterOutAnnotated(targetAnnotations: Set<String>): List<ClassBinarySignature> {
     if (targetAnnotations.isEmpty()) return this
     return filter {
         it.annotations.all { ann -> !targetAnnotations.any { ann.refersToName(it) } }
@@ -258,8 +256,7 @@ private fun List<ClassBinarySignature>.filterOutNotAnnotated(
  * ([see JSL 7.4.1](https://docs.oracle.com/javase/specs/jls/se21/html/jls-7.html#jls-7.4)
  * for details about `package-info`).
  */
-@ExternalApi
-public fun List<ClassBinarySignature>.extractAnnotatedPackages(targetAnnotations: Set<String>): List<String> {
+internal fun List<ClassBinarySignature>.extractAnnotatedPackages(targetAnnotations: Set<String>): List<String> {
     if (targetAnnotations.isEmpty()) return emptyList()
 
     return filter {
@@ -277,8 +274,7 @@ public fun List<ClassBinarySignature>.extractAnnotatedPackages(targetAnnotations
     }
 }
 
-@ExternalApi
-public fun List<ClassBinarySignature>.filterOutNonPublic(
+internal fun List<ClassBinarySignature>.filterOutNonPublic(
     nonPublicPackages: Collection<String> = emptyList(),
     nonPublicClasses: Collection<String> = emptyList()
 ): List<ClassBinarySignature> {

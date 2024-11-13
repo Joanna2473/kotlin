@@ -1,104 +1,33 @@
 /*
- * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
+ * Copyright 2016-2024 JetBrains s.r.o.
+ * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
  */
 
 package org.jetbrains.kotlin.abi.tools.klib
 
+import org.jetbrains.kotlin.abi.tools.api.AbiFilters
 import org.jetbrains.kotlin.library.abi.*
 import java.io.File
 import java.io.FileNotFoundException
 
-/**
- * Filters affecting how the klib ABI will be represented in a dump.
- */
-internal class KlibDumpFilters internal constructor(
-    /**
-     * Names of packages that should be excluded from a dump.
-     * If a package is listed here, none of its declarations will be included in a dump.
-     */
-    public val ignoredPackages: Set<String>,
-    /**
-     * Names of classes that should be excluded from a dump.
-     */
-    public val ignoredClasses: Set<String>,
-    /**
-     * Names of annotations marking non-public declarations.
-     * Such declarations will be excluded from a dump.
-     */
-    public val nonPublicMarkers: Set<String>,
-) {
-
-    public class Builder @PublishedApi internal constructor() {
-        /**
-         * Names of packages that should be excluded from a dump.
-         * If a package is listed here, none of its declarations will be included in a dump.
-         *
-         * By default, there are no ignored packages.
-         */
-        public val ignoredPackages: MutableSet<String> = mutableSetOf()
-
-        /**
-         * Names of classes that should be excluded from a dump.
-         *
-         * By default, there are no ignored classes.
-         */
-        public val ignoredClasses: MutableSet<String> = mutableSetOf()
-
-        /**
-         * Names of annotations marking non-public declarations.
-         * Such declarations will be excluded from a dump.
-         *
-         * By default, a set of non-public markers is empty.
-         */
-        public val nonPublicMarkers: MutableSet<String> = mutableSetOf()
-
-        @PublishedApi
-        internal fun build(): KlibDumpFilters {
-            return KlibDumpFilters(ignoredPackages, ignoredClasses, nonPublicMarkers)
-        }
-    }
-
-    public companion object {
-        /**
-         * Default KLib ABI dump filters which declares no filters
-         * and uses the latest KLib ABI signature version available.
-         */
-        public val DEFAULT: KlibDumpFilters = KlibDumpFilters {}
-    }
-}
-
-/**
- * Builds a new [KlibDumpFilters] instance by invoking a [builderAction] on a temporary
- * [KlibDumpFilters.Builder] instance and then converting it into filters.
- *
- * Supplied [KlibDumpFilters.Builder] is valid only during the scope of [builderAction] execution.
- */
-internal fun KlibDumpFilters(builderAction: KlibDumpFilters.Builder.() -> Unit): KlibDumpFilters {
-    val builder = KlibDumpFilters.Builder()
-    builderAction(builder)
-    return builder.build()
-}
 
 @OptIn(ExperimentalLibraryAbiReader::class)
-internal fun dumpTo(to: Appendable, klibFile: File, filters: KlibDumpFilters) {
-    if (!klibFile.exists()) {
-        throw FileNotFoundException("File does not exist: ${klibFile.absolutePath}")
-    }
+internal fun dumpTo(to: Appendable, klibFile: File, filters: AbiFilters) {
+    if(!klibFile.exists()) { throw FileNotFoundException("File does not exist: ${klibFile.absolutePath}") }
     val abiFilters = mutableListOf<AbiReadingFilter>()
-    filters.ignoredClasses.toKlibNames().also {
-        if (it.isNotEmpty()) {
-            abiFilters.add(AbiReadingFilter.ExcludedClasses(it))
-        }
-    }
-    filters.nonPublicMarkers.toKlibNames().also {
-        if (it.isNotEmpty()) {
-            abiFilters.add(AbiReadingFilter.NonPublicMarkerAnnotations(it))
-        }
-    }
-    if (filters.ignoredPackages.isNotEmpty()) {
-        abiFilters.add(AbiReadingFilter.ExcludedPackages(filters.ignoredPackages.map { AbiCompoundName(it) }))
-    }
+//    filters.ignoredClasses.toKlibNames().also {
+//        if (it.isNotEmpty()) {
+//            abiFilters.add(AbiReadingFilter.ExcludedClasses(it))
+//        }
+//    }
+//    filters.nonPublicMarkers.toKlibNames().also {
+//        if (it.isNotEmpty()) {
+//            abiFilters.add(AbiReadingFilter.NonPublicMarkerAnnotations(it))
+//        }
+//    }
+//    if (filters.ignoredPackages.isNotEmpty()) {
+//        abiFilters.add(AbiReadingFilter.ExcludedPackages(filters.ignoredPackages.map { AbiCompoundName(it) }))
+//    }
 
     val library = try {
         LibraryAbiReader.readAbiInfo(klibFile, abiFilters)

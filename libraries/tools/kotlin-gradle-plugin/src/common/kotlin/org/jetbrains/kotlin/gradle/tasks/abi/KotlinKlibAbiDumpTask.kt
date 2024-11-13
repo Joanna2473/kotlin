@@ -5,26 +5,33 @@
 
 package org.jetbrains.kotlin.gradle.tasks.abi
 
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.jetbrains.kotlin.abi.tools.api.AbiFilters
-import org.jetbrains.kotlin.abi.tools.api.JvmAbiSuit
-import org.jetbrains.kotlin.abi.tools.api.JvmAbiToolsInterface
+import org.jetbrains.kotlin.abi.tools.api.AbiToolsInterface
+import org.jetbrains.kotlin.abi.tools.api.KlibTarget
 
 internal abstract class KotlinKlibAbiDumpTask : AbiToolsTask(), KotlinAbiDumpTask {
     companion object {
         const val KLIB_TASK_NAME = "dumpKlibAbi"
     }
 
+    @get:InputFiles // don't fail the task if file does not exist, instead print custom error message from verify()
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val referenceDump: RegularFileProperty
+
     @get:OutputFile
     abstract override val dumpFile: RegularFileProperty
 
     @get:Nested
-    abstract val suits: MapProperty<String, SuitClasspath>
+    abstract val suits: MapProperty<String, Suit>
+
+    @get:Input
+    abstract val unsupportedSuites: MapProperty<String, String>
 
     @get:Input
     abstract val legacyFormat: Property<Boolean>
@@ -45,19 +52,7 @@ internal abstract class KotlinKlibAbiDumpTask : AbiToolsTask(), KotlinAbiDumpTas
     @get:Optional
     abstract val excludedAnnotatedWith: SetProperty<String>
 
-    override fun runTools(tools: JvmAbiToolsInterface) {
-        val jvmSuits = suits.get()
-            .mapValues { classpath ->
-                classpath.value.classfilesDirs.asFileTree
-                    .asSequence()
-                    .filter {
-                        !it.isDirectory && it.name.endsWith(".class") && !it.name.startsWith("META-INF/")
-                    }
-            }
-            .map { entry ->
-                JvmAbiSuit(entry.key, entry.value)
-            }
-
+    override fun runTools(tools: AbiToolsInterface) {
         val filters = AbiFilters(
             includedClasses.getOrElse(emptySet()),
             excludedClasses.getOrElse(emptySet()),
@@ -65,17 +60,29 @@ internal abstract class KotlinKlibAbiDumpTask : AbiToolsTask(), KotlinAbiDumpTas
             excludedAnnotatedWith.getOrElse(emptySet())
         )
 
-        if (legacyFormat.get()) {
-            tools.dumpToLegacyFile(jvmSuits, filters, dumpFile.get().asFile)
-        } else {
-            tools.dumpToV2File(jvmSuits, filters, dumpFile.get().asFile)
+        val mergedDump = tools.klib.emptyDump()
+        suits.get().forEach { (_, entry) ->
+            val dump = tools.klib.parseKlib(entry.klibFile.files.first(), filters)
+            mergedDump.merge(dump)
         }
+
+        val unsupported = unsupportedSuites.get()
+        val referenceFile = referenceDump.get().asFile
+        if (unsupported.isNotEmpty() && referenceFile.exists() && referenceFile.isFile) {
+            val targets = unsupported.map { (suitName, targetName) -> KlibTarget(targetName, suitName) }
+            mergedDump.partialMerge(tools.klib.parse(referenceFile), targets)
+        }
+
+        mergedDump.printToFile(dumpFile.get().asFile)
     }
 
-    internal class SuitClasspath(
+    internal class Suit(
+        @get:Input
+        val targetName: String,
+
         @get:InputFiles
         @get:Optional
         @get:PathSensitive(PathSensitivity.RELATIVE)
-        val classfilesDirs: ConfigurableFileCollection,
+        val klibFile: FileCollection,
     )
 }

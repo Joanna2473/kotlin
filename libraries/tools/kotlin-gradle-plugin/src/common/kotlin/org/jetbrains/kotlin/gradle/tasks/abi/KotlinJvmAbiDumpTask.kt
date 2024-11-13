@@ -12,8 +12,8 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.jetbrains.kotlin.abi.tools.api.AbiFilters
+import org.jetbrains.kotlin.abi.tools.api.AbiToolsInterface
 import org.jetbrains.kotlin.abi.tools.api.JvmAbiSuit
-import org.jetbrains.kotlin.abi.tools.api.JvmAbiToolsInterface
 
 internal abstract class KotlinJvmAbiDumpTask : AbiToolsTask(), KotlinAbiDumpTask {
     companion object {
@@ -47,7 +47,7 @@ internal abstract class KotlinJvmAbiDumpTask : AbiToolsTask(), KotlinAbiDumpTask
     @get:Optional
     abstract val excludedAnnotatedWith: SetProperty<String>
 
-    override fun runTools(tools: JvmAbiToolsInterface) {
+    override fun runTools(tools: AbiToolsInterface) {
         val jvmSuits = suits.get()
             .mapValues { classpath ->
                 classpath.value.classfilesDirs.asFileTree
@@ -57,7 +57,7 @@ internal abstract class KotlinJvmAbiDumpTask : AbiToolsTask(), KotlinAbiDumpTask
                     }
             }
             .map { entry ->
-                JvmAbiSuit(entry.key, entry.value)
+                JvmAbiSuit(entry.key, entry.value.asIterable())
             }
 
         val filters = AbiFilters(
@@ -67,11 +67,7 @@ internal abstract class KotlinJvmAbiDumpTask : AbiToolsTask(), KotlinAbiDumpTask
             excludedAnnotatedWith.getOrElse(emptySet())
         )
 
-        if (legacyFormat.get()) {
-            tools.dumpToLegacyFile(jvmSuits, filters, dumpFile.get().asFile)
-        } else {
-            tools.dumpToV2File(jvmSuits, filters, dumpFile.get().asFile)
-        }
+        tools.jvm.dumpTo(dumpFile.get().asFile, jvmSuits, filters)
     }
 
     internal class SuitClasspath(

@@ -8,7 +8,7 @@ package org.jetbrains.kotlin.gradle.plugin.abi
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.SourceSet
-import org.jetbrains.kotlin.gradle.dsl.*
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.multiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
@@ -21,6 +21,7 @@ internal suspend fun Project.abiValidationForKotlinMultiplatform(abiClasspath: C
     KotlinPluginLifecycle.Stage.AfterFinaliseCompilations.await()
 
     processJvmKindTargets(kotlinTargets, multiplatformExtension, abiClasspath)
+    processNonJvmTargets(kotlinTargets, multiplatformExtension, abiClasspath)
 }
 
 
@@ -29,7 +30,7 @@ private fun Project.processJvmKindTargets(
     kotlinExtension: KotlinMultiplatformExtension,
     abiClasspath: Configuration,
 ) {
-    val jvmTaskSet = taskSetForKotlinMultiplatform(kotlinExtension.abiValidation, abiClasspath)
+    val jvmTaskSet = jvmTaskSet(kotlinExtension.abiValidation, abiClasspath)
     targets
         .asSequence()
         .filter { target -> target.platformType == KotlinPlatformType.jvm }
@@ -51,6 +52,32 @@ private fun Project.processJvmKindTargets(
                 if (!compilation.androidVariant.isTestVariant) {
                     jvmTaskSet.addSuit(compilation.androidVariant.name, compilation.output.classesDirs)
                 }
+            }
+        }
+}
+
+
+private fun Project.processNonJvmTargets(
+    targets: Iterable<KotlinTarget>,
+    kotlinExtension: KotlinMultiplatformExtension,
+    abiClasspath: Configuration,
+) {
+    val taskSet = klibTaskSet(kotlinExtension.abiValidation, abiClasspath)
+    targets
+        .asSequence()
+        .filter { target -> target.emitsKlib }
+        .forEach { target ->
+            val canonicalTargetName = extractUnderlyingTarget(target)
+
+            if (targetIsSupported(target)) {
+                target.compilations.all { compilation ->
+                    // TODO additional source sets!
+                    if (compilation.name == KotlinCompilation.MAIN_COMPILATION_NAME) {
+                        taskSet.addSuit(target.targetName, canonicalTargetName, compilation.output.classesDirs)
+                    }
+                }
+            } else {
+                taskSet.keepSuit(target.targetName, canonicalTargetName)
             }
         }
 }

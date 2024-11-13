@@ -15,7 +15,7 @@ import org.jetbrains.kotlin.gradle.tasks.abi.KotlinJvmAbiDumpTask
 
 internal suspend fun Project.abiValidationForKotlinJvm(abiClasspath: Configuration) {
     val extension = kotlinJvmExtension
-    val taskSet = taskSetForKotlinJvmOrAndroid(extension.abiValidation, abiClasspath)
+    val taskSet = jvmTaskSet(extension.abiValidation, abiClasspath)
 
     // wait until all compilations are configured
     KotlinPluginLifecycle.Stage.AfterFinaliseCompilations.await()

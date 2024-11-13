@@ -11,6 +11,7 @@ import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.dsl.abi.AbiFiltersSpec
 import org.jetbrains.kotlin.gradle.dsl.abi.AbiValidationJvmKindExtension
+import org.jetbrains.kotlin.gradle.dsl.abi.AbiValidationKlibKindExtension
 import org.jetbrains.kotlin.gradle.dsl.abi.AbiValidationMultiplatformExtension
 import org.jetbrains.kotlin.gradle.tasks.abi.*
 import org.jetbrains.kotlin.gradle.tasks.abi.KotlinAbiCheckTask
@@ -25,31 +26,42 @@ internal abstract class AbiValidationMultiplatformExtensionImpl @Inject construc
     override val filters: AbiFiltersSpec = project.objects.newInstance<AbiFiltersSpecImpl>(project.objects)
 
     override val jvm: AbiValidationJvmKindExtension = project.objects.newInstance<AbiValidationJvmKindExtensionImpl>(project)
+    override val klib: AbiValidationKlibKindExtension = project.objects.newInstance<AbiValidationKlibKindExtensionImpl>(project)
 
     override val updateTaskProvider: TaskProvider<Task>
-        get() = project.locateTask(KotlinAbiUpdateTask.SIMPLE_TASK_NAME)
-            ?: throw GradleException("Couldn't locate task ${KotlinAbiUpdateTask.SIMPLE_TASK_NAME}")
+        get() = project.getTask(KotlinAbiUpdateTask.SIMPLE_TASK_NAME)
 
     override val dumpTaskProvider: TaskProvider<Task>
-        get() = project.locateTask(KotlinJvmAbiDumpTask.SIMPLE_TASK_NAME)
-            ?: throw GradleException("Couldn't locate task ${KotlinJvmAbiDumpTask.SIMPLE_TASK_NAME}")
+        get() = project.getTask(KotlinJvmAbiDumpTask.SIMPLE_TASK_NAME)
 
     override val checkTaskProvider: TaskProvider<Task>
-        get() = project.locateTask(KotlinAbiCheckTaskImpl.SIMPLE_TASK_NAME)
-            ?: throw GradleException("Couldn't locate task ${KotlinAbiCheckTaskImpl.SIMPLE_TASK_NAME}")
+        get() = project.getTask(KotlinAbiCheckTaskImpl.SIMPLE_TASK_NAME)
 }
 
 internal abstract class AbiValidationJvmKindExtensionImpl @Inject constructor(private val project: Project) :
     AbiValidationJvmKindExtension {
     override val updateTaskProvider: TaskProvider<Task>
-        get() = project.locateTask(KotlinAbiUpdateTask.JVM_TASK_NAME)
-            ?: throw GradleException("Couldn't locate task ${KotlinAbiUpdateTask.SIMPLE_TASK_NAME}")
+        get() = project.getTask(KotlinAbiUpdateTask.JVM_TASK_NAME)
 
     override val dumpTaskProvider: TaskProvider<KotlinAbiDumpTask>
-        get() = project.locateTask(KotlinJvmAbiDumpTask.JVM_TASK_NAME)
-            ?: throw GradleException("Couldn't locate task ${KotlinJvmAbiDumpTask.SIMPLE_TASK_NAME}")
+        get() = project.getTask(KotlinJvmAbiDumpTask.JVM_TASK_NAME)
 
     override val checkTaskProvider: TaskProvider<KotlinAbiCheckTask>
-        get() = project.locateTask(KotlinAbiCheckTaskImpl.JVM_TASK_NAME)
-            ?: throw GradleException("Couldn't locate task ${KotlinAbiCheckTaskImpl.SIMPLE_TASK_NAME}")
+        get() = project.getTask(KotlinAbiCheckTaskImpl.JVM_TASK_NAME)
+}
+
+internal abstract class AbiValidationKlibKindExtensionImpl @Inject constructor(private val project: Project) :
+    AbiValidationKlibKindExtension {
+    override val updateTaskProvider: TaskProvider<Task>
+        get() = project.getTask(KotlinAbiUpdateTask.KLIB_TASK_NAME)
+
+    override val dumpTaskProvider: TaskProvider<KotlinAbiDumpTask>
+        get() = project.getTask(KotlinKlibAbiDumpTask.KLIB_TASK_NAME)
+
+    override val checkTaskProvider: TaskProvider<KotlinAbiCheckTask>
+        get() = project.getTask(KotlinAbiCheckTaskImpl.KLIB_TASK_NAME)
+}
+
+private inline fun <reified T : Task> Project.getTask(taskName: String): TaskProvider<T> {
+    return locateTask(taskName) ?: throw GradleException("Couldn't locate task $taskName")
 }

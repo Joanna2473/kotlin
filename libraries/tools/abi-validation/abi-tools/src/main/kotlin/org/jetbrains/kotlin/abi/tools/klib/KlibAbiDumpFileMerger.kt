@@ -5,6 +5,8 @@
 
 package org.jetbrains.kotlin.abi.tools.klib
 
+import org.jetbrains.kotlin.abi.tools.api.KlibTarget
+import org.jetbrains.kotlin.abi.tools.api.konanTargetNameMapping
 import java.io.File
 import java.nio.file.Files
 import java.util.*
@@ -13,7 +15,7 @@ import kotlin.Comparator
 private class PeekingLineIterator(private val lines: Iterator<String>) : Iterator<String> {
     private var nextLine: String? = null
 
-    public fun peek(): String? {
+    fun peek(): String? {
         if (nextLine != null) {
             return nextLine
         }
@@ -91,19 +93,19 @@ internal class KlibAbiDumpMerger {
      */
     internal val targets: Set<KlibTarget> = _targets
 
-    internal fun merge(file: File, configurableTargetName: String? = null) {
+    internal fun merge(file: File) {
         require(file.exists()) { "File does not exist: $file" }
         // TODO: replace with file.toPath().useLines once language version get upgraded
         Files.lines(file.toPath()).use {
-            merge(it.iterator(), configurableTargetName)
+            merge(it.iterator())
         }
     }
 
-    internal fun merge(lines: Iterator<String>, configurableTargetName: String? = null) {
-        merge(PeekingLineIterator(lines), configurableTargetName)
+    internal fun merge(lines: Iterator<String>) {
+        merge(PeekingLineIterator(lines))
     }
 
-    private fun merge(lines: PeekingLineIterator, configurableTargetName: String?) {
+    private fun merge(lines: PeekingLineIterator) {
         require(lines.peek() != null) { "File is empty" }
         val isMergedFile = lines.determineFileType()
 
@@ -111,14 +113,10 @@ internal class KlibAbiDumpMerger {
         val bcvTargets = mutableSetOf<KlibTarget>()
         if (isMergedFile) {
             lines.next() // skip the heading line
-            bcvTargets.addAll(lines.parseTargets(configurableTargetName))
-            check(bcvTargets.size == 1 || configurableTargetName == null) {
-                "Can't use an explicit target name with a multi-target dump. " +
-                        "targetName: $configurableTargetName, dump targets: $bcvTargets"
-            }
+            bcvTargets.addAll(lines.parseTargets())
             aliases.putAll(lines.parseAliases())
         }
-        val header = lines.parseFileHeader(isMergedFile, configurableTargetName)
+        val header = lines.parseFileHeader(isMergedFile)
         bcvTargets.addAll(header.underlyingTargets)
         bcvTargets.intersect(targets).also {
             check(it.isEmpty()) { "This dump and a file to merge share some targets: $it" }
@@ -193,7 +191,7 @@ internal class KlibAbiDumpMerger {
         }
     }
 
-    private fun PeekingLineIterator.parseTargets(configurableTargetName: String?): Set<KlibTarget> {
+    private fun PeekingLineIterator.parseTargets(): Set<KlibTarget> {
         val line = peek()
         require(line != null) {
             "List of targets expected, but there are no more lines left."
@@ -203,12 +201,6 @@ internal class KlibAbiDumpMerger {
         }
         next()
         val targets = parseBcvTargetsLine(line)
-        require(configurableTargetName == null || targets.size == 1) {
-            "Can't use configurableTargetName ($configurableTargetName) for a multi-target dump: $targets"
-        }
-        if (configurableTargetName != null) {
-            return setOf(KlibTarget(targets.first().targetName, configurableTargetName))
-        }
         return targets
     }
 
@@ -236,7 +228,6 @@ internal class KlibAbiDumpMerger {
 
     private fun PeekingLineIterator.parseFileHeader(
         isMergedFile: Boolean,
-        configurableTargetName: String?
     ): KlibAbiDumpHeader {
         val header = mutableListOf<String>()
         var targets: String? = null
@@ -277,13 +268,12 @@ internal class KlibAbiDumpMerger {
         }
 
         // transform a combination of platform name and targets list to a set of KlibTargets
-        return KlibAbiDumpHeader(header, extractTargets(platform, targets, configurableTargetName))
+        return KlibAbiDumpHeader(header, extractTargets(platform, targets))
     }
 
     private fun extractTargets(
         platformString: String?,
-        targetsString: String?,
-        configurableTargetName: String?
+        targetsString: String?
     ): Set<KlibTarget> {
         check(platformString != null) {
             "The dump does not contain platform name. Please make sure that the manifest was included in the dump"
@@ -291,28 +281,17 @@ internal class KlibAbiDumpMerger {
 
         if (platformString == "WASM" && targetsString == null) {
             // For older dumps, there's no way to distinguish Wasm targets without explicitly specifying a target name
-            check(configurableTargetName != null) { "targetName has to be specified for a Wasm target" }
-            return setOf(KlibTarget(configurableTargetName))
+            return setOf(KlibTarget("wasm"))
         }
         if (platformString != "NATIVE" && platformString != "WASM") {
             val platformStringLc = platformString.lowercase(Locale.ROOT)
-            return if (configurableTargetName == null) {
-                setOf(KlibTarget(platformStringLc))
-            } else {
-                setOf(KlibTarget(platformStringLc, configurableTargetName))
-            }
+            return setOf(KlibTarget(platformStringLc))
         }
 
         check(targetsString != null) { "Dump for a native platform missing targets list." }
 
         val targetsList = targetsString.split(TARGETS_DELIMITER).map {
             konanTargetNameMapping[it.trim()] ?: throw IllegalStateException("Unknown native target: $it")
-        }
-        require(targetsList.size == 1 || configurableTargetName == null) {
-            "Can't use configurableTargetName ($configurableTargetName) for a multi-target dump: $targetsList"
-        }
-        if (targetsList.size == 1 && configurableTargetName != null) {
-            return setOf(KlibTarget(targetsList.first(), configurableTargetName))
         }
         return targetsList.asSequence().map { KlibTarget(it) }.toSet()
     }

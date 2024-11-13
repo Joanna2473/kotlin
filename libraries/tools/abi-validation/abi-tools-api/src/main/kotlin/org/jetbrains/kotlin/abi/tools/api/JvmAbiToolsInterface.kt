@@ -8,19 +8,10 @@ package org.jetbrains.kotlin.abi.tools.api
 import java.io.File
 
 public interface JvmAbiToolsInterface {
-
-    public fun dumpToLegacyFile(suites: List<JvmAbiSuit>, filters: AbiFilters, outputFile: File)
-
-    /**
-     * ! files should exist !
-     */
-    public fun filesDiff(
-        expectedFile: File,
-        actualFile: File
-    ): String?
+    public fun dumpTo(outputFile: File, suites: List<JvmAbiSuit>, filters: AbiFilters)
 }
 
 public class JvmAbiSuit(
     public val name: String,
-    public val classfiles: Sequence<File>,
+    public val classfiles: Iterable<File>,
 )

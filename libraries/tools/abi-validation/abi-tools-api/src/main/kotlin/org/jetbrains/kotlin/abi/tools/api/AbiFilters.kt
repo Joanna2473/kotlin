@@ -10,4 +10,8 @@ public class AbiFilters(
     public val excludedClasses: Set<String>,
     public val includedAnnotatedWith: Set<String>,
     public val excludedAnnotatedWith: Set<String>
-)
+) {
+    companion object {
+        val EMPTY: AbiFilters = AbiFilters(emptySet(), emptySet(), emptySet(), emptySet())
+    }
+}

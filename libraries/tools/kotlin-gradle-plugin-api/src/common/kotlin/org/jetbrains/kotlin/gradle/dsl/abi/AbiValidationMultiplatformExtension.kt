@@ -34,6 +34,12 @@ public interface AbiValidationMultiplatformExtension {
         action.execute(jvm)
     }
 
+    val klib: AbiValidationKlibKindExtension
+
+    fun klib(action: Action<AbiValidationKlibKindExtension>) {
+        action.execute(klib)
+    }
+
     val dumpTaskProvider: TaskProvider<Task>
 
     val checkTaskProvider: TaskProvider<Task>
@@ -43,6 +49,18 @@ public interface AbiValidationMultiplatformExtension {
 
 public interface AbiValidationJvmKindExtension {
     val referenceDumpFileName: Property<String>
+
+    val dumpTaskProvider: TaskProvider<KotlinAbiDumpTask>
+
+    val checkTaskProvider: TaskProvider<KotlinAbiCheckTask>
+
+    val updateTaskProvider: TaskProvider<Task>
+}
+
+public interface AbiValidationKlibKindExtension {
+    val referenceDumpFileName: Property<String>
+
+    val skipUnsupportedTargets: Property<Boolean>
 
     val dumpTaskProvider: TaskProvider<KotlinAbiDumpTask>
 

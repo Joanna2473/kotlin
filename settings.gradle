@@ -241,7 +241,6 @@ include ":kotlin-imports-dumper-compiler-plugin",
         ":tools:kotlinp",
         ":tools:kotlinp-jvm",
         ":tools:kotlinp-klib",
-        ":tools:abi-validation",
         ":tools:abi-tools",
         ":tools:abi-tools-api",
         ":kotlin-build-tools-enum-compat",
@@ -717,7 +716,7 @@ if (!buildProperties.inJpsBuildIdeaSync) {
 
     project(':tools').projectDir = "$rootDir/libraries/tools" as File
     project(':tools:binary-compatibility-validator').projectDir = "$rootDir/libraries/tools/binary-compatibility-validator" as File
-    project(':tools:abi-validation').projectDir = "$rootDir/libraries/tools/abi-validation" as File
+//    project(':tools:abi-validation').projectDir = "$rootDir/libraries/tools/abi-validation" as File
     project(':tools:abi-tools').projectDir = "$rootDir/libraries/tools/abi-validation/abi-tools" as File
     project(':tools:abi-tools-api').projectDir = "$rootDir/libraries/tools/abi-validation/abi-tools-api" as File
     project(':tools:jdk-api-validator').projectDir = "$rootDir/libraries/tools/jdk-api-validator" as File
