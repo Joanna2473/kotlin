@@ -358,6 +358,12 @@ class Fir2IrVisitor(
         irSnippet.parent = conversionScope.parentFromStack()
         declarationStorage.enterScope(irSnippet.symbol)
 
+        for (configurator in session.extensionService.fir2IrReplSnippetConfigurators) {
+            with(configurator) {
+                prepareSnippet(replSnippet, irSnippet)
+            }
+        }
+
         irSnippet.receiversParameters = replSnippet.receivers.mapIndexed { index, receiver ->
             val name = Name.identifier("${SCRIPT_RECEIVER_NAME_PREFIX}_$index")
             val origin = IrDeclarationOrigin.SCRIPT_IMPLICIT_RECEIVER

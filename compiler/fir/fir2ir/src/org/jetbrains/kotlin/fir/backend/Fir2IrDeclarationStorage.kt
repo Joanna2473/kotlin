@@ -643,6 +643,7 @@ class Fir2IrDeclarationStorage(
         }
     }
 
+    @OptIn(UnsafeDuringIrConstructionAPI::class)
     fun getIrPropertySymbol(
         firPropertySymbol: FirPropertySymbol,
         fakeOverrideOwnerLookupTag: ConeClassLikeLookupTag? = null,
