@@ -16,6 +16,7 @@
 
 package org.jetbrains.kotlin.codegen;
 
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Pair;
 import kotlin.io.FilesKt;
 import kotlin.text.Charsets;
@@ -29,7 +30,6 @@ import org.jetbrains.kotlin.utils.ExceptionUtilsKt;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.List;
 
 import static org.jetbrains.kotlin.script.ScriptTestUtilKt.loadScriptingPlugin;
 
@@ -37,7 +37,7 @@ public abstract class AbstractScriptCodegenTest extends CodegenTestCase {
     @Override
     protected void updateConfiguration(@NotNull CompilerConfiguration configuration) {
         super.updateConfiguration(configuration);
-        loadScriptingPlugin(configuration);
+        loadScriptingPlugin(configuration, Disposer.newDisposable());
     }
 
     @Override

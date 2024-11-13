@@ -311,7 +311,7 @@ open class KJvmReplCompilerBase<AnalyzerT : ReplCodeAnalyzerBase>(
                     scriptCompilationConfiguration,
                     hostConfiguration,
                     messageCollector,
-                    disposable
+                    disposable,
                 ).asSuccess()
             }.valueOr { throw IllegalStateException("Unable to initialize repl compiler:\n  ${it.reports.joinToString("\n  ")}") }
 

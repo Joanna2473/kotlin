@@ -5,16 +5,22 @@
 
 package org.jetbrains.kotlin.test.services.configuration
 
+import com.intellij.openapi.Disposable
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.script.loadScriptingPlugin
 import org.jetbrains.kotlin.test.model.TestModule
-import org.jetbrains.kotlin.test.services.*
+import org.jetbrains.kotlin.test.services.EnvironmentConfigurator
+import org.jetbrains.kotlin.test.services.TestServices
+import org.jetbrains.kotlin.test.services.isKtsFile
+import org.jetbrains.kotlin.test.services.standardLibrariesPathProvider
 
 class ScriptingEnvironmentConfigurator(testServices: TestServices) : EnvironmentConfigurator(testServices) {
     override fun configureCompilerConfiguration(configuration: CompilerConfiguration, module: TestModule) {
         if (module.files.any { it.isKtsFile }) {
             val pluginFiles = testServices.standardLibrariesPathProvider.scriptingPluginFilesForTests().map { it.path }
-            loadScriptingPlugin(configuration, pluginFiles)
+            // TODO where to get a proper disposable?
+            val parentDisposable = Disposable {}
+            loadScriptingPlugin(configuration, parentDisposable, pluginFiles)
         }
     }
 }

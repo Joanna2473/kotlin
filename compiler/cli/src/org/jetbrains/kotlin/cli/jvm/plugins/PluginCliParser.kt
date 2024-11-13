@@ -32,21 +32,43 @@ import java.io.File
 import java.net.URLClassLoader
 
 object PluginCliParser {
+    @Deprecated(message = "Use function which takes parent Disposable to properly cleanup ClassLoader.")
     @JvmStatic
     fun loadPluginsSafe(
         pluginClasspaths: Array<String>?,
         pluginOptions: Array<String>?,
         pluginConfigurations: Array<String>?,
         configuration: CompilerConfiguration,
-        rootDisposable: Disposable
+    ): ExitCode {
+        return loadPluginsSafe(pluginClasspaths, pluginOptions, pluginConfigurations, configuration, Disposer.newDisposable())
+    }
+
+    @JvmStatic
+    fun loadPluginsSafe(
+        pluginClasspaths: Array<String>?,
+        pluginOptions: Array<String>?,
+        pluginConfigurations: Array<String>?,
+        configuration: CompilerConfiguration,
+        parentDisposable: Disposable,
     ): ExitCode {
         return loadPluginsSafe(
             pluginClasspaths?.toList() ?: emptyList(),
             pluginOptions?.toList() ?: emptyList(),
             pluginConfigurations?.toList() ?: emptyList(),
             configuration,
-            rootDisposable
+            parentDisposable,
         )
+    }
+
+    @Deprecated(message = "Use function which takes parent Disposable to properly cleanup ClassLoader.")
+    @JvmStatic
+    fun loadPluginsSafe(
+        pluginClasspaths: Collection<String>,
+        pluginOptions: Collection<String>,
+        pluginConfigurations: Collection<String>,
+        configuration: CompilerConfiguration,
+    ): ExitCode {
+        return loadPluginsSafe(pluginClasspaths, pluginOptions, pluginConfigurations, configuration, Disposer.newDisposable())
     }
 
     @JvmStatic
@@ -55,12 +77,12 @@ object PluginCliParser {
         pluginOptions: Collection<String>,
         pluginConfigurations: Collection<String>,
         configuration: CompilerConfiguration,
-        rootDisposable: Disposable
+        parentDisposable: Disposable,
     ): ExitCode {
         val messageCollector = configuration.getNotNull(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY)
         try {
-            loadPluginsLegacyStyle(pluginClasspaths, pluginOptions, configuration, rootDisposable)
-            loadPluginsModernStyle(pluginConfigurations, configuration, rootDisposable)
+            loadPluginsLegacyStyle(pluginClasspaths, pluginOptions, configuration, parentDisposable)
+            loadPluginsModernStyle(pluginConfigurations, configuration, parentDisposable)
             return ExitCode.OK
         } catch (e: PluginProcessingException) {
             messageCollector.report(CompilerMessageSeverity.ERROR, e.message!!)
@@ -83,13 +105,13 @@ object PluginCliParser {
     )
 
     @Suppress("DEPRECATION")
-    private fun loadRegisteredPluginsInfo(rawPluginConfigurations: Iterable<String>, rootDisposable: Disposable): List<RegisteredPluginInfo> {
+    private fun loadRegisteredPluginsInfo(
+        rawPluginConfigurations: Iterable<String>,
+        parentDisposable: Disposable,
+    ): List<RegisteredPluginInfo> {
         val pluginConfigurations = extractPluginClasspathAndOptions(rawPluginConfigurations)
         val pluginInfos = pluginConfigurations.map { pluginConfiguration ->
-            val classLoader = createClassLoader(pluginConfiguration.classpath)
-            Disposer.register(rootDisposable) {
-                classLoader.close()
-            }
+            val classLoader = createClassLoader(pluginConfiguration.classpath, parentDisposable)
             val componentRegistrars = ServiceLoaderLite.loadImplementations(ComponentRegistrar::class.java, classLoader)
             val compilerPluginRegistrars = ServiceLoaderLite.loadImplementations(CompilerPluginRegistrar::class.java, classLoader)
 
@@ -122,9 +144,13 @@ object PluginCliParser {
         return pluginInfos
     }
 
-    private fun loadPluginsModernStyle(rawPluginConfigurations: Iterable<String>?, configuration: CompilerConfiguration, rootDisposable: Disposable) {
+    private fun loadPluginsModernStyle(
+        rawPluginConfigurations: Iterable<String>?,
+        configuration: CompilerConfiguration,
+        parentDisposable: Disposable,
+    ) {
         if (rawPluginConfigurations == null) return
-        val pluginInfos = loadRegisteredPluginsInfo(rawPluginConfigurations, rootDisposable)
+        val pluginInfos = loadRegisteredPluginsInfo(rawPluginConfigurations, parentDisposable)
         for (pluginInfo in pluginInfos) {
             pluginInfo.componentRegistrar?.let {
                 @Suppress("DEPRECATION")
@@ -144,12 +170,9 @@ object PluginCliParser {
         pluginClasspaths: Iterable<String>?,
         pluginOptions: Iterable<String>?,
         configuration: CompilerConfiguration,
-        rootDisposable: Disposable
+        parentDisposable: Disposable,
     ) {
-        val classLoader = createClassLoader(pluginClasspaths ?: emptyList())
-        Disposer.register(rootDisposable) {
-            classLoader.close()
-        }
+        val classLoader = createClassLoader(pluginClasspaths ?: emptyList(), parentDisposable)
         val componentRegistrars = ServiceLoaderLite.loadImplementations(ComponentRegistrar::class.java, classLoader)
         configuration.addAll(ComponentRegistrar.PLUGIN_COMPONENT_REGISTRARS, componentRegistrars)
 
@@ -170,7 +193,11 @@ object PluginCliParser {
         processCompilerPluginsOptions(configuration, pluginOptions, commandLineProcessors)
     }
 
-    private fun createClassLoader(classpath: Iterable<String>): URLClassLoader {
-        return URLClassLoader(classpath.map { File(it).toURI().toURL() }.toTypedArray(), this::class.java.classLoader)
+    private fun createClassLoader(classpath: Iterable<String>, parentDisposable: Disposable): URLClassLoader {
+        val classLoader = URLClassLoader(classpath.map { File(it).toURI().toURL() }.toTypedArray(), this::class.java.classLoader)
+        Disposer.register(parentDisposable) {
+            classLoader.close()
+        }
+        return classLoader
     }
 }

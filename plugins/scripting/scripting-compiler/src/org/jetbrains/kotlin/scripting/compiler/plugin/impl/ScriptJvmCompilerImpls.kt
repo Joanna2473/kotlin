@@ -58,7 +58,7 @@ class ScriptJvmCompilerIsolated(val hostConfiguration: ScriptingHostConfiguratio
                 }
 
                 val context = createIsolatedCompilationContext(
-                    initialConfiguration, hostConfiguration, messageCollector, disposable
+                    initialConfiguration, hostConfiguration, messageCollector, disposable,
                 )
 
                 compileImpl(script, context, initialConfiguration, messageCollector)
