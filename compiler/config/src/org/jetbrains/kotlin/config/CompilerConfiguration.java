@@ -59,13 +59,13 @@ public class CompilerConfiguration {
     @NotNull
     public <T> List<T> getList(@NotNull CompilerConfigurationKey<List<T>> key) {
         List<T> data = get(key);
-        return data == null ? Collections.emptyList() : data;
+        return data == null ? new ArrayList<>() : data;
     }
 
     @NotNull
     public <K, V> Map<K, V> getMap(@NotNull CompilerConfigurationKey<Map<K, V>> key) {
         Map<K, V> data = get(key);
-        return data == null ? Collections.emptyMap() : data;
+        return data == null ? new LinkedHashMap<>() : data;
     }
 
     public <T> void put(@NotNull CompilerConfigurationKey<T> key, @NotNull T value) {

@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.backend.common.phaser.PhaseConfig
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.ir.backend.js.LoweredIr
 import org.jetbrains.kotlin.ir.backend.js.ModulesStructure
 import org.jetbrains.kotlin.ir.backend.js.WholeWorldStageController
@@ -20,6 +21,13 @@ import org.jetbrains.kotlin.backend.js.JsGenerationGranularity
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImplForJsIC
 import org.jetbrains.kotlin.js.config.RuntimeDiagnostic
+import org.jetbrains.kotlin.js.config.dce
+import org.jetbrains.kotlin.js.config.dceRuntimeDiagnostic
+import org.jetbrains.kotlin.js.config.granularity
+import org.jetbrains.kotlin.js.config.keep
+import org.jetbrains.kotlin.js.config.minimizedMemberNames
+import org.jetbrains.kotlin.js.config.safeExternalBoolean
+import org.jetbrains.kotlin.js.config.safeExternalBooleanDiagnostic
 
 class Ir2JsTransformer private constructor(
     val module: ModulesStructure,
@@ -53,6 +61,27 @@ class Ir2JsTransformer private constructor(
         dce = arguments.irDce,
         minimizedMemberNames = arguments.irMinimizedMemberNames,
     )
+
+    constructor(
+        configuration: CompilerConfiguration,
+        module: ModulesStructure,
+        phaseConfig: PhaseConfig,
+        messageCollector: MessageCollector,
+        mainCallArguments: List<String>?,
+    ) : this(
+        module,
+        phaseConfig,
+        messageCollector,
+        mainCallArguments,
+        keep = configuration.keep.toSet(),
+        dceRuntimeDiagnostic = configuration.dceRuntimeDiagnostic,
+        safeExternalBoolean = configuration.safeExternalBoolean,
+        safeExternalBooleanDiagnostic = configuration.safeExternalBooleanDiagnostic,
+        granularity = configuration.granularity!!,
+        dce = configuration.dce,
+        minimizedMemberNames = configuration.minimizedMemberNames,
+    )
+
 
     private val performanceManager = module.compilerConfiguration[CLIConfigurationKeys.PERF_MANAGER]
 
