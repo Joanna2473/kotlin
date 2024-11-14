@@ -64,13 +64,7 @@ class FirDeclaredMemberScopeProvider(val useSiteSession: FirSession) : FirSessio
             klass.lazyResolveToPhaseWithCallableMembers(it)
         }
 
-        return declaredMemberCache.getValue(
-            klass,
-            DeclaredMemberScopeContext(
-                useLazyNestedClassifierScope,
-                existingNames,
-            )
-        )
+        return createDeclaredMemberScope(klass = klass, existingNamesForLazyNestedClassifierScope = existingNames)
     }
 
     private data class DeclaredMemberScopeContext(
@@ -112,7 +106,7 @@ class FirDeclaredMemberScopeProvider(val useSiteSession: FirSession) : FirSessio
     }
 
     fun nestedClassifierScope(klass: FirClass): FirNestedClassifierScope? {
-        return nestedClassifierCache.getValue(klass)
+        return createNestedClassifierScope(klass)
     }
 
     private fun createNestedClassifierScope(klass: FirClass): FirNestedClassifierScope? {
