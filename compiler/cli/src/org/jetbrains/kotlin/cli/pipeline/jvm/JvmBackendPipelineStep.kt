@@ -12,10 +12,7 @@ import org.jetbrains.kotlin.cli.common.buildFile
 import org.jetbrains.kotlin.cli.common.moduleChunk
 import org.jetbrains.kotlin.cli.jvm.compiler.*
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.codegenFactoryWithJvmIrBackendInput
-import org.jetbrains.kotlin.cli.pipeline.CompilerPipelineStep
-import org.jetbrains.kotlin.cli.pipeline.StepStatus
-import org.jetbrains.kotlin.cli.pipeline.toErrorStatus
-import org.jetbrains.kotlin.cli.pipeline.toOkStatus
+import org.jetbrains.kotlin.cli.pipeline.*
 import org.jetbrains.kotlin.codegen.CodegenFactory
 import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.config.messageCollector
@@ -25,6 +22,13 @@ import org.jetbrains.kotlin.fir.backend.jvm.FirJvmBackendExtension
 import org.jetbrains.kotlin.fir.backend.utils.extractFirDeclarations
 import org.jetbrains.kotlin.ir.declarations.impl.IrModuleFragmentImpl
 import org.jetbrains.kotlin.progress.ProgressIndicatorAndCompilationCanceledStatus
+
+object JvmBackendPipelinePhase : PipelinePhase<JvmFir2IrPipelineArtifact, JvmBinaryPipelineArtifact>(
+    name = "JvmBackendPipelineStep",
+    step = JvmBackendPipelineStep,
+    preActions = setOf(PerformanceNotifications.IrLoweringsStarted),
+    postActions = setOf(PerformanceNotifications.GenerationFinished, CheckCompilationErrors)
+)
 
 object JvmBackendPipelineStep : CompilerPipelineStep<JvmFir2IrPipelineArtifact, JvmBinaryPipelineArtifact>() {
     override fun execute(input: JvmFir2IrPipelineArtifact): StepStatus<JvmBinaryPipelineArtifact> {

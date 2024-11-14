@@ -41,8 +41,6 @@ object JsFrontendPipelineStep : CompilerPipelineStep<ConfigurationPipelineArtifa
         val libraries = configuration.libraries
         val friendLibraries = configuration.friendLibraries
 
-        val diagnosticsReporter = DiagnosticReporterFactory.createPendingReporter(messageCollector)
-
         val mainModule = MainModule.SourceFiles(environmentForJS.getSourceFiles())
         val moduleStructure = ModulesStructure(environmentForJS.project, mainModule, configuration, libraries, friendLibraries)
 
@@ -63,7 +61,7 @@ object JsFrontendPipelineStep : CompilerPipelineStep<ConfigurationPipelineArtifa
                 ktSourceFiles = groupedSources.commonSources + groupedSources.platformSources,
                 libraries = libraries,
                 friendLibraries = friendLibraries,
-                diagnosticsReporter = diagnosticsReporter,
+                diagnosticsReporter = input.diagnosticCollector,
                 incrementalDataProvider = configuration.incrementalDataProvider,
                 lookupTracker = lookupTracker,
                 useWasmPlatform = isWasm,
@@ -74,7 +72,7 @@ object JsFrontendPipelineStep : CompilerPipelineStep<ConfigurationPipelineArtifa
                 ktFiles = environmentForJS.getSourceFiles(),
                 libraries = libraries,
                 friendLibraries = friendLibraries,
-                diagnosticsReporter = diagnosticsReporter,
+                diagnosticsReporter = input.diagnosticCollector,
                 incrementalDataProvider = configuration.incrementalDataProvider,
                 lookupTracker = lookupTracker,
                 useWasmPlatform = isWasm,
@@ -85,7 +83,7 @@ object JsFrontendPipelineStep : CompilerPipelineStep<ConfigurationPipelineArtifa
         return JsFrontendPipelineArtifact(
             analyzedOutput,
             configuration,
-            diagnosticsReporter,
+            input.diagnosticCollector,
             moduleStructure,
         ).toOkStatus()
     }

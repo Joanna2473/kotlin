@@ -58,7 +58,7 @@ object JsConfigurationStep : CompilerPipelineStep<
         JsConfigurationFiller.fillConfiguration(arguments, configuration, JsConfigurationFiller.Context(rootDisposable, services))
 
         if (messageCollector.hasErrors()) return COMPILATION_ERROR.toErrorStatus()
-        return ConfigurationPipelineArtifact(configuration, rootDisposable).toOkStatus()
+        return ConfigurationPipelineArtifact(configuration, input.diagnosticCollector, rootDisposable).toOkStatus()
     }
 }
 

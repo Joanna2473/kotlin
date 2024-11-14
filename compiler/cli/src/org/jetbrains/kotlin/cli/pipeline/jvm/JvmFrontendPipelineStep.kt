@@ -11,7 +11,6 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import org.jetbrains.kotlin.KtPsiSourceFile
 import org.jetbrains.kotlin.KtSourceFile
 import org.jetbrains.kotlin.cli.common.*
-import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.fir.FirDiagnosticsCompilerResultsReporter
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
@@ -28,7 +27,6 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.messageCollector
 import org.jetbrains.kotlin.config.moduleName
 import org.jetbrains.kotlin.config.useLightTree
-import org.jetbrains.kotlin.diagnostics.DiagnosticReporterFactory
 import org.jetbrains.kotlin.fir.pipeline.*
 import org.jetbrains.kotlin.fir.session.environment.AbstractProjectFileSearchScope
 import org.jetbrains.kotlin.name.Name
@@ -36,9 +34,16 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.multiplatform.hmppModuleName
 import org.jetbrains.kotlin.resolve.multiplatform.isCommonSource
 
+object JvmFrontendPipelinePhase : PipelinePhase<ConfigurationPipelineArtifact, JvmFrontendPipelineArtifact>(
+    name = "JvmFrontendPipelinePhase",
+    step = JvmFrontendPipelineStep,
+    preActions = setOf(PerformanceNotifications.AnalysisStarted),
+    postActions = setOf(PerformanceNotifications.AnalysisFinished, CheckCompilationErrors)
+)
+
 object JvmFrontendPipelineStep : CompilerPipelineStep<ConfigurationPipelineArtifact, JvmFrontendPipelineArtifact>() {
     override fun execute(input: ConfigurationPipelineArtifact): StepStatus<JvmFrontendPipelineArtifact> {
-        val (configuration, rootDisposable) = input
+        val (configuration, diagnosticsCollector, rootDisposable) = input
         val messageCollector = configuration.messageCollector
 
         if (!FirKotlinToJvmBytecodeCompiler.checkNotSupportedPlugins(configuration, messageCollector)) {
@@ -124,7 +129,6 @@ object JvmFrontendPipelineStep : CompilerPipelineStep<ConfigurationPipelineArtif
         )
 
         val countFilesAndLines = if (performanceManager == null) null else performanceManager::addSourcesStats
-        val diagnosticsCollector = DiagnosticReporterFactory.createPendingReporter(messageCollector)
         val outputs = sessionsWithSources.map { (session, sources) ->
             val rawFirFiles = when (configuration.useLightTree) {
                 true -> session.buildFirViaLightTree(sources, diagnosticsCollector, countFilesAndLines)

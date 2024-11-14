@@ -8,10 +8,15 @@ package org.jetbrains.kotlin.cli.pipeline.jvm
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.jvm.JvmIrDeserializerImpl
 import org.jetbrains.kotlin.cli.jvm.compiler.pipeline.convertToIrAndActualizeForJvm
-import org.jetbrains.kotlin.cli.pipeline.CompilerPipelineStep
-import org.jetbrains.kotlin.cli.pipeline.StepStatus
-import org.jetbrains.kotlin.cli.pipeline.toOkStatus
+import org.jetbrains.kotlin.cli.pipeline.*
 import org.jetbrains.kotlin.fir.backend.jvm.JvmFir2IrExtensions
+
+object JvmFir2IrPipelinePhase : PipelinePhase<JvmFrontendPipelineArtifact, JvmFir2IrPipelineArtifact>(
+    name = "JvmFir2IrPipelinePhase",
+    step = JvmFir2IrPipelineStep,
+    preActions = setOf(PerformanceNotifications.IrTranslationStarted),
+    postActions = setOf(PerformanceNotifications.IrTranslationFinished, CheckCompilationErrors)
+)
 
 object JvmFir2IrPipelineStep : CompilerPipelineStep<JvmFrontendPipelineArtifact, JvmFir2IrPipelineArtifact>() {
     override fun execute(input: JvmFrontendPipelineArtifact): StepStatus<JvmFir2IrPipelineArtifact> {

@@ -44,7 +44,6 @@ object JsCliPipeline {
     private fun runPipeline(argumentsInput: ArgumentsPipelineArtifact<K2JSCompilerArguments>): ExitCode {
         val configurationOutput = JsConfigurationStep.execute(argumentsInput).unwrap { return it.code }
         val configuration = configurationOutput.configuration
-        val performanceManager = argumentsInput.performanceManager
         val arguments = argumentsInput.arguments
         val messageCollector = configuration.messageCollector
         val klibOutput = if (arguments.includes == null) {
@@ -69,7 +68,7 @@ object JsCliPipeline {
                 configuration.computeOutputKlibPath(),
                 sourceModule = null,
                 project = environmentForJS.project,
-                DiagnosticReporterFactory.createPendingReporter(messageCollector),
+                argumentsInput.diagnosticCollector,
                 configuration
             )
         }

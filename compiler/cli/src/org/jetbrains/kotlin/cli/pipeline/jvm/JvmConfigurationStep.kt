@@ -22,6 +22,11 @@ import org.jetbrains.kotlin.metadata.deserialization.MetadataVersion
 import org.jetbrains.kotlin.metadata.jvm.deserialization.JvmProtoBufUtil
 import java.io.File
 
+object JvmConfigurationPipelinePhase : PipelinePhase<ArgumentsPipelineArtifact<K2JVMCompilerArguments>, ConfigurationPipelineArtifact>(
+    name = "JvmConfigurationPipelinePhase",
+    step = JvmConfigurationStep,
+)
+
 object JvmConfigurationStep : CompilerPipelineStep<ArgumentsPipelineArtifact<K2JVMCompilerArguments>, ConfigurationPipelineArtifact>() {
     override fun execute(input: ArgumentsPipelineArtifact<K2JVMCompilerArguments>): StepStatus<ConfigurationPipelineArtifact> {
         val (arguments, services, rootDisposable, messageCollector) = input
@@ -39,7 +44,7 @@ object JvmConfigurationStep : CompilerPipelineStep<ArgumentsPipelineArtifact<K2J
         JvmConfigurationFiller.fillConfiguration(arguments, configuration, JvmConfigurationFiller.Context(services))
 
         if (messageCollector.hasErrors()) return ExitCode.COMPILATION_ERROR.toErrorStatus()
-        return ConfigurationPipelineArtifact(configuration, rootDisposable).toOkStatus()
+        return ConfigurationPipelineArtifact(configuration, input.diagnosticCollector, rootDisposable).toOkStatus()
     }
 
     private fun provideCustomScriptingPluginOptions(arguments: K2JVMCompilerArguments): List<String> {

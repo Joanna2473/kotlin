@@ -14,6 +14,8 @@ import org.jetbrains.kotlin.cli.common.messages.GroupingMessageCollector
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.Services
+import org.jetbrains.kotlin.diagnostics.DiagnosticReporterFactory
+import org.jetbrains.kotlin.diagnostics.impl.BaseDiagnosticsCollector
 import org.jetbrains.kotlin.fir.pipeline.Fir2IrActualizedResult
 import org.jetbrains.kotlin.fir.pipeline.FirResult
 
@@ -40,10 +42,13 @@ data class ArgumentsPipelineArtifact<out A : CommonCompilerArguments>(
     val rootDisposable: Disposable,
     val messageCollector: GroupingMessageCollector,
     val performanceManager: CommonCompilerPerformanceManager,
-) : PipelineArtifact()
+) : PipelineArtifact() {
+    val diagnosticCollector: BaseDiagnosticsCollector = DiagnosticReporterFactory.createPendingReporter(messageCollector)
+}
 
 data class ConfigurationPipelineArtifact(
     val configuration: CompilerConfiguration,
+    val diagnosticCollector: BaseDiagnosticsCollector,
     val rootDisposable: Disposable,
 ) : PipelineArtifact()
 
@@ -63,6 +68,8 @@ abstract class CompilerPipelineStep<in I : PipelineArtifact, out O : PipelineArt
 }
 
 // ============================== utils ==============================
+
+class PipelineStepException : RuntimeException()
 
 fun <A : PipelineArtifact> A.toOkStatus(): StepStatus.Ok<A> {
     return StepStatus.Ok(this)

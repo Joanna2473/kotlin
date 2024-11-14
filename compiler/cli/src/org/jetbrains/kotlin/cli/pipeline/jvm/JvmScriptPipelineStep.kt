@@ -7,7 +7,6 @@ package org.jetbrains.kotlin.cli.pipeline.jvm
 
 import org.jetbrains.kotlin.cli.common.ExitCode.COMPILATION_ERROR
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
-import org.jetbrains.kotlin.cli.common.config.kotlinSourceRoots
 import org.jetbrains.kotlin.cli.common.extensions.ScriptEvaluationExtension
 import org.jetbrains.kotlin.cli.common.extensions.ShellExtension
 import org.jetbrains.kotlin.cli.common.freeArgsForScript
@@ -18,9 +17,14 @@ import org.jetbrains.kotlin.cli.pipeline.*
 import org.jetbrains.kotlin.config.expressionToEvaluate
 import org.jetbrains.kotlin.config.messageCollector
 
+object JvmScriptPipelinePhase : PipelinePhase<ConfigurationPipelineArtifact, JvmScriptPipelineArtifact>(
+    name = "JvmScriptPipelinePhase",
+    step = JvmScriptPipelineStep
+)
+
 object JvmScriptPipelineStep : CompilerPipelineStep<ConfigurationPipelineArtifact, JvmScriptPipelineArtifact>() {
     override fun execute(input: ConfigurationPipelineArtifact): StepStatus<JvmScriptPipelineArtifact> {
-        val (configuration, rootDisposable) = input
+        val (configuration, _, rootDisposable) = input
         val messageCollector = configuration.messageCollector
         if (configuration.scriptMode && configuration.freeArgsForScript.isEmpty()) {
             messageCollector.report(ERROR, "Specify script source path to evaluate")
