@@ -117,6 +117,14 @@ open class UpgradeCallableReferences(
             return visitElement(declaration, data) as IrFile
         }
 
+        override fun visitCall(expression: IrCall, data: IrDeclarationParent): IrElement {
+            return when (expression.symbol.owner.name.asString()) {
+                "<jvm-indy-lambda-metafactory>" -> expression
+                "<signature-string>" -> expression
+                else -> super.visitCall(expression, data)
+            }
+        }
+
         private fun IrType.arrayDepth(): Int {
             if (this !is IrSimpleType) return 0
             return when (classOrNull) {
@@ -164,6 +172,11 @@ open class UpgradeCallableReferences(
             val (function, reference, samType) = expression.parseAdaptedBlock() ?: return super.visitBlock(expression, data)
             function.transformChildren(this, function)
             reference.transformChildren(this, data)
+
+            // TODO: temp for jvm
+            if (function.origin == LoweredDeclarationOrigins.INLINE_LAMBDA) {
+                return expression
+            }
             val isRestrictedSuspension = function.isRestrictedSuspensionFunction()
             function.flattenParameters()
             val (boundParameters, unboundParameters) = function.parameters.partition { reference.arguments[it.indexInParameters] != null }

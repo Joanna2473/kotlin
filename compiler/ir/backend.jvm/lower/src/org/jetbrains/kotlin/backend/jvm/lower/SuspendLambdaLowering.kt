@@ -29,6 +29,7 @@ import org.jetbrains.kotlin.ir.builders.*
 import org.jetbrains.kotlin.ir.builders.declarations.*
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrBlock
+import org.jetbrains.kotlin.ir.expressions.IrRichFunctionReference
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionReference
 import org.jetbrains.kotlin.ir.expressions.IrGetValue
@@ -42,10 +43,10 @@ import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 import org.jetbrains.kotlin.load.java.JavaDescriptorVisibilities
-import org.jetbrains.kotlin.name.FqNameUnsafe
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 import org.jetbrains.kotlin.resolve.jvm.AsmTypes
+import org.jetbrains.kotlin.utils.addToStdlib.shouldNotBeCalled
 import org.jetbrains.org.objectweb.asm.Type
 import kotlin.collections.set
 
@@ -112,19 +113,25 @@ internal class SuspendLambdaLowering(context: JvmBackendContext) : SuspendLoweri
             override fun visitBlock(expression: IrBlock): IrExpression {
                 val reference = expression.statements.lastOrNull() as? IrFunctionReference ?: return super.visitBlock(expression)
                 if (reference.isSuspend && reference.origin.isLambda) {
-                    assert(expression.statements.size == 2 && expression.statements[0] is IrFunction)
-                    expression.transformChildrenVoid(this)
-                    val parent = currentDeclarationParent ?: error("No current declaration parent at ${reference.dump()}")
-                    return generateAnonymousObjectForLambda(reference, parent)
+                    shouldNotBeCalled()
                 }
                 return super.visitBlock(expression)
+            }
+
+            override fun visitRichFunctionReference(expression: IrRichFunctionReference): IrExpression {
+                require(expression.invokeFunction.isSuspend && expression.origin.isLambda) {
+                    "Expected to be lowered before: ${expression.dump()}"
+                }
+                expression.transformChildrenVoid(this)
+                val parent = currentDeclarationParent ?: error("No current declaration parent at ${expression.dump()}")
+                return generateAnonymousObjectForLambda(expression, parent)
             }
         })
     }
 
-    private fun generateAnonymousObjectForLambda(reference: IrFunctionReference, parent: IrDeclarationParent) =
-        context.createIrBuilder(reference.symbol).irBlock(reference.startOffset, reference.endOffset) {
-            assert(reference.getArgumentsWithIr().isEmpty()) { "lambda with bound arguments: ${reference.render()}" }
+    private fun generateAnonymousObjectForLambda(reference: IrRichFunctionReference, parent: IrDeclarationParent) =
+        context.createIrBuilder(reference.invokeFunction.symbol).irBlock(reference.startOffset, reference.endOffset) {
+            assert(reference.boundValues.isEmpty()) { "lambda with bound arguments: ${reference.render()}" }
             val continuation = generateContinuationClassForLambda(reference, parent)
             +continuation
             +irCall(continuation.constructors.single().symbol).apply {
@@ -133,7 +140,7 @@ internal class SuspendLambdaLowering(context: JvmBackendContext) : SuspendLoweri
             }
         }
 
-    private fun generateContinuationClassForLambda(reference: IrFunctionReference, parent: IrDeclarationParent): IrClass =
+    private fun generateContinuationClassForLambda(reference: IrRichFunctionReference, parent: IrDeclarationParent): IrClass =
         context.irFactory.buildClass {
             name = SpecialNames.NO_NAME_PROVIDED
             origin = JvmLoweredDeclarationOrigin.SUSPEND_LAMBDA
@@ -143,11 +150,8 @@ internal class SuspendLambdaLowering(context: JvmBackendContext) : SuspendLoweri
             createThisReceiverParameter()
             copyAttributes(reference)
 
-            val function = reference.symbol.owner
-            val extensionReceiver = function.extensionReceiverParameter?.type?.classOrNull
-            val isRestricted = extensionReceiver != null && extensionReceiver.owner.annotations.any {
-                it.type.classOrNull?.isClassWithFqName(FqNameUnsafe("kotlin.coroutines.RestrictsSuspension")) == true
-            }
+            val function = reference.invokeFunction
+            val isRestricted = reference.isRestrictedSuspension
             val suspendLambda =
                 if (isRestricted) context.ir.symbols.restrictedSuspendLambdaClass.owner
                 else context.ir.symbols.suspendLambdaClass.owner

@@ -11,6 +11,15 @@ import org.jetbrains.kotlin.backend.common.phaser.*
 import org.jetbrains.kotlin.backend.jvm.lower.*
 import org.jetbrains.kotlin.config.phaser.SameTypeNamedCompilerPhase
 
+@PhaseDescription("JvmUpgradeCallableReferenceLowering")
+class JvmUpgradeCallableReferenceLowering(context: JvmBackendContext) : UpgradeCallableReferences(
+    context,
+    upgradeFunctionReferences = true,
+    upgradePropertyReferences = false,
+    upgradeLocalDelegatedPropertyReferences = false,
+    upgradeSamConversions = false,
+)
+
 private val jvmFilePhases = createFilePhases<JvmBackendContext>(
     ::TypeAliasAnnotationMethodsLowering,
     ::ProvisionalFunctionExpressionLowering,
@@ -30,6 +39,7 @@ private val jvmFilePhases = createFilePhases<JvmBackendContext>(
     ::DirectInvokeLowering,
     ::FunctionReferenceLowering,
 
+    ::JvmUpgradeCallableReferenceLowering,
     ::SuspendLambdaLowering,
     ::PropertyReferenceDelegationLowering,
     ::SingletonOrConstantDelegationLowering,
