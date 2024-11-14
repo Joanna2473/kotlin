@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManagerForWasm
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.*
+import org.jetbrains.kotlin.gradle.targets.js.targetVariant
 import org.jetbrains.kotlin.gradle.tasks.registerTask
 import org.jetbrains.kotlin.gradle.utils.CompositeProjectComponentArtifactMetadata
 import org.jetbrains.kotlin.gradle.utils.`is`
@@ -81,17 +82,15 @@ abstract class KotlinPackageJsonTask :
             val npmProject = compilation.npmProject
             val packageJsonTaskName = npmProject.packageJsonTaskName
 
-            val npmResolutionManager = if (compilation.wasmTarget == null) {
-                project.kotlinNpmResolutionManager
-            } else {
-                project.kotlinNpmResolutionManagerForWasm
-            }
+            val npmResolutionManager = compilation.targetVariant(
+                { project.kotlinNpmResolutionManager },
+                { project.kotlinNpmResolutionManagerForWasm },
+            )
 
-            val gradleNodeModules = if (compilation.wasmTarget == null) {
-                GradleNodeModulesCache.registerIfAbsent(project, null, null, "Js")
-            } else {
-                GradleNodeModulesCache.registerIfAbsent(project, null, null, "Wasm")
-            }
+            val gradleNodeModules = compilation.targetVariant(
+                { GradleNodeModulesCache.registerIfAbsent(project, null, null, "Js") },
+                { GradleNodeModulesCache.registerIfAbsent(project, null, null, "Wasm") }
+            )
 
             val nodeJsRoot = npmProject.nodeJsRoot
 

@@ -8,10 +8,7 @@ package org.jetbrains.kotlin.gradle.targets.js.webpack
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.Incubating
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileTree
-import org.gradle.api.file.FileTreeElement
-import org.gradle.api.file.RegularFile
+import org.gradle.api.file.*
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -28,13 +25,12 @@ import org.jetbrains.kotlin.build.report.metrics.GradleBuildPerformanceMetric
 import org.jetbrains.kotlin.build.report.metrics.GradleBuildTime
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.report.UsesBuildMetricsService
+import org.jetbrains.kotlin.gradle.targets.js.NpmVersions
 import org.jetbrains.kotlin.gradle.targets.js.RequiredKotlinJsDependency
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinWebpackRulesContainer
 import org.jetbrains.kotlin.gradle.targets.js.dsl.WebpackRulesDsl
 import org.jetbrains.kotlin.gradle.targets.js.dsl.WebpackRulesDsl.Companion.webpackRulesContainer
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.RequiresNpmDependencies
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode
@@ -51,17 +47,11 @@ constructor(
     final override val compilation: KotlinJsIrCompilation,
     private val objects: ObjectFactory,
 ) : DefaultTask(), RequiresNpmDependencies, WebpackRulesDsl, UsesBuildMetricsService {
-    private val isWasm = compilation.wasmTarget != null
+    @get:Internal
+    internal abstract val versions: Property<NpmVersions>
 
-    private val versions by lazy {
-        project.rootProject.kotlinNodeJsRootExtension.versions
-    }
-    private val versionsWasm by lazy {
-        project.rootProject.kotlinNodeJsForWasmRootExtension.versions
-    }
-
-    private val rootPackageDir by lazy { project.rootProject.kotlinNodeJsRootExtension.rootPackageDirectory }
-    private val rootPackageDirWasm by lazy { project.rootProject.kotlinNodeJsForWasmRootExtension.rootPackageDirectory }
+    @get:Internal
+    internal val rootPackageDir: Property<Directory> = project.objects.directoryProperty()
 
     private val npmProject = compilation.npmProject
 
@@ -289,7 +279,7 @@ constructor(
     }
 
     override val requiredNpmDependencies: Set<RequiredKotlinJsDependency>
-        @Internal get() = createWebpackConfig(true).getRequiredDependencies(if (isWasm) versionsWasm else versions)
+        @Internal get() = createWebpackConfig(true).getRequiredDependencies(versions.get())
 
     private val isContinuous = project.gradle.startParameter.isContinuous
 
@@ -312,7 +302,7 @@ constructor(
             runner.copy(
                 config = runner.config.copy(
                     progressReporter = true,
-                    progressReporterPathFilter = (if (isWasm) rootPackageDirWasm else rootPackageDir).getFile()
+                    progressReporterPathFilter = rootPackageDir.getFile()
                 )
             ).execute(services)
 

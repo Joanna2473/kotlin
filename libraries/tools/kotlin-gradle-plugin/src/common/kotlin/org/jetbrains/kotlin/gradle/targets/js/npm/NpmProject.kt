@@ -17,14 +17,15 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.fileExtension
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsForWasmEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinPackageJsonTask
+import org.jetbrains.kotlin.gradle.targets.js.targetVariant
 import org.jetbrains.kotlin.gradle.utils.getFile
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 import java.io.File
 import java.io.Serializable
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsForWasmEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 
 val KotlinJsIrCompilation.npmProject: NpmProject
     get() = NpmProject(this)
@@ -50,20 +51,18 @@ open class NpmProject(@Transient val compilation: KotlinJsIrCompilation) : Seria
 
     @delegate:Transient
     val nodeJsRoot by lazy {
-        if (compilation.wasmTarget == null) {
-            project.rootProject.kotlinNodeJsRootExtension
-        } else {
-            project.rootProject.kotlinNodeJsForWasmRootExtension
-        }
+        compilation.targetVariant(
+            { project.rootProject.kotlinNodeJsRootExtension },
+            { project.rootProject.kotlinNodeJsForWasmRootExtension },
+        )
     }
 
     @delegate:Transient
     val nodeJs by lazy {
-        if (compilation.wasmTarget == null) {
-            project.kotlinNodeJsEnvSpec
-        } else {
-            project.kotlinNodeJsForWasmEnvSpec
-        }
+        compilation.targetVariant(
+            { project.kotlinNodeJsEnvSpec },
+            { project.kotlinNodeJsForWasmEnvSpec },
+        )
     }
 
     val dir: Provider<Directory> = nodeJsRoot.projectPackagesDirectory.map { it.dir(name) }
@@ -95,7 +94,8 @@ open class NpmProject(@Transient val compilation: KotlinJsIrCompilation) : Seria
     val main: Provider<String> = extension.map { "${DIST_FOLDER}/$name.$it" }
 
     val publicPackageJsonTaskName: String
-        get() = compilation.disambiguateName(nodeJsRoot.platformDisambiguate?.let { it + PublicPackageJsonTask.NAME } ?: PublicPackageJsonTask.NAME)
+        get() = compilation.disambiguateName(nodeJsRoot.platformDisambiguate?.let { it + PublicPackageJsonTask.NAME }
+                                                 ?: PublicPackageJsonTask.NAME)
 
     internal val modules by lazy {
         NpmProjectModules(dir.getFile())
@@ -109,7 +109,7 @@ open class NpmProject(@Transient val compilation: KotlinJsIrCompilation) : Seria
         exec: ExecSpec,
         tool: String,
         nodeArgs: List<String> = listOf(),
-        args: List<String>
+        args: List<String>,
     ) {
         exec.workingDir(dir)
         exec.executable(nodeExecutable)

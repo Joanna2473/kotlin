@@ -9,7 +9,6 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.AbstractKotlinTargetConfigurator.Companion.runTaskNameSuffix
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -20,17 +19,15 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinTargetWithTests
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.resources.publication.setUpResourcesVariant
-import org.jetbrains.kotlin.gradle.targets.js.JsAggregatingExecutionSource
-import org.jetbrains.kotlin.gradle.targets.js.KotlinJsReportAggregatingTestRun
+import org.jetbrains.kotlin.gradle.targets.js.*
 import org.jetbrains.kotlin.gradle.targets.js.KotlinJsTestRunFactory
-import org.jetbrains.kotlin.gradle.targets.js.KotlinWasmTargetType
 import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenExec
 import org.jetbrains.kotlin.gradle.targets.js.dsl.*
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTargetConfigurator.Companion.configureJsDefaultOptions
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsRootForWasmExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmResolverForWasmPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmResolverPlugin
 import org.jetbrains.kotlin.gradle.targets.js.typescript.TypeScriptValidationTask
@@ -165,11 +162,10 @@ constructor(
     }
 
     private val commonLazyDelegate = lazy {
-        if (wasmTargetType != null) {
-            NpmResolverForWasmPlugin.apply(project)
-        } else {
-            NpmResolverPlugin.apply(project)
-        }
+        targetVariant(
+            { NpmResolverPlugin.apply(project) },
+            { NpmResolverForWasmPlugin.apply(project) },
+        )
         compilations.all { compilation ->
             compilation.binaries
                 .withType(JsIrBinary::class.java)
@@ -195,6 +191,12 @@ constructor(
         val linkTask = binary.linkTask
         val compilation = binary.compilation
         return project.registerTask(binary.validateGeneratedTsTaskName, listOf(compilation)) {
+            it.versions.value(
+                compilation.targetVariant(
+                    { project.rootProject.kotlinNodeJsRootExtension.versions },
+                    { project.rootProject.kotlinNodeJsRootForWasmExtension.versions },
+                )
+            ).disallowChanges()
             it.inputDir.set(linkTask.flatMap { it.destinationDirectory })
             it.validationStrategy.set(
                 when (binary.mode) {

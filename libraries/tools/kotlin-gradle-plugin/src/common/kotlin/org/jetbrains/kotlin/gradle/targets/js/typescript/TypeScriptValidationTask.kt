@@ -12,11 +12,10 @@ import org.gradle.api.tasks.*
 import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.internal.execWithProgress
+import org.jetbrains.kotlin.gradle.targets.js.NpmVersions
 import org.jetbrains.kotlin.gradle.targets.js.RequiredKotlinJsDependency
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinIrJsGeneratedTSValidationStrategy
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.RequiresNpmDependencies
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 import javax.inject.Inject
@@ -27,18 +26,16 @@ abstract class TypeScriptValidationTask
 constructor(
     @Internal
     @Transient
-    override val compilation: KotlinJsIrCompilation
+    final override val compilation: KotlinJsIrCompilation
 ) : DefaultTask(), RequiresNpmDependencies {
     private val npmProject = compilation.npmProject
 
-    private val versions by lazy { project.rootProject.kotlinNodeJsRootExtension.versions }
-    private val versionsWasm by lazy { project.rootProject.kotlinNodeJsForWasmRootExtension.versions }
-
-    private val getWasm: Boolean = compilation.wasmTarget != null
+    @get:Internal
+    internal abstract val versions: Property<NpmVersions>
 
     @get:Internal
     override val requiredNpmDependencies: Set<RequiredKotlinJsDependency>
-        get() = if (getWasm) setOf(versionsWasm.typescript) else setOf(versions.typescript)
+        get() = setOf(versions.get().typescript)
 
     @get:SkipWhenEmpty
     @get:NormalizeLineEndings
