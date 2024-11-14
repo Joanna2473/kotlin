@@ -7,9 +7,19 @@ package org.jetbrains.kotlin.cli.pipeline.js
 
 import org.jetbrains.kotlin.cli.common.perfManager
 import org.jetbrains.kotlin.cli.js.klib.transformFirToIr
+import org.jetbrains.kotlin.cli.pipeline.CheckCompilationErrors
 import org.jetbrains.kotlin.cli.pipeline.CompilerPipelineStep
+import org.jetbrains.kotlin.cli.pipeline.PerformanceNotifications
+import org.jetbrains.kotlin.cli.pipeline.PipelinePhase
 import org.jetbrains.kotlin.cli.pipeline.StepStatus
 import org.jetbrains.kotlin.cli.pipeline.toOkStatus
+
+object JsFir2IrPipelinePhase : PipelinePhase<JsFrontendPipelineArtifact, JsFir2IrPipelineArtifact>(
+    name = "JsFir2IrPipelinePhase",
+    step = JsFir2IrPipelineStep,
+    preActions = setOf(PerformanceNotifications.IrTranslationStarted),
+    postActions = setOf(PerformanceNotifications.IrTranslationFinished, CheckCompilationErrors)
+)
 
 object JsFir2IrPipelineStep : CompilerPipelineStep<JsFrontendPipelineArtifact, JsFir2IrPipelineArtifact>() {
     override fun execute(input: JsFrontendPipelineArtifact): StepStatus<JsFir2IrPipelineArtifact> {

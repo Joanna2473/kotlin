@@ -11,7 +11,9 @@ import org.jetbrains.kotlin.backend.common.phaser.PhaserState
 import org.jetbrains.kotlin.cli.common.createPhaseConfig
 import org.jetbrains.kotlin.cli.common.runPreSerializationLoweringPhases
 import org.jetbrains.kotlin.cli.js.klib.serializeFirKlib
+import org.jetbrains.kotlin.cli.pipeline.CheckCompilationErrors
 import org.jetbrains.kotlin.cli.pipeline.CompilerPipelineStep
+import org.jetbrains.kotlin.cli.pipeline.PipelinePhase
 import org.jetbrains.kotlin.cli.pipeline.StepStatus
 import org.jetbrains.kotlin.cli.pipeline.toOkStatus
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -19,6 +21,12 @@ import org.jetbrains.kotlin.config.messageCollector
 import org.jetbrains.kotlin.ir.backend.js.JsPreSerializationLoweringPhasesProvider
 import org.jetbrains.kotlin.js.config.*
 import org.jetbrains.kotlin.wasm.config.wasmTarget
+
+object JsKlibPipelinePhase : PipelinePhase<JsFir2IrPipelineArtifact, JsKlibPipelineArtifact>(
+    name = "JsKlibPipelinePhase",
+    step = JsKlibPipelineStep,
+    postActions = setOf(CheckCompilationErrors)
+)
 
 object JsKlibPipelineStep : CompilerPipelineStep<JsFir2IrPipelineArtifact, JsKlibPipelineArtifact>() {
     override fun execute(input: JsFir2IrPipelineArtifact): StepStatus<JsKlibPipelineArtifact> {
@@ -57,6 +65,7 @@ object JsKlibPipelineStep : CompilerPipelineStep<JsFir2IrPipelineArtifact, JsKli
         ).toOkStatus()
     }
 }
+
 
 fun CompilerConfiguration.computeOutputKlibPath(): String {
     return if (produceKlibFile) {

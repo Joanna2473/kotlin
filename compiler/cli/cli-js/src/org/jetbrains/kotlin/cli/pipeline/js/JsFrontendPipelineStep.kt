@@ -12,8 +12,11 @@ import org.jetbrains.kotlin.cli.js.klib.compileModuleToAnalyzedFirWithPsi
 import org.jetbrains.kotlin.cli.js.klib.compileModulesToAnalyzedFirWithLightTree
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.cli.pipeline.CheckCompilationErrors
 import org.jetbrains.kotlin.cli.pipeline.CompilerPipelineStep
 import org.jetbrains.kotlin.cli.pipeline.ConfigurationPipelineArtifact
+import org.jetbrains.kotlin.cli.pipeline.PerformanceNotifications
+import org.jetbrains.kotlin.cli.pipeline.PipelinePhase
 import org.jetbrains.kotlin.cli.pipeline.StepStatus
 import org.jetbrains.kotlin.cli.pipeline.toOkStatus
 import org.jetbrains.kotlin.config.lookupTracker
@@ -30,6 +33,13 @@ import org.jetbrains.kotlin.js.config.incrementalDataProvider
 import org.jetbrains.kotlin.js.config.libraries
 import org.jetbrains.kotlin.js.config.wasmCompilation
 import org.jetbrains.kotlin.library.KotlinLibrary
+
+object JsFrontendPipelinePhase : PipelinePhase<ConfigurationPipelineArtifact, JsFrontendPipelineArtifact>(
+    name = "JsFrontendPipelinePhase",
+    step = JsFrontendPipelineStep,
+    preActions = setOf(PerformanceNotifications.AnalysisStarted),
+    postActions = setOf(PerformanceNotifications.AnalysisFinished, CheckCompilationErrors)
+)
 
 object JsFrontendPipelineStep : CompilerPipelineStep<ConfigurationPipelineArtifact, JsFrontendPipelineArtifact>() {
     override fun execute(input: ConfigurationPipelineArtifact): StepStatus<JsFrontendPipelineArtifact> {

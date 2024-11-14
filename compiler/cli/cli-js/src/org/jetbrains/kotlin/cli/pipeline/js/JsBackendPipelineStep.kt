@@ -6,14 +6,23 @@
 package org.jetbrains.kotlin.cli.pipeline.js
 
 import org.jetbrains.kotlin.backend.common.CompilationException
+import org.jetbrains.kotlin.backend.common.phaser.PhaseConfigurationService
+import org.jetbrains.kotlin.backend.common.phaser.PhaserState
+import org.jetbrains.kotlin.backend.common.phaser.SimpleNamedCompilerPhase
 import org.jetbrains.kotlin.cli.common.ExitCode
 import org.jetbrains.kotlin.cli.common.createPhaseConfig
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.INFO
 import org.jetbrains.kotlin.cli.js.Ir2JsTransformer
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
+import org.jetbrains.kotlin.cli.pipeline.CheckCompilationErrors
 import org.jetbrains.kotlin.cli.pipeline.CompilerPipelineStep
+import org.jetbrains.kotlin.cli.pipeline.PerformanceNotifications
+import org.jetbrains.kotlin.cli.pipeline.PipelineContext
+import org.jetbrains.kotlin.cli.pipeline.PipelinePhase
 import org.jetbrains.kotlin.cli.pipeline.StepStatus
+import org.jetbrains.kotlin.cli.pipeline.invokeAsPhase
 import org.jetbrains.kotlin.cli.pipeline.toErrorStatus
 import org.jetbrains.kotlin.cli.pipeline.toOkStatus
 import org.jetbrains.kotlin.config.messageCollector
@@ -30,12 +39,21 @@ import org.jetbrains.kotlin.js.config.outputDir
 import org.jetbrains.kotlin.js.config.outputName
 import org.jetbrains.kotlin.js.config.tsCompilationStrategy
 import org.jetbrains.kotlin.js.config.wasmCompilation
+import org.jetbrains.kotlin.utils.addToStdlib.shouldNotBeCalled
 import java.io.File
 
+object JsBackendPipelinePhase : PipelinePhase<JsKlibPipelineArtifact, JsBackendPipelineArtifact>(
+    name = "JsBackendPipelinePhase",
+    step = JsBackendPipelineStep,
+    preActions = setOf(PerformanceNotifications.GenerationStarted),
+    postActions = setOf(PerformanceNotifications.GenerationFinished, CheckCompilationErrors),
+)
 object JsBackendPipelineStep : CompilerPipelineStep<JsKlibPipelineArtifact, JsBackendPipelineArtifact>() {
     override fun execute(input: JsKlibPipelineArtifact): StepStatus<JsBackendPipelineArtifact> {
         val (_, sourceModule, project, _, configuration) = input
         val messageCollector = configuration.messageCollector
+        messageCollector.report(INFO, "Produce executable: ${configuration.outputDir}")
+        messageCollector.report(INFO, "Cache directory: null") // arguments.cacheDirectory was here
         val module = sourceModule ?: run {
             val includes = configuration.includes!!
             val includesPath = File(includes).canonicalPath

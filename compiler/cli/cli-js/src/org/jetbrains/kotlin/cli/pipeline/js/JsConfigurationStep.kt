@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.cli.pipeline.js
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.text.StringUtil
+import org.jetbrains.kotlin.backend.common.phaser.SimpleNamedCompilerPhase
 import org.jetbrains.kotlin.cli.common.*
 import org.jetbrains.kotlin.cli.common.ExitCode.COMPILATION_ERROR
 import org.jetbrains.kotlin.cli.common.ExitCode.OK
@@ -36,6 +37,11 @@ import org.jetbrains.kotlin.serialization.js.ModuleKind
 import org.jetbrains.kotlin.wasm.config.WasmConfigurationKeys
 import java.io.File
 import java.io.IOException
+
+object JsConfigurationPhase : PipelinePhase<ArgumentsPipelineArtifact<K2JSCompilerArguments>, ConfigurationPipelineArtifact>(
+    name = "JsConfigurationPhase",
+    step = JsConfigurationStep,
+)
 
 object JsConfigurationStep : CompilerPipelineStep<
         ArgumentsPipelineArtifact<K2JSCompilerArguments>,
