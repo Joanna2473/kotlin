@@ -335,6 +335,12 @@ public class TieredBackendJvmLightTreeTestGenerated extends AbstractTieredBacken
     }
 
     @Test
+    @TestMetadata("isCheckAndVariance.kt")
+    public void testIsCheckAndVariance() {
+      runTest("compiler/testData/diagnostics/tests/isCheckAndVariance.kt");
+    }
+
+    @Test
     @TestMetadata("k2IrParentIssue.kt")
     public void testK2IrParentIssue() {
       runTest("compiler/testData/diagnostics/tests/k2IrParentIssue.kt");

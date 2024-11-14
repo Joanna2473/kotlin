@@ -946,6 +946,12 @@ public class FirLightTreeOldFrontendDiagnosticsWithLatestLanguageVersionTestGene
     }
 
     @Test
+    @TestMetadata("isCheckAndVariance.kt")
+    public void testIsCheckAndVariance() {
+      runTest("compiler/testData/diagnostics/tests/isCheckAndVariance.kt");
+    }
+
+    @Test
     @TestMetadata("IsExpressions.kt")
     public void testIsExpressions() {
       runTest("compiler/testData/diagnostics/tests/IsExpressions.kt");
