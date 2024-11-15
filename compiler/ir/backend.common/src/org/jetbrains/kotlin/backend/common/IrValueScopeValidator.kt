@@ -80,6 +80,12 @@ internal class IrValueScopeValidator(
             }
         }
 
+        override fun visitReplSnippet(declaration: IrReplSnippet, data: Nothing?) {
+            visitScopeOwner(declaration) {
+                declaration.propertiesFromOtherSnippets.forEach { addIfNotNull(it.symbol) }
+            }
+        }
+
         override fun visitFunction(declaration: IrFunction) {
             visitScopeOwner(declaration) {
                 // A function parameter's default value may reference the parameters that come after it,
