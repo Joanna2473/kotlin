@@ -15,8 +15,7 @@ import org.junit.jupiter.api.DisplayName
 @DisplayName("Build services usages in tasks are declared with `usesService`")
 class BuildServiceDeclarationIT : KGPBaseTest() {
     override val defaultBuildOptions = super.defaultBuildOptions.copy(
-        warningMode = WarningMode.All // we currently have other warnings when `STABLE_CONFIGURATION_CACHE` is enabled unrelated to build services declaration, so we check for this kind of warnings in the build output
-        // see KT-55563 and KT-55740
+        warningMode = WarningMode.Fail
     )
 
     @DisplayName("Build services are registered for Kotlin/JVM projects")
@@ -26,7 +25,6 @@ class BuildServiceDeclarationIT : KGPBaseTest() {
         project(
             "kotlinJavaProject",
             gradleVersion,
-            buildOptions = defaultBuildOptions.copy(warningMode = WarningMode.Fail)
         ) {
             enableStableConfigurationCachePreview()
             build("build") {
@@ -38,6 +36,7 @@ class BuildServiceDeclarationIT : KGPBaseTest() {
     @DisplayName("Build services are registered for Kotlin/JS browser projects")
     @GradleTest
     @JsGradlePluginTests
+    @GradleTestVersions(minVersion = TestVersions.Gradle.G_8_0)
     fun testJsBrowserProject(gradleVersion: GradleVersion) {
         project("kotlin-js-browser-project", gradleVersion) {
             enableStableConfigurationCachePreview()
@@ -50,6 +49,7 @@ class BuildServiceDeclarationIT : KGPBaseTest() {
     @DisplayName("Build services are registered for Kotlin/JS nodejs projects")
     @GradleTest
     @JsGradlePluginTests
+    @GradleTestVersions(minVersion = TestVersions.Gradle.G_8_0)
     fun testJsNodeJsProject(gradleVersion: GradleVersion) {
         project("kotlin-js-nodejs-project", gradleVersion) {
             enableStableConfigurationCachePreview()
@@ -62,6 +62,7 @@ class BuildServiceDeclarationIT : KGPBaseTest() {
     @DisplayName("Build services are registered for Kotlin/MPP projects")
     @GradleTest
     @MppGradlePluginTests
+    @GradleTestVersions(minVersion = TestVersions.Gradle.G_8_0)
     fun testMppProject(gradleVersion: GradleVersion) {
         project("new-mpp-lib-with-tests", gradleVersion) {
             enableStableConfigurationCachePreview()
@@ -78,7 +79,6 @@ class BuildServiceDeclarationIT : KGPBaseTest() {
         project(
             "kapt2/simple",
             gradleVersion,
-            buildOptions = defaultBuildOptions.copy(warningMode = WarningMode.Fail)
         ) {
             enableStableConfigurationCachePreview()
             build("build") {

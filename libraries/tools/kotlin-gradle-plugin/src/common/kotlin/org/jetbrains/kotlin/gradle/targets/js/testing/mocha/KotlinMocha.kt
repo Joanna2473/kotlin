@@ -16,28 +16,32 @@ import org.jetbrains.kotlin.gradle.targets.js.RequiredKotlinJsDependency
 import org.jetbrains.kotlin.gradle.targets.js.internal.parseNodeJsStackTraceAsJvm
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
+import org.jetbrains.kotlin.gradle.targets.js.targetVariant
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTestFramework
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinTestRunnerCliArgs
 import org.jetbrains.kotlin.gradle.utils.getFile
 import org.jetbrains.kotlin.gradle.utils.getValue
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
 
 class KotlinMocha(@Transient override val compilation: KotlinJsIrCompilation, private val basePath: String) :
     KotlinJsTestFramework {
     @Transient
     private val project: Project = compilation.target.project
     private val npmProject = compilation.npmProject
-    private val versions by lazy {
-        project.rootProject.kotlinNodeJsRootExtension.versions
-    }
-    private val versionsWasm by lazy {
-        project.rootProject.kotlinNodeJsForWasmRootExtension.versions
-    }
-    private val npmProjectDir by project.provider { npmProject.dir }
 
-    private val isWasm = compilation.wasmTarget != null
+    @Transient
+    private val nodeJsRoot = compilation.targetVariant(
+        { project.rootProject.kotlinNodeJsRootExtension },
+        { project.rootProject.kotlinNodeJsForWasmRootExtension },
+    )
+
+    private val versions by lazy {
+        nodeJsRoot.versions
+    }
+
+    private val npmProjectDir by project.provider { npmProject.dir }
 
     override val workingDir: Provider<Directory>
         get() = npmProjectDir
@@ -46,19 +50,11 @@ class KotlinMocha(@Transient override val compilation: KotlinJsIrCompilation, pr
         get() = "mocha"
 
     override val requiredNpmDependencies: Set<RequiredKotlinJsDependency>
-        get() = if (isWasm) {
-            setOf(
-                versionsWasm.mocha,
-                versionsWasm.sourceMapSupport,
-                versionsWasm.kotlinWebHelpers,
-            )
-        } else {
-            setOf(
-                versions.mocha,
-                versions.sourceMapSupport,
-                versions.kotlinWebHelpers,
-            )
-        }
+        get() = setOf(
+            versions.mocha,
+            versions.sourceMapSupport,
+            versions.kotlinWebHelpers,
+        )
 
     override fun getPath() = "$basePath:kotlinMocha"
 
@@ -71,7 +67,7 @@ class KotlinMocha(@Transient override val compilation: KotlinJsIrCompilation, pr
         task: KotlinJsTest,
         forkOptions: ProcessForkOptions,
         nodeJsArgs: MutableList<String>,
-        debug: Boolean
+        debug: Boolean,
     ): TCServiceMessagesTestExecutionSpec {
         val clientSettings = TCServiceMessagesClientSettings(
             task.name,

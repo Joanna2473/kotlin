@@ -23,13 +23,10 @@ import org.jetbrains.kotlin.gradle.internal.testing.TCServiceMessagesClientSetti
 import org.jetbrains.kotlin.gradle.internal.testing.TCServiceMessagesTestExecutionSpec
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider.Companion.kotlinPropertiesProvider
-import org.jetbrains.kotlin.gradle.targets.js.NpmPackageVersion
-import org.jetbrains.kotlin.gradle.targets.js.RequiredKotlinJsDependency
-import org.jetbrains.kotlin.gradle.targets.js.appendConfigsFromDir
+import org.jetbrains.kotlin.gradle.targets.js.*
 import org.jetbrains.kotlin.gradle.targets.js.dsl.WebpackRulesDsl.Companion.webpackRulesContainer
 import org.jetbrains.kotlin.gradle.targets.js.internal.parseNodeJsStackTraceAsJvm
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
-import org.jetbrains.kotlin.gradle.targets.js.jsQuoted
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 import org.jetbrains.kotlin.gradle.targets.js.testing.*
@@ -55,20 +52,19 @@ class KotlinKarma(
 
     private val platformType = compilation.platformType
 
-    private val isWasm = compilation.wasmTarget != null
+    @Transient
+    private val nodeJsRoot = compilation.targetVariant(
+        { project.rootProject.kotlinNodeJsRootExtension },
+        { project.rootProject.kotlinNodeJsForWasmRootExtension },
+    )
 
-//    @Transient
-//    private val nodeJs = project.rootProject.kotlinNodeJsRootExtension
     private val nodeRootPackageDir by lazy {
-        if (isWasm)
-            project.rootProject.kotlinNodeJsForWasmRootExtension.rootPackageDirectory
-        else
-            project.rootProject.kotlinNodeJsRootExtension.rootPackageDirectory
+        nodeJsRoot.rootPackageDirectory
     }
-    private val versions = if (isWasm)
-        project.rootProject.kotlinNodeJsForWasmRootExtension.versions
-    else
-        project.rootProject.kotlinNodeJsRootExtension.versions
+
+    private val versions by lazy {
+        nodeJsRoot.versions
+    }
 
     private val config: KarmaConfig = KarmaConfig()
     private val requiredDependencies = mutableSetOf<RequiredKotlinJsDependency>()
