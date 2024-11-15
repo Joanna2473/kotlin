@@ -75,6 +75,7 @@ private class ReplConfigurator(testServices: TestServices) : EnvironmentConfigur
 private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHandler(testServices) {
 
     private var scriptProcessed = false
+    private val replState: MutableMap<String, Any?> = mutableMapOf()
 
     override fun processModule(module: TestModule, info: BinaryArtifacts.Jvm) {
         val fileInfos = info.fileInfos.ifEmpty { return }
@@ -111,7 +112,7 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
         val eval = scriptClass.methods.find { it.name.contains("eval") }!!
 
         val res = captureOut {
-            eval.invoke(null)
+            eval.invoke(null, replState)
         }
 
         assertions.assertEquals(expected, res)

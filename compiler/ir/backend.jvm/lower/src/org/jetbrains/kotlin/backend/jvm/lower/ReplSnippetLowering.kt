@@ -17,21 +17,24 @@ import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
+import org.jetbrains.kotlin.ir.builders.*
 import org.jetbrains.kotlin.ir.builders.declarations.IrFunctionBuilder
 import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
-import org.jetbrains.kotlin.ir.builders.irBlockBody
-import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
 import org.jetbrains.kotlin.ir.expressions.IrComposite
+import org.jetbrains.kotlin.ir.expressions.IrExpression
+import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrConstructorSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrFieldSymbolImpl
+import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
+import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.NameUtils
@@ -114,6 +117,8 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                 .transform(lambdaPatcher, ScriptFixLambdasTransformerContext())
         }
 
+        irSnippetClass.dump()
+
         irSnippetClass.addFunction {
             name = Name.identifier("eval")
             startOffset = SYNTHETIC_OFFSET
@@ -121,18 +126,58 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
             returnType = context.irBuiltIns.unitType // TODO: implement value returning
             visibility = INTERNAL
         }.apply {
+            parent = irSnippetClass
+            val mapClass = context.irBuiltIns.mutableMapClass
+            val mapGet = mapClass.functions.single { it.owner.name.asString() == "get" }
+            val mapPut = mapClass.functions.single { it.owner.name.asString() == "put" }
+            val replStateParameter = context.irFactory.createValueParameter(
+                UNDEFINED_OFFSET, UNDEFINED_OFFSET,
+                IrDeclarationOrigin.REPL_FROM_OTHER_SNIPPET,
+                Name.special("<repl state>"),
+                symbol = IrValueParameterSymbolImpl(),
+                type = mapClass.typeWith(context.irBuiltIns.stringType, context.irBuiltIns.anyNType),
+                varargElementType = null,
+                isAssignable = false,
+                isCrossinline = false,
+                isHidden = false,
+                isNoinline = false,
+            ).also { parent = this }
+            valueParameters = listOf(replStateParameter)
+            var lastExpression: IrExpression? = null
             body =
                 context.createIrBuilder(symbol).irBlockBody {
-                    irSnippet.body.statements.forEach { scriptStatement ->
-                        val transformedStatement = scriptStatement.patchStatementForClass() as IrStatement
-                        if (transformedStatement is IrComposite) {
-                            for (statement in transformedStatement.statements)
-                                +statement
+                    irSnippet.propertiesFromOtherSnippets.forEach {
+                        it.initializer = irCall(mapGet).apply {
+                            dispatchReceiver = IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, replStateParameter.symbol)
+                            putValueArgument(0, irString(it.name.asString()))
+                        }
+                        +(it.patchStatementForClass() as IrStatement)
+                    }
+                    val flattenedStatements = irSnippet.body.statements.flatMap { scriptStatement ->
+                        if (scriptStatement is IrComposite) {
+                            scriptStatement.statements
                         } else {
-                            +transformedStatement
+                            listOf(scriptStatement)
+                        }
+                    }
+                    lastExpression = flattenedStatements.lastOrNull() as? IrExpression
+                    flattenedStatements.forEach { statement ->
+                        val patchedStatement = statement.patchStatementForClass() as IrStatement
+                        if (statement == lastExpression) {
+                            +irReturn(patchedStatement as IrExpression)
+                        } else {
+                            +patchedStatement
+                            if (patchedStatement is IrVariable) {
+                                +irCall(mapPut).apply {
+                                    dispatchReceiver = IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, replStateParameter.symbol)
+                                    putValueArgument(0, irString(patchedStatement.name.asString()))
+                                    putValueArgument(1, IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, patchedStatement.symbol))
+                                }
+                            }
                         }
                     }
                 }
+            returnType = lastExpression?.type ?: context.irBuiltIns.unitType
         }
 
         irSnippetClass.annotations += (irSnippetClass.parent as IrFile).annotations
