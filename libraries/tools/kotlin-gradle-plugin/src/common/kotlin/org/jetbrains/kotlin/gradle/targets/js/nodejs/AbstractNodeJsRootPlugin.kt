@@ -95,37 +95,70 @@ abstract class AbstractNodeJsRootPlugin : Plugin<Project>, HasPlatformDisambigua
             it.gradleNodeModules.set(gradleNodeModulesProvider)
         }
 
+        project.registerTask<Task>(extensionName(PACKAGE_JSON_UMBRELLA_TASK_NAME))
+
+        nodeJsRoot.resolver = KotlinRootNpmResolver(
+            project.name,
+            project.version.toString(),
+            TasksRequirements(),
+            nodeJsRoot.versions,
+            nodeJsRoot.rootProjectDir,
+            platformType
+        )
+
+        val objectFactory = project.objects
+
+        val npmResolutionManager: Provider<KotlinNpmResolutionManager> = KotlinNpmResolutionManager.registerIfAbsent(
+            project,
+            objectFactory.providerWithLazyConvention {
+                nodeJsRoot.resolver.close()
+            },
+            gradleNodeModulesProvider,
+            nodeJsRoot.projectPackagesDirectory,
+            ::extensionName
+        )
+
+        val packageJsonUmbrella = nodeJsRoot
+            .packageJsonUmbrellaTaskProvider
+
+        val rootPackageJson = project.tasks.register(extensionName(RootPackageJsonTask.NAME), RootPackageJsonTask::class.java) { task ->
+            task.group = TASKS_GROUP_NAME
+            task.description = "Create root package.json"
+
+            task.configureNodeJsEnvironmentTasks(
+                setupFileHasherTask,
+                nodeJsRoot,
+                nodeJs,
+                npmResolutionManager,
+            )
+
+            task.rootPackageJsonFile.value(
+                nodeJsRoot.rootPackageDirectory.map { it.file(NpmProject.PACKAGE_JSON) }
+            ).disallowChanges()
+
+            task.onlyIfCompat("Prepare NPM project only in configuring state") {
+                it as RootPackageJsonTask
+                it.npmResolutionManager.get().isConfiguringState()
+            }
+
+            task.dependsOn(packageJsonUmbrella)
+        }
+
+        configureRequiresNpmDependencies(project, rootPackageJson)
+
         val npmInstall = project.registerTask<KotlinNpmInstallTask>(extensionName(KotlinNpmInstallTask.NAME)) { npmInstall ->
             with(nodeJs) {
                 npmInstall.dependsOn(project.nodeJsSetupTaskProvider)
             }
-            npmInstall.dependsOn(setupFileHasherTask)
             npmInstall.group = TASKS_GROUP_NAME
             npmInstall.description = "Find, download and link NPM dependencies and projects"
 
-            npmInstall.packageJsonFiles.value(
-                project.provider {
-                    nodeJsRoot.resolver
-                        .projectResolvers.values
-                        .flatMap { it.compilationResolvers }
-                        .map { it.compilationNpmResolution }
-                        .map { resolution ->
-                            val name = resolution.npmProjectName
-                            nodeJsRoot.projectPackagesDirectory.map { it.dir(name).file(NpmProject.PACKAGE_JSON) }.get()
-                        }
-                }
-            ).disallowChanges()
-
-            npmInstall.nodeJsEnvironment.value(
-                nodeJs.produceEnv(project.providers)
-                    .map {
-                        asNodeJsEnvironment(nodeJsRoot, it)
-                    }
-            ).disallowChanges()
-
-            npmInstall.packageManagerEnv.value(
-                nodeJsRoot.packageManagerExtension.map { it.environment }
-            ).disallowChanges()
+            npmInstall.configureNodeJsEnvironmentTasks(
+                setupFileHasherTask,
+                nodeJsRoot,
+                nodeJs,
+                npmResolutionManager,
+            )
 
             npmInstall.nodeModules.value(
                 nodeJsRoot.rootPackageDirectory.map { it.dir("node_modules") }
@@ -151,85 +184,11 @@ abstract class AbstractNodeJsRootPlugin : Plugin<Project>, HasPlatformDisambigua
             npmInstall.outputs.upToDateWhen {
                 npmInstall.nodeModules.getFile().exists()
             }
-        }
 
-        project.registerTask<Task>(extensionName(PACKAGE_JSON_UMBRELLA_TASK_NAME))
+            npmInstall.dependsOn(rootPackageJson)
+            npmInstall.inputs.property("npmIgnoreScripts", { npm.ignoreScripts })
 
-        nodeJsRoot.resolver = KotlinRootNpmResolver(
-            project.name,
-            project.version.toString(),
-            TasksRequirements(),
-            nodeJsRoot.versions,
-            nodeJsRoot.rootProjectDir,
-            platformType
-        )
-
-        val objectFactory = project.objects
-
-        val npmResolutionManager: Provider<KotlinNpmResolutionManager> = KotlinNpmResolutionManager.registerIfAbsent(
-            project,
-            objectFactory.providerWithLazyConvention {
-                nodeJsRoot.resolver.close()
-            },
-            gradleNodeModulesProvider,
-            nodeJsRoot.projectPackagesDirectory,
-            ::extensionName
-        )
-
-        val rootPackageJson = project.tasks.register(extensionName(RootPackageJsonTask.NAME), RootPackageJsonTask::class.java) { task ->
-            task.dependsOn(setupFileHasherTask)
-            task.group = TASKS_GROUP_NAME
-            task.description = "Create root package.json"
-
-            task.npmResolutionManager.value(npmResolutionManager)
-                .disallowChanges()
-
-            task.packageJsonFiles.value(
-                project.provider {
-                    nodeJsRoot.resolver
-                        .projectResolvers.values
-                        .flatMap { it.compilationResolvers }
-                        .map { it.compilationNpmResolution }
-                        .map { resolution ->
-                            val name = resolution.npmProjectName
-                            nodeJsRoot.projectPackagesDirectory.map { it.dir(name).file(NpmProject.PACKAGE_JSON) }.get()
-                        }
-                }
-            ).disallowChanges()
-
-            task.nodeJsEnvironment.value(
-                nodeJs.produceEnv(project.providers)
-                    .map {
-                        asNodeJsEnvironment(nodeJsRoot, it)
-                    }
-            ).disallowChanges()
-
-            task.rootPackageJsonFile.value(
-                nodeJsRoot.rootPackageDirectory.map { it.file(NpmProject.PACKAGE_JSON) }
-            ).disallowChanges()
-
-            task.packageManagerEnv.value(
-                nodeJsRoot.packageManagerExtension.map { it.environment }
-            ).disallowChanges()
-
-            task.onlyIfCompat("Prepare NPM project only in configuring state") {
-                it as RootPackageJsonTask
-                it.npmResolutionManager.get().isConfiguringState()
-            }
-        }
-
-        configureRequiresNpmDependencies(project, rootPackageJson)
-
-        val packageJsonUmbrella = nodeJsRoot
-            .packageJsonUmbrellaTaskProvider
-
-        nodeJsRoot.rootPackageJsonTaskProvider.configure {
-            it.dependsOn(packageJsonUmbrella)
-        }
-
-        npmInstall.configure {
-            it.dependsOn(rootPackageJson)
-            it.inputs.property("npmIgnoreScripts", { npm.ignoreScripts })
+            npmInstall.dependsOn(nodeJsRoot.packageManagerExtension.map { it.preInstallTasks })
         }
 
         project.tasks.register(extensionName(LockCopyTask.STORE_PACKAGE_LOCK_NAME), LockStoreTask::class.java) { task ->
@@ -311,14 +270,6 @@ abstract class AbstractNodeJsRootPlugin : Plugin<Project>, HasPlatformDisambigua
             listOf(npm.storePackageLockTaskProvider)
         ).disallowChanges()
 
-        npmInstall.configure {
-            it.dependsOn(nodeJsRoot.packageManagerExtension.map { it.preInstallTasks })
-        }
-
-        npmInstall.configure {
-            it.npmResolutionManager.value(npmResolutionManager).disallowChanges()
-        }
-
         project.tasks.register(extensionName("node" + CleanDataTask.NAME_SUFFIX), CleanDataTask::class.java) {
             it.cleanableStoreProvider = nodeJs.produceEnv(project.providers).map { it.cleanableStore }
             it.group = TASKS_GROUP_NAME
@@ -330,6 +281,42 @@ abstract class AbstractNodeJsRootPlugin : Plugin<Project>, HasPlatformDisambigua
         if (propertiesProvider.yarn) {
             project.plugins.apply(yarnPlugin.java)
         }
+    }
+
+    private fun NodeJsEnvironmentTask.configureNodeJsEnvironmentTasks(
+        setupFileHasherTask: TaskProvider<*>,
+        nodeJsRoot: NodeJsRootExtension,
+        nodeJs: NodeJsEnvSpec,
+        npmResolutionManager: Provider<KotlinNpmResolutionManager>,
+    ) {
+        dependsOn(setupFileHasherTask)
+
+        this.npmResolutionManager.value(npmResolutionManager)
+            .disallowChanges()
+
+        packageJsonFiles.value(
+            project.provider {
+                nodeJsRoot.resolver
+                    .projectResolvers.values
+                    .flatMap { it.compilationResolvers }
+                    .map { it.compilationNpmResolution }
+                    .map { resolution ->
+                        val name = resolution.npmProjectName
+                        nodeJsRoot.projectPackagesDirectory.map { it.dir(name).file(NpmProject.PACKAGE_JSON) }.get()
+                    }
+            }
+        ).disallowChanges()
+
+        nodeJsEnvironment.value(
+            nodeJs.produceEnv(project.providers)
+                .map {
+                    asNodeJsEnvironment(nodeJsRoot, it)
+                }
+        ).disallowChanges()
+
+        packageManagerEnv.value(
+            nodeJsRoot.packageManagerExtension.map { it.environment }
+        ).disallowChanges()
     }
 
     // Yes, we need to break Task Configuration Avoidance here

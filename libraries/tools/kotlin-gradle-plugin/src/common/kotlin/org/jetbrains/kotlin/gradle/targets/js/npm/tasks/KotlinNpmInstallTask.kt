@@ -21,16 +21,11 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.UsesKotlinNpmResolutionManager
 @DisableCachingByDefault
 abstract class KotlinNpmInstallTask :
     DefaultTask(),
+    NodeJsEnvironmentTask,
     UsesKotlinNpmResolutionManager {
     init {
         check(project == project.rootProject)
     }
-
-    @get:Internal
-    internal abstract val nodeJsEnvironment: Property<NodeJsEnvironment>
-
-    @get:Internal
-    internal abstract val packageManagerEnv: Property<PackageManagerEnvironment>
 
     @Input
     val args: MutableList<String> = mutableListOf()
@@ -40,12 +35,6 @@ abstract class KotlinNpmInstallTask :
     @get:NormalizeLineEndings
     @get:InputFiles
     abstract val preparedFiles: ConfigurableFileCollection
-
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:IgnoreEmptyDirectories
-    @get:NormalizeLineEndings
-    @get:InputFiles
-    abstract val packageJsonFiles: ListProperty<RegularFile>
 
     @get:OutputFiles
     abstract val additionalFiles: ConfigurableFileCollection

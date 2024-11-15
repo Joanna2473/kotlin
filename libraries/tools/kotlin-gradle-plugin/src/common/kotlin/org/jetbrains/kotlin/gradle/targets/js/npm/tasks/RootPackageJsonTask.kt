@@ -14,30 +14,20 @@ import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.PackageManagerEnvironment
 import org.jetbrains.kotlin.gradle.targets.js.npm.NodeJsEnvironment
+import org.jetbrains.kotlin.gradle.targets.js.npm.NodeJsEnvironmentTask
 import org.jetbrains.kotlin.gradle.targets.js.npm.UsesKotlinNpmResolutionManager
 
 @DisableCachingByDefault
 abstract class RootPackageJsonTask :
     DefaultTask(),
+    NodeJsEnvironmentTask,
     UsesKotlinNpmResolutionManager {
     init {
         check(project == project.rootProject)
     }
 
-    @get:Internal
-    internal abstract val nodeJsEnvironment: Property<NodeJsEnvironment>
-
-    @get:Internal
-    internal abstract val packageManagerEnv: Property<PackageManagerEnvironment>
-
     @get:OutputFile
     val rootPackageJsonFile: Property<RegularFile> = project.objects.fileProperty()
-
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:IgnoreEmptyDirectories
-    @get:NormalizeLineEndings
-    @get:InputFiles
-    abstract val packageJsonFiles: ListProperty<RegularFile>
 
     @TaskAction
     fun resolve() {
