@@ -22,7 +22,6 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NpmApiExtension
 open class NpmExtension(
     val project: Project,
     val nodeJsRoot: NodeJsRootExtension,
-    private val platformDisambiguate: String? = null,
 ) : ConfigurationPhaseAware<NpmEnv>(), NpmApiExtension<NpmEnvironment, Npm> {
     init {
         check(project == project.rootProject)

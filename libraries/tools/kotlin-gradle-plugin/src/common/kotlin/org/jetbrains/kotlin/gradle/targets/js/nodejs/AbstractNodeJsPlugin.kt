@@ -8,14 +8,13 @@ package org.jetbrains.kotlin.gradle.targets.js.nodejs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.internal.unameExecResult
+import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
 import org.jetbrains.kotlin.gradle.tasks.registerTask
 import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 import org.jetbrains.kotlin.gradle.utils.providerWithLazyConvention
 
-abstract class AbstractNodeJsPlugin : Plugin<Project> {
-
-    abstract val platformDisambiguate: String?
+abstract class AbstractNodeJsPlugin : Plugin<Project>, HasPlatformDisambiguate {
 
     abstract fun nodeJsRootApply(project: Project): NodeJsRootExtension
 
@@ -78,7 +77,4 @@ abstract class AbstractNodeJsPlugin : Plugin<Project> {
                 }
         ).disallowChanges()
     }
-
-    private fun extensionName(baseName: String): String =
-        lowerCamelCaseName(baseName, platformDisambiguate)
 }

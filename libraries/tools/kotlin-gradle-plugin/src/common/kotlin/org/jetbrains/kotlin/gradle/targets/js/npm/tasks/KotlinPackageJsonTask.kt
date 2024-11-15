@@ -17,8 +17,6 @@ import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.wasmPlatform
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.*
@@ -89,11 +87,6 @@ abstract class KotlinPackageJsonTask :
                 { project.kotlinNpmResolutionManagerForWasm },
             )
 
-            val gradleNodeModules = compilation.targetVariant(
-                { GradleNodeModulesCache.registerIfAbsent(project, null, null, null) },
-                { GradleNodeModulesCache.registerIfAbsent(project, null, null, wasmPlatform) }
-            )
-
             val nodeJsRoot = npmProject.nodeJsRoot
 
             val packageJsonTask = project.registerTask<KotlinPackageJsonTask>(packageJsonTaskName) { task ->
@@ -105,7 +98,7 @@ abstract class KotlinPackageJsonTask :
                 task.npmResolutionManager.value(npmResolutionManager)
                     .disallowChanges()
 
-                task.gradleNodeModules.value(gradleNodeModules)
+                task.gradleNodeModules.value(npmResolutionManager.flatMap { it.parameters.gradleNodeModulesProvider })
                     .disallowChanges()
 
                 task.packageJsonMain.set(compilation.npmProject.main)

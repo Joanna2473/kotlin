@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
@@ -13,7 +14,6 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.wasmPlatform
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
-import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 import java.io.File
 
 open class YarnForWasmPlugin : AbstractYarnPlugin() {
@@ -33,14 +33,14 @@ open class YarnForWasmPlugin : AbstractYarnPlugin() {
     override fun lockFileDirectory(projectDirectory: File): File =
         projectDirectory.resolve(LockCopyTask.KOTLIN_JS_STORE).resolve(platformDisambiguate)
 
-    companion object {
+    companion object : HasPlatformDisambiguate {
         fun apply(project: Project): YarnRootExtension {
             val rootProject = project.rootProject
             rootProject.plugins.apply(YarnForWasmPlugin::class.java)
             return rootProject.extensions.getByName(extensionName(YarnRootExtension.YARN)) as YarnRootExtension
         }
 
-        private fun extensionName(baseName: String): String =
-            lowerCamelCaseName(baseName, wasmPlatform)
+        override val platformDisambiguate: String
+            get() = wasmPlatform
     }
 }

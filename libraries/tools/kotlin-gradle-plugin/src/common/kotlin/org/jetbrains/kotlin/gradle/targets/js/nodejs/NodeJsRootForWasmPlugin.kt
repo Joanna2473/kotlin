@@ -10,11 +10,11 @@ import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnForWasmPlugin
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
-import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 import kotlin.reflect.KClass
 
 open class NodeJsRootForWasmPlugin : AbstractNodeJsRootPlugin() {
@@ -38,7 +38,7 @@ open class NodeJsRootForWasmPlugin : AbstractNodeJsRootPlugin() {
     override val platformType: KotlinPlatformType
         get() = KotlinPlatformType.wasm
 
-    companion object {
+    companion object : HasPlatformDisambiguate {
         fun apply(rootProject: Project): NodeJsRootExtension {
             check(rootProject == rootProject.rootProject)
             rootProject.plugins.apply(NodeJsRootForWasmPlugin::class.java)
@@ -61,7 +61,7 @@ open class NodeJsRootForWasmPlugin : AbstractNodeJsRootPlugin() {
         val wasmPlatform: String
             get() = KotlinPlatformType.wasm.name
 
-        private fun extensionName(baseName: String): String =
-            lowerCamelCaseName(baseName, wasmPlatform)
+        override val platformDisambiguate: String
+            get() = wasmPlatform
     }
 }

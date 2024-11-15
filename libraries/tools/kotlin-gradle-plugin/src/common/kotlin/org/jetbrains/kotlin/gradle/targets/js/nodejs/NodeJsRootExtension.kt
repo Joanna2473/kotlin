@@ -12,13 +12,13 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
+import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.NpmVersions
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.KotlinRootNpmResolver
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.PACKAGE_JSON_UMBRELLA_TASK_NAME
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmCachesSetup
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.RootPackageJsonTask
-import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 import org.jetbrains.kotlin.gradle.utils.property
 import java.io.File
 
@@ -26,8 +26,8 @@ open class NodeJsRootExtension(
     val project: Project,
     private val nodeJs: () -> NodeJsEnvSpec,
     rootDir: String,
-    internal val platformDisambiguate: String? = null,
-) {
+    override val platformDisambiguate: String? = null,
+) : HasPlatformDisambiguate {
 
     init {
         check(project.rootProject == project)
@@ -151,9 +151,6 @@ open class NodeJsRootExtension(
     fun requireConfigured(): NodeJsEnv {
         return nodeJs().produceEnv(project.providers).get()
     }
-
-    fun extensionName(baseName: String) =
-        lowerCamelCaseName(baseName, platformDisambiguate.orEmpty())
 
     companion object {
         const val EXTENSION_NAME: String = "kotlinNodeJs"

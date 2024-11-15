@@ -6,9 +6,9 @@
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.wasmPlatform
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
-import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 
 open class NodeJsForWasmPlugin : AbstractNodeJsPlugin() {
     override val platformDisambiguate: String?
@@ -17,7 +17,7 @@ open class NodeJsForWasmPlugin : AbstractNodeJsPlugin() {
     override fun nodeJsRootApply(project: Project): NodeJsRootExtension =
         NodeJsRootForWasmPlugin.apply(project)
 
-    companion object {
+    companion object : HasPlatformDisambiguate {
         fun apply(project: Project): NodeJsEnvSpec {
             project.plugins.apply(NodeJsForWasmPlugin::class.java)
             return project.extensions.getByName(extensionName(NodeJsEnvSpec.EXTENSION_NAME)) as NodeJsEnvSpec
@@ -26,7 +26,7 @@ open class NodeJsForWasmPlugin : AbstractNodeJsPlugin() {
         val Project.kotlinNodeJsEnvSpec: NodeJsEnvSpec
             get() = extensions.getByName(extensionName(NodeJsEnvSpec.EXTENSION_NAME)).castIsolatedKotlinPluginClassLoaderAware()
 
-        private fun extensionName(baseName: String): String =
-            lowerCamelCaseName(baseName, wasmPlatform)
+        override val platformDisambiguate: String
+            get() = wasmPlatform
     }
 }

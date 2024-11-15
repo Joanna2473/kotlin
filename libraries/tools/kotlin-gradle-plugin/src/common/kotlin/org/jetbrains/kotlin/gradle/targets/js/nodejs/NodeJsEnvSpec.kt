@@ -72,7 +72,7 @@ abstract class NodeJsEnvSpec : EnvSpec<NodeJsEnv>() {
             .named(extensionName(NodeJsSetupTask.NAME))
 
     fun extensionName(baseName: String) =
-        lowerCamelCaseName(baseName, platformDisambiguate.orNull.orEmpty())
+        lowerCamelCaseName(platformDisambiguate.orNull.orEmpty(), baseName)
 
     companion object {
         const val EXTENSION_NAME: String = "kotlinNodeJsSpec"
