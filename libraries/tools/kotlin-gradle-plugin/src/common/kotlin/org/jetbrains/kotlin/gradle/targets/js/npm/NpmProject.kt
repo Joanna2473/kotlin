@@ -80,7 +80,7 @@ open class NpmProject(@Transient val compilation: KotlinJsIrCompilation) : Seria
         get() = dir.map { it.file(PACKAGE_JSON) }
 
     val packageJsonTaskName: String
-        get() = compilation.disambiguateName(nodeJsRoot.platformDisambiguate?.let { "packageJson" + it } ?: "packageJson")
+        get() = compilation.disambiguateName("packageJson")
 
     val packageJsonTask: KotlinPackageJsonTask
         get() = project.tasks.getByName(packageJsonTaskName) as KotlinPackageJsonTask
@@ -94,8 +94,7 @@ open class NpmProject(@Transient val compilation: KotlinJsIrCompilation) : Seria
     val main: Provider<String> = extension.map { "${DIST_FOLDER}/$name.$it" }
 
     val publicPackageJsonTaskName: String
-        get() = compilation.disambiguateName(nodeJsRoot.platformDisambiguate?.let { it + PublicPackageJsonTask.NAME }
-                                                 ?: PublicPackageJsonTask.NAME)
+        get() = compilation.disambiguateName(PublicPackageJsonTask.NAME)
 
     internal val modules by lazy {
         NpmProjectModules(dir.getFile())

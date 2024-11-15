@@ -15,10 +15,11 @@ import org.gradle.api.tasks.*
 import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.wasmPlatform
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManager
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManagerForWasm
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.*
 import org.jetbrains.kotlin.gradle.targets.js.targetVariant
@@ -27,6 +28,7 @@ import org.jetbrains.kotlin.gradle.utils.CompositeProjectComponentArtifactMetada
 import org.jetbrains.kotlin.gradle.utils.`is`
 import org.jetbrains.kotlin.gradle.utils.mapToFile
 import java.io.File
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNpmResolutionManager as kotlinNpmResolutionManagerForWasm
 
 @DisableCachingByDefault
 abstract class KotlinPackageJsonTask :
@@ -88,8 +90,8 @@ abstract class KotlinPackageJsonTask :
             )
 
             val gradleNodeModules = compilation.targetVariant(
-                { GradleNodeModulesCache.registerIfAbsent(project, null, null, "Js") },
-                { GradleNodeModulesCache.registerIfAbsent(project, null, null, "Wasm") }
+                { GradleNodeModulesCache.registerIfAbsent(project, null, null, null) },
+                { GradleNodeModulesCache.registerIfAbsent(project, null, null, wasmPlatform) }
             )
 
             val nodeJsRoot = npmProject.nodeJsRoot
@@ -98,7 +100,7 @@ abstract class KotlinPackageJsonTask :
                 task.compilationDisambiguatedName.set(compilation.disambiguatedName)
                 task.packageJsonHandlers.set(compilation.packageJsonHandlers)
                 task.description = "Create package.json file for $compilation"
-                task.group = NodeJsRootPlugin.TASKS_GROUP_NAME
+                task.group = AbstractNodeJsRootPlugin.TASKS_GROUP_NAME
 
                 task.npmResolutionManager.value(npmResolutionManager)
                     .disallowChanges()

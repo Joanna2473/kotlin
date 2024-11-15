@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.PACKAGE_JSON_UMBRELLA
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmCachesSetup
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.RootPackageJsonTask
+import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 import org.jetbrains.kotlin.gradle.utils.property
 import java.io.File
 
@@ -124,18 +125,18 @@ open class NodeJsRootExtension(
 
     val npmInstallTaskProvider: TaskProvider<out KotlinNpmInstallTask>
         get() = project.tasks.withType(KotlinNpmInstallTask::class.java)
-            .named(platformDisambiguate?.let { KotlinNpmInstallTask.NAME + it } ?: KotlinNpmInstallTask.NAME)
+            .named(extensionName(KotlinNpmInstallTask.NAME))
 
     val rootPackageJsonTaskProvider: TaskProvider<RootPackageJsonTask>
         get() = project.tasks.withType(RootPackageJsonTask::class.java)
-            .named(platformDisambiguate?.let { RootPackageJsonTask.NAME + it } ?: RootPackageJsonTask.NAME)
+            .named(extensionName(RootPackageJsonTask.NAME))
 
     val packageJsonUmbrellaTaskProvider: TaskProvider<Task>
-        get() = project.tasks.named(platformDisambiguate?.let { PACKAGE_JSON_UMBRELLA_TASK_NAME + it } ?: PACKAGE_JSON_UMBRELLA_TASK_NAME)
+        get() = project.tasks.named(extensionName(PACKAGE_JSON_UMBRELLA_TASK_NAME))
 
     val npmCachesSetupTaskProvider: TaskProvider<out KotlinNpmCachesSetup>
         get() = project.tasks.withType(KotlinNpmCachesSetup::class.java)
-            .named(platformDisambiguate?.let { KotlinNpmCachesSetup.NAME + it } ?: KotlinNpmCachesSetup.NAME)
+            .named(extensionName(KotlinNpmCachesSetup.NAME))
 
     @Deprecated(
         "Use nodeJsSetupTaskProvider from NodeJsExtension (not NodeJsRootExtension) instead" +
@@ -150,6 +151,9 @@ open class NodeJsRootExtension(
     fun requireConfigured(): NodeJsEnv {
         return nodeJs().produceEnv(project.providers).get()
     }
+
+    fun extensionName(baseName: String) =
+        lowerCamelCaseName(baseName, platformDisambiguate.orEmpty())
 
     companion object {
         const val EXTENSION_NAME: String = "kotlinNodeJs"

@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.KotlinProjectNpmResol
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.KotlinRootNpmResolver
 import org.jetbrains.kotlin.gradle.tasks.withType
 import org.jetbrains.kotlin.gradle.utils.SingleActionPerProject
+import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 
 internal interface UsesKotlinNpmResolutionManager : Task {
     @get:Internal
@@ -164,9 +165,10 @@ abstract class KotlinNpmResolutionManager : BuildService<KotlinNpmResolutionMana
             resolution: Provider<KotlinRootNpmResolution>?,
             gradleNodeModulesProvider: Provider<GradleNodeModulesCache>?,
             packagesDir: Provider<Directory>,
-            name: String
+            name: String?
         ): Provider<KotlinNpmResolutionManager> {
-            project.gradle.sharedServices.registrations.findByName(serviceName + name)?.let {
+            val serviceName = lowerCamelCaseName(serviceName, name.orEmpty())
+            project.gradle.sharedServices.registrations.findByName(serviceName)?.let {
                 @Suppress("UNCHECKED_CAST")
                 return it.service as Provider<KotlinNpmResolutionManager>
             }
@@ -178,7 +180,7 @@ abstract class KotlinNpmResolutionManager : BuildService<KotlinNpmResolutionMana
             requireNotNull(resolution, message)
             requireNotNull(gradleNodeModulesProvider, message)
 
-            return project.gradle.sharedServices.registerIfAbsent(serviceName + name, serviceClass) {
+            return project.gradle.sharedServices.registerIfAbsent(serviceName, serviceClass) {
                 it.parameters.resolution.set(
                     resolution
                 )
@@ -192,7 +194,7 @@ abstract class KotlinNpmResolutionManager : BuildService<KotlinNpmResolutionMana
             resolution: Provider<KotlinRootNpmResolution>?,
             gradleNodeModulesProvider: Provider<GradleNodeModulesCache>?,
             packagesDir: Provider<Directory>,
-            name: String
+            name: String?
         ) = registerIfAbsentImpl(project, resolution, gradleNodeModulesProvider, packagesDir, name).also { serviceProvider ->
             SingleActionPerProject.run(project, UsesKotlinNpmResolutionManager::class.java.name) {
                 project.tasks.withType<UsesKotlinNpmResolutionManager>().configureEach { task ->

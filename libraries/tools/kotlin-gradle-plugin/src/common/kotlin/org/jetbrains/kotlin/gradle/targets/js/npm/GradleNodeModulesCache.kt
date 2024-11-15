@@ -16,6 +16,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.jetbrains.kotlin.gradle.tasks.withType
 import org.jetbrains.kotlin.gradle.utils.SingleActionPerProject
+import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 import java.io.File
 import javax.inject.Inject
 
@@ -56,9 +57,10 @@ abstract class GradleNodeModulesCache : AbstractNodeModulesCache() {
             project: Project,
             rootProjectDir: File?,
             cacheDir: Provider<Directory>?,
-            name: String
+            name: String?
         ): Provider<GradleNodeModulesCache> {
-            project.gradle.sharedServices.registrations.findByName(serviceName + name)?.let {
+            val serviceName = lowerCamelCaseName(serviceName, name.orEmpty())
+            project.gradle.sharedServices.registrations.findByName(serviceName)?.let {
                 @Suppress("UNCHECKED_CAST")
                 return it.service as Provider<GradleNodeModulesCache>
             }
@@ -70,7 +72,7 @@ abstract class GradleNodeModulesCache : AbstractNodeModulesCache() {
             requireNotNull(rootProjectDir, message)
             requireNotNull(cacheDir, message)
 
-            return project.gradle.sharedServices.registerIfAbsent(serviceName + name, serviceClass) {
+            return project.gradle.sharedServices.registerIfAbsent(serviceName, serviceClass) {
                 it.parameters.rootProjectDir.set(rootProjectDir)
                 it.parameters.cacheDir.set(cacheDir)
             }
@@ -80,7 +82,7 @@ abstract class GradleNodeModulesCache : AbstractNodeModulesCache() {
             project: Project,
             rootProjectDir: File?,
             cacheDir: Provider<Directory>?,
-            name: String
+            name: String?
         ) = registerIfAbsentImpl(project, rootProjectDir, cacheDir, name).also { serviceProvider ->
             SingleActionPerProject.run(project, UsesGradleNodeModulesCache::class.java.name) {
                 project.tasks.withType<UsesGradleNodeModulesCache>().configureEach { task ->

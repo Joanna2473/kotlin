@@ -6,20 +6,22 @@
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.targets.js.EnvSpec
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import org.jetbrains.kotlin.gradle.utils.getFile
+import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 import java.io.File
 
 /**
  * Spec for Node.js - common JS and Wasm runtime.
  */
-abstract class NodeJsEnvSpec(
-    private val platformDisambiguate: String? = null,
-) : EnvSpec<NodeJsEnv>() {
+abstract class NodeJsEnvSpec : EnvSpec<NodeJsEnv>() {
+
+    internal abstract val platformDisambiguate: Property<String>
 
     /**
      * Specify a platform information with name and architecture
@@ -67,7 +69,10 @@ abstract class NodeJsEnvSpec(
 
     val Project.nodeJsSetupTaskProvider: TaskProvider<out NodeJsSetupTask>
         get() = project.tasks.withType(NodeJsSetupTask::class.java)
-            .named(platformDisambiguate?.let { NodeJsSetupTask.NAME + it } ?: NodeJsSetupTask.NAME)
+            .named(extensionName(NodeJsSetupTask.NAME))
+
+    fun extensionName(baseName: String) =
+        lowerCamelCaseName(baseName, platformDisambiguate.orNull.orEmpty())
 
     companion object {
         const val EXTENSION_NAME: String = "kotlinNodeJsSpec"
