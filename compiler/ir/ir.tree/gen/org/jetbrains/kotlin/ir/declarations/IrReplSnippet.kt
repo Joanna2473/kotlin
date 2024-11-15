@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrReplSnippetSymbol
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.transformIfNeeded
+import org.jetbrains.kotlin.ir.util.transformInPlace
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
 
@@ -29,6 +30,8 @@ abstract class IrReplSnippet : IrDeclarationBase(), IrDeclarationWithName, IrDec
 
     abstract var receiversParameters: List<IrValueParameter>
 
+    abstract val propertiesFromOtherSnippets: MutableList<IrVariable>
+
     abstract var body: IrBody
 
     abstract var returnType: IrType?
@@ -40,11 +43,13 @@ abstract class IrReplSnippet : IrDeclarationBase(), IrDeclarationWithName, IrDec
 
     override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
         receiversParameters.forEach { it.accept(visitor, data) }
+        propertiesFromOtherSnippets.forEach { it.accept(visitor, data) }
         body.accept(visitor, data)
     }
 
     override fun <D> transformChildren(transformer: IrElementTransformer<D>, data: D) {
         receiversParameters = receiversParameters.transformIfNeeded(transformer, data)
+        propertiesFromOtherSnippets.transformInPlace(transformer, data)
         body = body.transform(transformer, data)
     }
 }

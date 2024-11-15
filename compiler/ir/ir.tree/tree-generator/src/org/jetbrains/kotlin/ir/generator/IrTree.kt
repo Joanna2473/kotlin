@@ -545,6 +545,7 @@ object IrTree : AbstractTreeBuilder() {
         +declaredSymbol(replSnippetSymbol)
         +descriptor("ReplSnippetDescriptor")
         +listField("receiversParameters", valueParameter, mutability = Var)
+        +listField("propertiesFromOtherSnippets", variable, mutability = MutableList)
         +field("body", body)
         +field("returnType", irTypeType, nullable = true)
         +referencedSymbol("targetClass", classSymbol, nullable = true)
