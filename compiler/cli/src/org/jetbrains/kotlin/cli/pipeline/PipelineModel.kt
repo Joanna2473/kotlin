@@ -34,6 +34,9 @@ sealed class StepStatus<out A : PipelineArtifact> {
     class NoSources : Error(ExitCode.COMPILATION_ERROR)
 }
 
+val <T : PipelineArtifact> StepStatus<T>.resultOrFail: T
+    get() = (this as StepStatus.Ok<T>).result
+
 abstract class PipelineArtifact
 
 data class ArgumentsPipelineArtifact<out A : CommonCompilerArguments>(

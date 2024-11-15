@@ -139,13 +139,6 @@ object JvmFrontendPipelineStep : CompilerPipelineStep<ConfigurationPipelineArtif
         outputs.runPlatformCheckers(diagnosticsCollector)
         performanceManager?.notifyAnalysisFinished()
 
-        if (diagnosticsCollector.hasErrors) {
-            FirDiagnosticsCompilerResultsReporter.reportToMessageCollector(
-                diagnosticsCollector, messageCollector,
-                configuration.renderDiagnosticInternalName
-            )
-            return ExitCode.COMPILATION_ERROR.toErrorStatus()
-        }
         val kotlinPackageUsageIsFine = when (configuration.useLightTree) {
             true -> outputs.all { checkKotlinPackageUsageForLightTree(configuration, it.fir) }
             false -> sessionsWithSources.all { (_, sources) -> checkKotlinPackageUsageForPsi(configuration, sources.asKtFilesList()) }

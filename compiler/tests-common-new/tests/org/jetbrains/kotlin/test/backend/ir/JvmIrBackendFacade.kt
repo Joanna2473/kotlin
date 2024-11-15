@@ -9,6 +9,8 @@ import org.jetbrains.kotlin.KtPsiSourceFile
 import org.jetbrains.kotlin.backend.common.BackendException
 import org.jetbrains.kotlin.backend.jvm.MultifileFacadeFileEntry
 import org.jetbrains.kotlin.backend.jvm.lower.getFileClassInfoFromIrFile
+import org.jetbrains.kotlin.cli.pipeline.jvm.JvmBackendPipelineStep
+import org.jetbrains.kotlin.cli.pipeline.resultOrFail
 import org.jetbrains.kotlin.fileClasses.JvmFileClassUtil
 import org.jetbrains.kotlin.ir.PsiIrFileEntry
 import org.jetbrains.kotlin.ir.declarations.IrFile
@@ -27,11 +29,16 @@ class JvmIrBackendFacade(
     testServices: TestServices
 ) : IrBackendFacade<BinaryArtifacts.Jvm>(testServices, ArtifactKinds.Jvm) {
     private val javaCompilerFacade = JavaCompilerFacade(testServices)
+    private val phasedFacade = PhasedJvmIrBackendFacade(testServices)
 
     override fun transform(
         module: TestModule,
         inputArtifact: IrBackendInput
     ): BinaryArtifacts.Jvm? {
+        if (inputArtifact is IrBackendInput.PhasedJvmIrBackendInput) {
+            return phasedFacade.transform(module, inputArtifact)
+        }
+
         require(inputArtifact is IrBackendInput.JvmIrBackendInput) {
             "JvmIrBackendFacade expects IrBackendInput.JvmIrBackendInput as input"
         }
@@ -60,6 +67,55 @@ class JvmIrBackendFacade(
                 }
                 is NaiveSourceBasedFileEntryImpl -> {
                     val sourceFile = inputArtifact.sourceFiles.find { it.path == fileEntry.name }
+                    if (sourceFile == null) emptyList() // synthetic files, like CoroutineHelpers.kt, are ignored here
+                    else listOf(SourceFileInfo(sourceFile, getFileClassInfoFromIrFile(irFile, sourceFile.name)))
+                }
+                is MultifileFacadeFileEntry -> {
+                    if (!allowNestedMultifileFacades) error("nested multi-file facades are not allowed")
+                    else fileEntry.partFiles.flatMap { sourceFileInfos(it, allowNestedMultifileFacades = false) }
+                }
+                else -> {
+                    error("unknown kind of file entry: $fileEntry")
+                }
+            }
+
+        return BinaryArtifacts.Jvm(
+            state.factory,
+            inputArtifact.irModuleFragment.files.flatMap {
+                sourceFileInfos(it, allowNestedMultifileFacades = true)
+            }
+        )
+    }
+}
+
+class PhasedJvmIrBackendFacade(
+    testServices: TestServices
+) : IrBackendFacade<BinaryArtifacts.Jvm>(testServices, ArtifactKinds.Jvm) {
+    private val javaCompilerFacade = JavaCompilerFacade(testServices)
+
+    override fun transform(
+        module: TestModule,
+        inputArtifact: IrBackendInput
+    ): BinaryArtifacts.Jvm? {
+        require(inputArtifact is IrBackendInput.PhasedJvmIrBackendInput) {}
+        val output = JvmBackendPipelineStep.execute(inputArtifact.input).resultOrFail
+        val state = output.outputs.single()
+
+        val configuration = inputArtifact.input.configuration
+        javaCompilerFacade.compileJavaFiles(module, configuration, state.factory)
+
+        fun sourceFileInfos(irFile: IrFile, allowNestedMultifileFacades: Boolean): List<SourceFileInfo> =
+            when (val fileEntry = irFile.fileEntry) {
+                is PsiIrFileEntry -> {
+                    listOf(
+                        SourceFileInfo(
+                            KtPsiSourceFile(fileEntry.psiFile),
+                            JvmFileClassUtil.getFileClassInfoNoResolve(fileEntry.psiFile as KtFile)
+                        )
+                    )
+                }
+                is NaiveSourceBasedFileEntryImpl -> {
+                    val sourceFile = inputArtifact.input.sourceFiles.find { it.path == fileEntry.name }
                     if (sourceFile == null) emptyList() // synthetic files, like CoroutineHelpers.kt, are ignored here
                     else listOf(SourceFileInfo(sourceFile, getFileClassInfoFromIrFile(irFile, sourceFile.name)))
                 }

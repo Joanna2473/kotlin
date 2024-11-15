@@ -72,6 +72,7 @@ open class FirFrontendFacade(
     private val additionalSessionConfiguration: SessionConfiguration?
 ) : FrontendFacade<FirOutputArtifact>(testServices, FrontendKinds.FIR) {
     private val testModulesByName by lazy { testServices.moduleStructure.modules.associateBy { it.name } }
+    private val phasedJvmFrontedFacade = PhasedJvmFrontedFacade(testServices)
 
     // Separate constructor is needed for creating callable references to it
     constructor(testServices: TestServices) : this(testServices, additionalSessionConfiguration = null)
@@ -100,6 +101,10 @@ open class FirFrontendFacade(
     }
 
     override fun analyze(module: TestModule): FirOutputArtifact {
+        if (module.targetPlatform.isJvm()) {
+            return phasedJvmFrontedFacade.analyze(module)
+        }
+
         val isMppSupported = module.languageVersionSettings.supportsFeature(LanguageFeature.MultiPlatformProjects)
 
         val sortedModules = if (isMppSupported) sortDependsOnTopologically(module) else listOf(module)
@@ -347,7 +352,7 @@ open class FirFrontendFacade(
             .onEach { assert(it.first.name == it.second.name) }
             .toMap()
 
-        return FirOutputPartForDependsOnModule(module, moduleBasedSession, firAnalyzerFacade, filesMap)
+        return FirOutputPartForDependsOnModule(module, moduleBasedSession, firAnalyzerFacade.scopeSession, firAnalyzerFacade, filesMap)
     }
 
     private fun createModuleBasedSession(
@@ -472,3 +477,4 @@ open class FirFrontendFacade(
         }
     }
 }
+

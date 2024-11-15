@@ -5,11 +5,16 @@
 
 package org.jetbrains.kotlin.test.frontend.fir
 
+import org.jetbrains.kotlin.cli.pipeline.jvm.JvmFir2IrPipelineStep
+import org.jetbrains.kotlin.cli.pipeline.jvm.JvmFrontendPipelineArtifact
+import org.jetbrains.kotlin.cli.pipeline.resultOrFail
+import org.jetbrains.kotlin.fir.pipeline.FirResult
 import org.jetbrains.kotlin.platform.isCommon
 import org.jetbrains.kotlin.platform.isJs
 import org.jetbrains.kotlin.platform.isWasm
 import org.jetbrains.kotlin.platform.jvm.isJvm
 import org.jetbrains.kotlin.test.backend.ir.IrBackendInput
+import org.jetbrains.kotlin.test.backend.ir.IrBackendInput.PhasedJvmIrBackendInput
 import org.jetbrains.kotlin.test.model.BackendKinds
 import org.jetbrains.kotlin.test.model.Frontend2BackendConverter
 import org.jetbrains.kotlin.test.model.FrontendKinds
@@ -27,7 +32,7 @@ class Fir2IrResultsConverter(
     FrontendKinds.FIR,
     BackendKinds.IrBackend
 ) {
-    private val jvmResultsConverter = Fir2IrJvmResultsConverter(testServices)
+    private val jvmResultsConverter = PhasedFir2IrFacade(testServices)
     private val jsResultsConverter = Fir2IrJsResultsConverter(testServices)
     private val wasmResultsConverter = Fir2IrWasmResultsConverter(testServices)
 
@@ -42,5 +47,20 @@ class Fir2IrResultsConverter(
             wasmResultsConverter.transform(module, inputArtifact)
         }
         else -> error("Unsupported platform: ${module.targetPlatform}")
+    }
+}
+
+class PhasedFir2IrFacade(testServices: TestServices) : Frontend2BackendConverter<FirOutputArtifact, IrBackendInput>(
+    testServices,
+    FrontendKinds.FIR,
+    BackendKinds.IrBackend
+) {
+    override fun transform(
+        module: TestModule,
+        inputArtifact: FirOutputArtifact,
+    ): IrBackendInput? {
+        val input = inputArtifact.phasedOutput!!
+        val output = JvmFir2IrPipelineStep.execute(input).resultOrFail
+        return PhasedJvmIrBackendInput(output)
     }
 }
