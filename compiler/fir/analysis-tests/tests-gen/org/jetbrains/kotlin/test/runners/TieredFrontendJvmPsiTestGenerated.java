@@ -3834,18 +3834,6 @@ public class TieredFrontendJvmPsiTestGenerated extends AbstractTieredFrontendJvm
       }
 
       @Test
-      @TestMetadata("IsErasedDissallowForSubtypeMappedToTwoParamsWithFirstInvalid.kt")
-      public void testIsErasedDissallowForSubtypeMappedToTwoParamsWithFirstInvalid() {
-        runTest("compiler/testData/diagnostics/tests/cast/IsErasedDissallowForSubtypeMappedToTwoParamsWithFirstInvalid.kt");
-      }
-
-      @Test
-      @TestMetadata("IsErasedDissallowForSubtypeMappedToTwoParamsWithSecondInvalid.kt")
-      public void testIsErasedDissallowForSubtypeMappedToTwoParamsWithSecondInvalid() {
-        runTest("compiler/testData/diagnostics/tests/cast/IsErasedDissallowForSubtypeMappedToTwoParamsWithSecondInvalid.kt");
-      }
-
-      @Test
       @TestMetadata("IsErasedToErrorType.kt")
       public void testIsErasedToErrorType() {
         runTest("compiler/testData/diagnostics/tests/cast/IsErasedToErrorType.kt");

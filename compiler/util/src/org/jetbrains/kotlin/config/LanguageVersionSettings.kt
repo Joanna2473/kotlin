@@ -361,6 +361,7 @@ enum class LanguageFeature(
     ForbidJvmAnnotationsOnAnnotationParameters(KOTLIN_2_2, kind = BUG_FIX), // KT-25861
     ForbidFieldAnnotationsOnAnnotationParameters(KOTLIN_2_2, kind = BUG_FIX), // KT-70233
     ForbidParenthesizedLhsInAssignments(KOTLIN_2_2, kind = BUG_FIX), // KT-70507
+    SaferGenericDowncastsWrtVariance(KOTLIN_2_2, kind = BUG_FIX), // KT-7972
     ProhibitConstructorAndSupertypeOnTypealiasWithTypeProjection(KOTLIN_2_2, kind = BUG_FIX), // KT-60305
     // TODO: Remove org.jetbrains.kotlin.fir.resolve.calls.stages.ConstraintSystemForks together with this LF (KT-72961)
     ConsiderForkPointsWhenCheckingContradictions(KOTLIN_2_2), // KT-68768

@@ -1,5 +1,4 @@
 // LATEST_LV_DIFFERENCE
-// RUN_PIPELINE_TILL: BACKEND
 interface A<out T>
 
 interface MutableA<T> : A<T> {
@@ -19,7 +18,7 @@ fun test2(a: A<String>) {
 }
 
 fun test3(a: A<String>) {
-    if (a is <!CANNOT_CHECK_FOR_ERASED_DEPRECATION_WARNING!>MutableA<!>) {
+    if (a is <!CANNOT_CHECK_FOR_ERASED!>MutableA<!>) {
         a.add("")
     }
 }

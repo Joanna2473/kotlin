@@ -2383,6 +2383,18 @@ public class TieredBackendJvmPsiTestGenerated extends AbstractTieredBackendJvmPs
       }
 
       @Test
+      @TestMetadata("IsErasedDissallowForSubtypeMappedToTwoParamsWithFirstInvalid.kt")
+      public void testIsErasedDissallowForSubtypeMappedToTwoParamsWithFirstInvalid() {
+        runTest("compiler/testData/diagnostics/tests/cast/IsErasedDissallowForSubtypeMappedToTwoParamsWithFirstInvalid.kt");
+      }
+
+      @Test
+      @TestMetadata("IsErasedDissallowForSubtypeMappedToTwoParamsWithSecondInvalid.kt")
+      public void testIsErasedDissallowForSubtypeMappedToTwoParamsWithSecondInvalid() {
+        runTest("compiler/testData/diagnostics/tests/cast/IsErasedDissallowForSubtypeMappedToTwoParamsWithSecondInvalid.kt");
+      }
+
+      @Test
       @TestMetadata("IsErasedNonGeneric.kt")
       public void testIsErasedNonGeneric() {
         runTest("compiler/testData/diagnostics/tests/cast/IsErasedNonGeneric.kt");
