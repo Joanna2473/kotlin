@@ -285,6 +285,7 @@ open class DeepCopyIrTreeWithSymbols(
             with(factory) { declarationCreated() }
             annotations = declaration.annotations.memoryOptimizedMap { it.transform() }
             receiversParameters = declaration.receiversParameters.memoryOptimizedMap { it.transform() }
+            declaration.propertiesFromOtherSnippets.mapTo(propertiesFromOtherSnippets) { it.transform() }
             body = declaration.body.transform()
             returnType = declaration.returnType?.remapType()
             targetClass = declaration.targetClass?.let(symbolRemapper::getReferencedClass)
