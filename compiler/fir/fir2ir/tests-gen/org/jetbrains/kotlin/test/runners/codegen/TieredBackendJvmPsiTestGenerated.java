@@ -3025,12 +3025,6 @@ public class TieredBackendJvmPsiTestGenerated extends AbstractTieredBackendJvmPs
         runTest("compiler/testData/diagnostics/tests/contracts/nonKotlinContractCall.kt");
       }
 
-      @Test
-      @TestMetadata("nonKotlinContractCall2.kt")
-      public void testNonKotlinContractCall2() {
-        runTest("compiler/testData/diagnostics/tests/contracts/nonKotlinContractCall2.kt");
-      }
-
       @Nested
       @TestMetadata("compiler/testData/diagnostics/tests/contracts/pos")
       @TestDataPath("$PROJECT_ROOT")
@@ -19273,6 +19267,12 @@ public class TieredBackendJvmPsiTestGenerated extends AbstractTieredBackendJvmPs
       @TestMetadata("privateToThisK1Crash.kt")
       public void testPrivateToThisK1Crash() {
         runTest("compiler/testData/diagnostics/tests/visibility/privateToThisK1Crash.kt");
+      }
+
+      @Test
+      @TestMetadata("privateTypeInProjection.kt")
+      public void testPrivateTypeInProjection() {
+        runTest("compiler/testData/diagnostics/tests/visibility/privateTypeInProjection.kt");
       }
 
       @Test

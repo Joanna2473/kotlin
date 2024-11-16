@@ -41,4 +41,4 @@ actual fun StringDemoInterface.<!ACTUAL_WITHOUT_EXPECT("actual fun KotlinXString
 // FILE: main.kt
 class StringDemo(override val value: String) : StringDemoInterface
 
-fun box() = StringDemo("O").plusK()
+fun box() = <!OTHER_ERROR_WITH_REASON("Unresolved name: value")!>StringDemo("O").plusK()<!>
