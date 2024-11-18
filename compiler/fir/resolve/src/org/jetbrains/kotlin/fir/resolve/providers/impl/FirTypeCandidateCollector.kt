@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.fir.declarations.isDeprecationLevelHidden
 import org.jetbrains.kotlin.fir.diagnostics.ConeDiagnostic
 import org.jetbrains.kotlin.fir.resolve.SupertypeSupplier
 import org.jetbrains.kotlin.fir.resolve.calls.AbstractCandidate
+import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeHiddenCandidateError
 import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeVisibilityError
 import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
 import org.jetbrains.kotlin.fir.scopes.platformClassMapper
@@ -52,7 +53,7 @@ class FirTypeCandidateCollector(
         if (resolveDeprecations) {
             if (symbol.isDeprecationLevelHidden(session)) {
                 symbolApplicability = minOf(CandidateApplicability.HIDDEN, symbolApplicability)
-                diagnostic = null
+                diagnostic = ConeHiddenCandidateError(symbol, hiddenType = true)
             }
         }
 

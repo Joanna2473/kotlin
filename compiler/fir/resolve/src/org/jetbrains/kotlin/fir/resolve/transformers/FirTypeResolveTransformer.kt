@@ -383,7 +383,7 @@ open class FirTypeResolveTransformer(
                             originalTypeRef.delegatedTypeRef?.transformSingle(this, data) ?: return annotationCall
                         val coneTypeFromCompilerRequiredPhase = originalTypeRef.coneType
                         val coneTypeFromTypesPhase = alternativeResolvedTypeRef.coneType
-                        if (coneTypeFromTypesPhase != coneTypeFromCompilerRequiredPhase) {
+                        if (coneTypeFromTypesPhase != coneTypeFromCompilerRequiredPhase && coneTypeFromTypesPhase !is ConeErrorType) {
                             val errorTypeRef = buildErrorTypeRef {
                                 source = originalTypeRef.source
                                 coneType = coneTypeFromCompilerRequiredPhase

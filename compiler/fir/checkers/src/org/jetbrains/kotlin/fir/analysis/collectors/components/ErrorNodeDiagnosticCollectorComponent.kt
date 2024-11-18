@@ -211,6 +211,11 @@ class ErrorNodeDiagnosticCollectorComponent(
             return
         }
 
+        // Will be handled by FirDeprecationChecker
+        if (diagnostic is ConeHiddenCandidateError && diagnostic.hiddenType) {
+            return
+        }
+
         for (coneDiagnostic in diagnostic.toFirDiagnostics(session, source, callOrAssignmentSource)) {
             reporter.report(coneDiagnostic, context)
         }

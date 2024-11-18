@@ -94,7 +94,7 @@ private fun ConeDiagnostic.toKtDiagnostic(
         // See: https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-deprecated/
         FirErrors.UNRESOLVED_REFERENCE.createOn(
             source,
-            ((this.candidateSymbol as? FirCallableSymbol)?.name ?: SpecialNames.NO_NAME_PROVIDED).asString(),
+            ((this.symbol as? FirCallableSymbol)?.name ?: SpecialNames.NO_NAME_PROVIDED).asString(),
             null,
         )
     }

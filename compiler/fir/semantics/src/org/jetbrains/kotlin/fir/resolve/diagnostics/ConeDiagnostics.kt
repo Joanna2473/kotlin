@@ -101,9 +101,10 @@ class ConeResolutionToClassifierError(
 }
 
 class ConeHiddenCandidateError(
-    override val candidate: AbstractCallCandidate<*>
-) : ConeDiagnosticWithSingleCandidate {
-    override val reason: String get() = "HIDDEN: ${describeSymbol(candidateSymbol)} is deprecated with DeprecationLevel.HIDDEN"
+    override val symbol: FirBasedSymbol<*>,
+    val hiddenType: Boolean,
+) : ConeDiagnosticWithSymbol<FirBasedSymbol<*>> {
+    override val reason: String get() = "HIDDEN: ${describeSymbol(symbol)} is deprecated with DeprecationLevel.HIDDEN"
 }
 
 open class ConeVisibilityError(
