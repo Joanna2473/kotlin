@@ -25,7 +25,9 @@ import org.jetbrains.kotlin.fir.symbols.impl.*
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.types.impl.ConeClassLikeTypeImpl
 import org.jetbrains.kotlin.name.ClassId
+import org.jetbrains.kotlin.resolve.calls.tower.ApplicabilityDetail
 import org.jetbrains.kotlin.resolve.calls.tower.CandidateApplicability
+import org.jetbrains.kotlin.resolve.calls.tower.isSuccess
 
 @ThreadSafeMutableState
 class FirTypeResolverImpl(private val session: FirSession) : FirTypeResolver() {
@@ -143,7 +145,6 @@ class FirTypeResolverImpl(private val session: FirSession) : FirTypeResolver() {
         return enumEntryMatchingLastQualifier?.symbol
     }
 
-    @OptIn(SymbolInternals::class)
     private fun resolveUserType(
         typeRef: FirUserTypeRef,
         result: TypeResolutionResult,
@@ -151,21 +152,22 @@ class FirTypeResolverImpl(private val session: FirSession) : FirTypeResolver() {
         topContainer: FirDeclaration?,
         isOperandOfIsOperator: Boolean
     ): ConeKotlinType {
-        val (symbol, substitutor) = when (result) {
+        val typeCandidate = when (result) {
             is TypeResolutionResult.Resolved -> {
-                result.typeCandidate.symbol to result.typeCandidate.substitutor
+                result.typeCandidate
             }
-            is TypeResolutionResult.Ambiguity -> null to null
-            TypeResolutionResult.Unresolved -> null to null
+            is TypeResolutionResult.Ambiguity -> null
+            TypeResolutionResult.Unresolved -> null
         }
 
         val qualifier = typeRef.qualifier
         val allTypeArguments =
             qualifier.reversed().flatMap { it.typeArgumentList.typeArguments }.mapTo(mutableListOf()) { it.toConeTypeProjection() }
 
+        val symbol = typeCandidate?.symbol
         if (symbol is FirClassLikeSymbol<*> && !isPossibleBareType(areBareTypesAllowed, allTypeArguments)) {
             matchQualifierPartsAndClasses(symbol, qualifier)?.let { return ConeErrorType(it) }
-            allTypeArguments.addImplicitTypeArgumentsOrReturnError(symbol, topContainer, substitutor)
+            allTypeArguments.addImplicitTypeArgumentsOrReturnError(symbol, topContainer, typeCandidate.substitutor)
                 ?.let { return ConeErrorType(it) }
         }
 
@@ -205,7 +207,7 @@ class FirTypeResolverImpl(private val session: FirSession) : FirTypeResolver() {
             }
         }
 
-        return symbol.constructType(
+        val resultingType = symbol.constructType(
             resultingArguments,
             typeRef.isMarkedNullable,
             typeRef.annotations.computeTypeAttributes(
@@ -220,6 +222,11 @@ class FirTypeResolverImpl(private val session: FirSession) : FirTypeResolver() {
                 lookupTag.bindSymbolToLookupTag(session, symbol)
             }
         }
+        @OptIn(ApplicabilityDetail::class)
+        if (typeCandidate.applicability.isSuccess) {
+            return resultingType
+        }
+        return ConeErrorType(diagnostic = typeCandidate.diagnostic!!, delegatedType = resultingType, typeArguments = resultingArguments)
     }
 
     private fun isPossibleBareType(areBareTypesAllowed: Boolean, allTypeArguments: List<ConeTypeProjection>): Boolean =
