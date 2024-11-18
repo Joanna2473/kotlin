@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.fir.originalForSubstitutionOverride
 import org.jetbrains.kotlin.fir.references.*
 import org.jetbrains.kotlin.fir.resolve.dfa.controlFlowGraph
 import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeDiagnosticWithCandidates
+import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeHiddenCandidateError
 import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeUnresolvedNameError
 import org.jetbrains.kotlin.fir.resolve.diagnostics.ConeVisibilityError
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
@@ -133,6 +134,7 @@ object FirReassignmentAndInvisibleSetterChecker : FirVariableAssignmentChecker(M
             is ConeSimpleDiagnostic -> it.kind == DiagnosticKind.VariableExpected
             is ConeUnresolvedNameError -> true
             is ConeDiagnosticWithCandidates -> it.candidates.any { it.symbol is FirPropertySymbol }
+            is ConeHiddenCandidateError -> true
             else -> false
         }
     }
