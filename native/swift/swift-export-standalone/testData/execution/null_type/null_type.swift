@@ -77,6 +77,9 @@ func null_strings() throws {
 
     try assertEquals(actual: extPrint(receiver: optionalString), expected: "<null>")
     try assertEquals(actual: extPrint(receiver: "string"), expected: "string")
+
+    try assertEquals(actual: getExtPrintProp(receiver: optionalString), expected: "<null>")
+    try assertEquals(actual: getExtPrintProp(receiver: "string"), expected: "string")
 }
 
 func null_never() throws {

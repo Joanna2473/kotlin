@@ -255,6 +255,28 @@ public final class Object_without_package : KotlinRuntime.KotlinBase {
         super.init(__externalRCRef: __externalRCRef)
     }
 }
+public func getExtensionVarOnNullablePrimitive(
+    receiver: Swift.Int32?
+) -> Swift.String {
+    return __root___extensionVarOnNullablePrimitive_get__TypesOfArguments__Swift_Int32_opt___(receiver.map { it in NSNumber(value: it) } ?? .none)
+}
+public func setExtensionVarOnNullablePrimitive(
+    receiver: Swift.Int32?,
+    _ newValue: Swift.String
+) {
+    return __root___extensionVarOnNullablePrimitive_set__TypesOfArguments__Swift_Int32_opt__Swift_String__(receiver.map { it in NSNumber(value: it) } ?? .none, newValue)
+}
+public func getExtensionVarOnNullableRef(
+    receiver: main.Class_without_package?
+) -> Swift.String {
+    return __root___extensionVarOnNullableRef_get__TypesOfArguments__main_Class_without_package_opt___(receiver.map { it in it.__externalRCRef() } ?? 0)
+}
+public func setExtensionVarOnNullableRef(
+    receiver: main.Class_without_package?,
+    _ newValue: Swift.String
+) {
+    return __root___extensionVarOnNullableRef_set__TypesOfArguments__main_Class_without_package_opt__Swift_String__(receiver.map { it in it.__externalRCRef() } ?? 0, newValue)
+}
 public var nullablePrim: Swift.Int32? {
     get {
         return __root___nullablePrim_get().map { it in it.int32Value }

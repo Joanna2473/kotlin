@@ -36,7 +36,9 @@ internal class BridgeGeneratorImpl(private val typeNamer: SirTypeNamer) : Bridge
                 add(
                     request.descriptor(typeNamer).createFunctionBridge {
                         require(args.isEmpty()) { "Received a getter $name with ${args.size} parameters instead of no parameters, aborting" }
-                        name
+                        if (selfParameter != null && extensionReceiverParameter != null) {
+                            "__${selfParameter.name}.run { __${extensionReceiverParameter.name}.${kotlinFqName.last()} }"
+                        } else name
                     }
                 )
             }
@@ -44,7 +46,9 @@ internal class BridgeGeneratorImpl(private val typeNamer: SirTypeNamer) : Bridge
                 add(
                     request.descriptor(typeNamer).createFunctionBridge {
                         require(args.size == 1) { "Received a setter $name with ${args.size} parameters instead of a single one, aborting" }
-                        "$name = ${args.single()}"
+                        if (selfParameter != null && extensionReceiverParameter != null) {
+                            "__${selfParameter.name}.run { __${extensionReceiverParameter.name}.${kotlinFqName.last()} = ${args.single()} }"
+                        } else "$name = ${args.single()}"
                     }
                 )
             }
@@ -134,6 +138,9 @@ private fun FunctionBridgeRequest.descriptor(typeNamer: SirTypeNamer): BridgeFun
         } else null,
         extensionReceiverParameter = when (callable) {
             is SirFunction -> callable.extensionReceiverParameter?.let {
+                BridgeParameter("receiver", bridgeType(it.type))
+            }
+            is SirAccessor -> (callable.parent as SirVariable).extensionReceiverParameter?.let {
                 BridgeParameter("receiver", bridgeType(it.type))
             }
             else -> null

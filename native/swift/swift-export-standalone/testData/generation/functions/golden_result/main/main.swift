@@ -3,6 +3,22 @@
 import KotlinRuntime
 
 public final class Foo : KotlinRuntime.KotlinBase {
+    public func getExtVal(
+        receiver: Swift.String
+    ) -> Swift.String {
+        return Foo_extVal_get__TypesOfArguments__Swift_String__(self.__externalRCRef(), receiver)
+    }
+    public func getExtVar(
+        receiver: Swift.String
+    ) -> Swift.String {
+        return Foo_extVar_get__TypesOfArguments__Swift_String__(self.__externalRCRef(), receiver)
+    }
+    public func setExtVar(
+        receiver: Swift.String,
+        _ newValue: Swift.String
+    ) {
+        return Foo_extVar_set__TypesOfArguments__Swift_String_Swift_String__(self.__externalRCRef(), receiver, newValue)
+    }
     public override init() {
         let __kt = __root___Foo_init_allocate()
         super.init(__externalRCRef: __kt)
@@ -18,6 +34,70 @@ public final class Foo : KotlinRuntime.KotlinBase {
     ) -> Swift.Void {
         return Foo_ext__TypesOfArguments__Swift_String__(self.__externalRCRef(), receiver)
     }
+}
+public func getBar(
+    receiver: Swift.Int32
+) -> Swift.String {
+    return __root___bar_get__TypesOfArguments__Swift_Int32__(receiver)
+}
+public func getBar(
+    receiver: Swift.Int32?
+) -> Swift.String {
+    return __root___bar_get__TypesOfArguments__Swift_Int32_opt___(receiver.map { it in NSNumber(value: it) } ?? .none)
+}
+public func getBar(
+    receiver: main.Foo
+) -> Swift.String {
+    return __root___bar_get__TypesOfArguments__main_Foo__(receiver.__externalRCRef())
+}
+public func getBar(
+    receiver: main.Foo?
+) -> Swift.String {
+    return __root___bar_get__TypesOfArguments__main_Foo_opt___(receiver.map { it in it.__externalRCRef() } ?? 0)
+}
+public func getFoo(
+    receiver: Swift.Int32
+) -> Swift.String {
+    return __root___foo_get__TypesOfArguments__Swift_Int32__(receiver)
+}
+public func setFoo(
+    receiver: Swift.Int32,
+    _ newValue: Swift.String
+) {
+    return __root___foo_set__TypesOfArguments__Swift_Int32_Swift_String__(receiver, newValue)
+}
+public func getFoo(
+    receiver: Swift.Int32?
+) -> Swift.String {
+    return __root___foo_get__TypesOfArguments__Swift_Int32_opt___(receiver.map { it in NSNumber(value: it) } ?? .none)
+}
+public func setFoo(
+    receiver: Swift.Int32?,
+    _ newValue: Swift.String
+) {
+    return __root___foo_set__TypesOfArguments__Swift_Int32_opt__Swift_String__(receiver.map { it in NSNumber(value: it) } ?? .none, newValue)
+}
+public func getFoo(
+    receiver: main.Foo
+) -> Swift.String {
+    return __root___foo_get__TypesOfArguments__main_Foo__(receiver.__externalRCRef())
+}
+public func setFoo(
+    receiver: main.Foo,
+    _ newValue: Swift.String
+) {
+    return __root___foo_set__TypesOfArguments__main_Foo_Swift_String__(receiver.__externalRCRef(), newValue)
+}
+public func getFoo(
+    receiver: main.Foo?
+) -> Swift.String {
+    return __root___foo_get__TypesOfArguments__main_Foo_opt___(receiver.map { it in it.__externalRCRef() } ?? 0)
+}
+public func setFoo(
+    receiver: main.Foo?,
+    _ newValue: Swift.String
+) {
+    return __root___foo_set__TypesOfArguments__main_Foo_opt__Swift_String__(receiver.map { it in it.__externalRCRef() } ?? 0, newValue)
 }
 public func foo(
     receiver: Swift.Int32

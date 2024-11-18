@@ -74,6 +74,12 @@ func testExtArrayOrInt() throws {
     try assertReversed(reversed: extReverseListInt(receiver: original), original: original)
 }
 
+func testExtArrayOrIntProp() throws {
+    let original = array.map { Int32($0) }
+    try assertReversed(reversed: getExtReverseListIntProp(receiver: original), original: original)
+}
+
+
 class ListTests : TestProvider {
     var tests: [TestCase] = []
 
@@ -94,6 +100,7 @@ class ListTests : TestProvider {
             TestCase(name: "testOptArray", method: withAutorelease(testOptArray)),
 
             TestCase(name: "testExtArrayOrInt", method: withAutorelease(testExtArrayOrInt)),
+            TestCase(name: "testExtArrayOrIntProp", method: withAutorelease(testExtArrayOrIntProp)),
         ]
     }
 }
