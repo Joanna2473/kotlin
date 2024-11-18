@@ -92,7 +92,7 @@ private fun ConeKotlinType.scope(
     scopeSession: ScopeSession,
     requiredMembersPhase: FirResolvePhase?,
 ): FirTypeScope? = when (this) {
-    is ConeErrorType -> null
+    is ConeErrorType -> delegatedType?.scope(useSiteSession, scopeSession, requiredMembersPhase)
     is ConeClassLikeType -> classScope(useSiteSession, scopeSession, requiredMembersPhase, lookupTag)
     is ConeTypeParameterType -> {
         val symbol = lookupTag.symbol
