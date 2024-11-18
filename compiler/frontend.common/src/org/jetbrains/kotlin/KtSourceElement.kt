@@ -60,7 +60,7 @@ sealed class KtFakeSourceElementKind(final override val shouldSkipErrorTypeRepor
     /**
      * for ConeErrorTypes seen through a typealias expansion
      */
-    object ErroneousTypealiasExpansion : KtFakeSourceElementKind(shouldSkipErrorTypeReporting = true)
+    object ErroneousTypealiasExpansion : KtFakeSourceElementKind()
 
     /**
      * for return types of anonymous functions, because ImplicitTypeRef

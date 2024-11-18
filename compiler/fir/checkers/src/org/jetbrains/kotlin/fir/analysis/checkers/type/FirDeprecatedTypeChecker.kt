@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.fir.types.classLikeLookupTagIfAny
 object FirDeprecatedTypeChecker : FirResolvedTypeRefChecker(MppCheckerKind.Common) {
     override fun check(typeRef: FirResolvedTypeRef, context: CheckerContext, reporter: DiagnosticReporter) {
         val source = typeRef.source ?: return
-        if (source.kind is KtFakeSourceElementKind) return
+        if (source.kind is KtFakeSourceElementKind && source.kind !is KtFakeSourceElementKind.ErroneousTypealiasExpansion) return
         val symbol = typeRef.coneType.abbreviatedTypeOrSelf.classLikeLookupTagIfAny?.toSymbol(context.session) ?: return
 
         FirDeprecationChecker.reportApiStatusIfNeeded(source, symbol, context, reporter)
