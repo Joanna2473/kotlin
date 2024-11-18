@@ -68,7 +68,7 @@ class ConeErrorType(
     override val attributes: ConeAttributes = ConeAttributes.Empty
 ) : ConeClassLikeType() {
     override val lookupTag: ConeClassLikeLookupTag
-        get() = ConeClassLikeErrorLookupTag(ClassId.fromString("<error>"))
+        get() = (delegatedType as? ConeClassLikeType)?.lookupTag ?: ConeClassLikeErrorLookupTag(ClassId.fromString("<error>"))
 
     override val isMarkedNullable: Boolean
         get() = (diagnostic as? ConeDiagnosticWithNullability)?.isNullable == true
