@@ -43,7 +43,14 @@ infix fun DataFlowVariable.notEq(constant: Nothing?): OperationStatement =
 infix fun OperationStatement.implies(effect: Statement): Implication = Implication(this, effect)
 
 infix fun RealVariable.typeEq(type: ConeKotlinType): MutableTypeStatement =
-    MutableTypeStatement(this, if (type is ConeErrorType) linkedSetOf() else linkedSetOf(type))
+    MutableTypeStatement(
+        this,
+        if (type is ConeErrorType) {
+            type.delegatedType?.let { linkedSetOf(it) } ?: linkedSetOf()
+        } else {
+            linkedSetOf(type)
+        }
+    )
 
 // --------------------------------------- Utils ---------------------------------------
 
