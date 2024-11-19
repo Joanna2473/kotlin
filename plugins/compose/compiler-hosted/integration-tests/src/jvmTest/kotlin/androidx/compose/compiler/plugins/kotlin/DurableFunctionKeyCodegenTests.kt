@@ -24,7 +24,10 @@ import org.junit.Test
 class DurableFunctionKeyCodegenTests(useFir: Boolean) : AbstractCodegenSignatureTest(useFir) {
 
     override fun CompilerConfiguration.updateConfiguration() {
-        put(ComposeConfiguration.GENERATE_FUNCTION_KEY_META_CLASSES_KEY, true)
+        put(
+            ComposeConfiguration.GENERATE_FUNCTION_KEY_META_ANNOTATIONS_KEY,
+            listOf(FunctionKeyMetaAnnotations.Location.Class.name)
+        )
     }
 
     @Test

@@ -41,10 +41,10 @@ object ComposeConfiguration {
         CompilerConfigurationKey<Boolean>(
             "Enable Live Literals code generation (with per-file enabled flags)"
         )
-    val GENERATE_FUNCTION_KEY_META_CLASSES_KEY =
-        CompilerConfigurationKey<Boolean>(
-            "Generate function key meta classes"
-        )
+
+    val GENERATE_FUNCTION_KEY_META_ANNOTATIONS_KEY =
+        CompilerConfigurationKey<List<String>>("Generate function key meta annotations (Not intended for user configuration)")
+
     val SOURCE_INFORMATION_ENABLED_KEY =
         CompilerConfigurationKey<Boolean>("Include source information in generated code")
     val METRICS_DESTINATION_KEY =
@@ -104,9 +104,20 @@ class ComposeCommandLineProcessor : CommandLineProcessor {
             "generateFunctionKeyMetaClasses",
             "<true|false>",
             "Generate function key meta classes with annotations indicating the " +
-                    "functions and their group keys. Generally used for tooling.",
+                    "functions and their group keys. Generally used for tooling. " +
+                    "Deprecated. Use 'generateFunctionKeyMetaAnnotations=class' instead",
             required = false,
             allowMultipleOccurrences = false
+        )
+        val GENERATE_FUNCTION_KEY_META_ANNOTATIONS_OPTION = CliOption(
+            "generateFunctionKeyMetaAnnotations",
+            "<function|class>",
+            "Generate function key meta annotations indicating the " +
+                    "function group keys and source offsets. Generally used for tooling. " +
+                    "function: Will add the annotation to Composable functions, available at runtime. " +
+                    "class: Will generate special 'meta key classes' containing this annotation",
+            required = false,
+            allowMultipleOccurrences = true
         )
         val SOURCE_INFORMATION_ENABLED_OPTION = CliOption(
             "sourceInformation",
@@ -214,6 +225,7 @@ class ComposeCommandLineProcessor : CommandLineProcessor {
         LIVE_LITERALS_ENABLED_OPTION,
         LIVE_LITERALS_V2_ENABLED_OPTION,
         GENERATE_FUNCTION_KEY_META_CLASSES_OPTION,
+        GENERATE_FUNCTION_KEY_META_ANNOTATIONS_OPTION,
         SOURCE_INFORMATION_ENABLED_OPTION,
         METRICS_DESTINATION_OPTION,
         REPORTS_DESTINATION_OPTION,
@@ -242,10 +254,30 @@ class ComposeCommandLineProcessor : CommandLineProcessor {
             ComposeConfiguration.LIVE_LITERALS_V2_ENABLED_KEY,
             value == "true"
         )
-        GENERATE_FUNCTION_KEY_META_CLASSES_OPTION -> configuration.put(
-            ComposeConfiguration.GENERATE_FUNCTION_KEY_META_CLASSES_KEY,
-            value == "true"
-        )
+        GENERATE_FUNCTION_KEY_META_CLASSES_OPTION -> run {
+            if (value == "true") {
+                oldOptionDeprecationWarning(
+                    configuration,
+                    GENERATE_FUNCTION_KEY_META_CLASSES_OPTION,
+                    GENERATE_FUNCTION_KEY_META_ANNOTATIONS_OPTION
+                )
+                configuration.appendList(
+                    ComposeConfiguration.GENERATE_FUNCTION_KEY_META_ANNOTATIONS_KEY,
+                    FunctionKeyMetaAnnotations.Location.Class.name
+                )
+            }
+        }
+        GENERATE_FUNCTION_KEY_META_ANNOTATIONS_OPTION -> run {
+            val location = FunctionKeyMetaAnnotations.Location.entries.firstOrNull { location ->
+                location.name.equals(value, ignoreCase = true)
+            } ?: throw CliOptionProcessingException("Unknown value: ${option.optionName}=$value")
+
+            configuration.appendList(
+                ComposeConfiguration.GENERATE_FUNCTION_KEY_META_ANNOTATIONS_KEY,
+                location.name
+            )
+        }
+
         SOURCE_INFORMATION_ENABLED_OPTION -> configuration.put(
             ComposeConfiguration.SOURCE_INFORMATION_ENABLED_KEY,
             value == "true"
@@ -515,6 +547,17 @@ fun oldOptionDeprecationWarning(
     )
 }
 
+fun oldOptionDeprecationWarning(
+    configuration: CompilerConfiguration,
+    oldOption: AbstractCliOption,
+    newOption: AbstractCliOption,
+) {
+    configuration.messageCollector.report(
+        CompilerMessageSeverity.WARNING,
+        "${oldOption.optionName} is deprecated. Use ${newOption.optionName} instead"
+    )
+}
+
 fun validateFeatureFlag(
     configuration: CompilerConfiguration,
     value: String,
@@ -624,9 +667,14 @@ class ComposePluginRegistrar : CompilerPluginRegistrar() {
             val liveLiteralsV2Enabled = configuration.getBoolean(
                 ComposeConfiguration.LIVE_LITERALS_V2_ENABLED_KEY,
             )
-            val generateFunctionKeyMetaClasses = configuration.getBoolean(
-                ComposeConfiguration.GENERATE_FUNCTION_KEY_META_CLASSES_KEY,
+
+            val functionKeyMetaAnnotations = FunctionKeyMetaAnnotations(
+                configuration.getList(ComposeConfiguration.GENERATE_FUNCTION_KEY_META_ANNOTATIONS_KEY).map { value ->
+                    FunctionKeyMetaAnnotations.Location.valueOf(value)
+                }
             )
+
+
             val sourceInformationEnabled = configuration.getBoolean(
                 ComposeConfiguration.SOURCE_INFORMATION_ENABLED_KEY,
             )
@@ -711,7 +759,7 @@ class ComposePluginRegistrar : CompilerPluginRegistrar() {
             return ComposeIrGenerationExtension(
                 liveLiteralsEnabled = liveLiteralsEnabled,
                 liveLiteralsV2Enabled = liveLiteralsV2Enabled,
-                generateFunctionKeyMetaClasses = generateFunctionKeyMetaClasses,
+                functionKeyMetaAnnotations = functionKeyMetaAnnotations,
                 sourceInformationEnabled = sourceInformationEnabled,
                 traceMarkersEnabled = traceMarkersEnabled,
                 metricsDestination = metricsDestination,
