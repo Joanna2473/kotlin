@@ -1,5 +1,6 @@
-// RUN_PIPELINE_TILL: BACKEND
+// FIR_IDENTICAL
 // LATEST_LV_DIFFERENCE
+// RUN_PIPELINE_TILL: BACKEND
 // ISSUE: KT-57095
 
 open class ValueType<T> {
@@ -7,5 +8,5 @@ open class ValueType<T> {
 }
 
 private fun checkType(type: ValueType<out Any?>) {
-    type as ValueType.Optional
+    type <!UNCHECKED_CAST!>as <!UNSAFE_DOWNCAST_WRT_VARIANCE!>ValueType.Optional<!><!>
 }
