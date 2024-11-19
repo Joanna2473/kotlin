@@ -1,3 +1,4 @@
+// LATEST_LV_DIFFERENCE
 // RUN_PIPELINE_TILL: FRONTEND
 fun <E> foo(x: Any, y: Any) : Any {
     class C

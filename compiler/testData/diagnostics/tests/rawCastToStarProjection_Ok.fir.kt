@@ -1,4 +1,5 @@
 // RUN_PIPELINE_TILL: BACKEND
+// LATEST_LV_DIFFERENCE
 // ISSUE: KT-57095
 
 open class ValueType<T> {
