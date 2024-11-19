@@ -38,6 +38,11 @@ internal abstract class AbiToolsTask : DefaultTask(), UsesClassLoadersCachingBui
             ?: error("The classpath contains more than one implementation for ${cls.qualifiedName}")
     }
 
+    /**
+     * Class loader to isolate classpath of classes from ServiceLoader and KGP classes.
+     *
+     * At the same time, it allows to share classes from JDK and `abi-tools-api` dependency (via `org.jetbrains.kotlin.abi.tools.api` package)
+     */
     internal object SharedClassLoaderProvider : ParentClassLoaderProvider {
         override fun getClassLoader() = createSharedClassLoader()
 

@@ -23,14 +23,15 @@ internal abstract class AbiValidationJvmExtensionImpl @Inject constructor(privat
     override val filters: AbiFiltersSpec = project.objects.newInstance<AbiFiltersSpecImpl>(project.objects)
 
     override val updateTaskProvider: TaskProvider<Task>
-        get() = project.locateTask(KotlinAbiUpdateTask.SIMPLE_TASK_NAME)
-            ?: throw GradleException("Couldn't locate task ${KotlinAbiUpdateTask.SIMPLE_TASK_NAME}")
+        get() = project.getTask(KotlinAbiUpdateTask.SIMPLE_TASK_NAME)
 
     override val dumpTaskProvider: TaskProvider<KotlinAbiDumpTask>
-        get() = project.locateTask(KotlinJvmAbiDumpTask.SIMPLE_TASK_NAME)
-            ?: throw GradleException("Couldn't locate task ${KotlinJvmAbiDumpTask.SIMPLE_TASK_NAME}")
+        get() = project.getTask(KotlinJvmAbiDumpTask.SIMPLE_TASK_NAME)
 
     override val checkTaskProvider: TaskProvider<KotlinAbiCheckTask>
-        get() = project.locateTask(KotlinAbiCheckTaskImpl.SIMPLE_TASK_NAME)
-            ?: throw GradleException("Couldn't locate task ${KotlinAbiCheckTaskImpl.SIMPLE_TASK_NAME}")
+        get() = project.getTask(KotlinAbiCheckTaskImpl.SIMPLE_TASK_NAME)
+}
+
+private inline fun <reified T : Task> Project.getTask(taskName: String): TaskProvider<T> {
+    return locateTask(taskName) ?: throw GradleException("Couldn't locate task $taskName")
 }
