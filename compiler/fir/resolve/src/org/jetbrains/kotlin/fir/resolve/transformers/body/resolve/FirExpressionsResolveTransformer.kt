@@ -983,16 +983,19 @@ open class FirExpressionsResolveTransformer(transformer: FirAbstractBodyResolveT
         }
 
         val outerClasses by lazy(LazyThreadSafetyMode.NONE) { firClass.symbol.getClassAndItsOuterClassesWhenLocal(session) }
-        val newType = components.computeRepresentativeTypeForBareType(type, originalType)
-            ?: if (
-                firClass.isLocal && firClass.typeParameters.none { it.symbol.containingDeclarationSymbol in outerClasses } &&
-                (operation == NOT_IS || operation == IS || operation == AS || operation == SAFE_AS)
-            ) {
-                (firClass as FirClass).defaultType()
-            } else return buildErrorTypeRef {
-                source = this@withTypeArgumentsForBareType.source
-                diagnostic = ConeNoTypeArgumentsOnRhsError(firClass.typeParameters.size, firClass.symbol)
-            }
+        val isCheckForLocalWithoutOwnParameters = firClass.isLocal
+                && firClass.typeParameters.none { it.symbol.containingDeclarationSymbol in outerClasses }
+        val isTypeOperation = operation in FirOperation.TYPES
+
+        val newType = when {
+            isCheckForLocalWithoutOwnParameters && isTypeOperation -> (firClass as FirClass).defaultType()
+            else -> components.computeRepresentativeTypeForBareType(type, originalType)
+                ?: return buildErrorTypeRef {
+                    source = this@withTypeArgumentsForBareType.source
+                    diagnostic = ConeNoTypeArgumentsOnRhsError(firClass.typeParameters.size, firClass.symbol)
+                }
+        }
+
         return if (newType.typeArguments.isEmpty()) this else withReplacedConeType(newType)
     }
 

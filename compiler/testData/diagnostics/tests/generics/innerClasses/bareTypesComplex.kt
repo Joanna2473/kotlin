@@ -1,6 +1,5 @@
-// FIR_IDENTICAL
-// LATEST_LV_DIFFERENCE
 // RUN_PIPELINE_TILL: FRONTEND
+// FIR_IDENTICAL
 open class SuperOuter<E> {
     inner open class SuperInner<F>
 }
