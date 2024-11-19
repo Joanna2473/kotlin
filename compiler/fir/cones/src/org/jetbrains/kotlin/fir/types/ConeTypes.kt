@@ -71,7 +71,7 @@ class ConeErrorType(
         get() = (delegatedType as? ConeClassLikeType)?.lookupTag ?: ConeClassLikeErrorLookupTag(ClassId.fromString("<error>"))
 
     override val isMarkedNullable: Boolean
-        get() = (diagnostic as? ConeDiagnosticWithNullability)?.isNullable == true
+        get() = delegatedType?.isMarkedNullable ?: ((diagnostic as? ConeDiagnosticWithNullability)?.isNullable == true)
 
     override fun equals(other: Any?): Boolean = this === other
     override fun hashCode(): Int = System.identityHashCode(this)

@@ -44,7 +44,7 @@ fun test() {
     <!INVISIBLE_SETTER("xx; private; file")!>xx<!> = 40
 }
 
-class B : <!EXPOSED_SUPER_CLASS, INVISIBLE_REFERENCE!>A<!>() {}
+class B : <!EXPOSED_SUPER_CLASS, INVISIBLE_REFERENCE, INVISIBLE_REFERENCE!>A<!>() {}
 
 class Q {
     class W {

@@ -36,7 +36,7 @@ fun test() {
     val po = <!INVISIBLE_REFERENCE!>PO<!>
 }
 
-class B : <!EXPOSED_SUPER_CLASS, INVISIBLE_REFERENCE!>A<!>() {}
+class B : <!EXPOSED_SUPER_CLASS, INVISIBLE_REFERENCE, INVISIBLE_REFERENCE!>A<!>() {}
 
 class Q {
     class W {
