@@ -1,3 +1,4 @@
+// RUN_PIPELINE_TILL: FRONTEND
 // LANGUAGE: +NestedTypeAliases
 
 class C {
@@ -36,5 +37,5 @@ class E : <!CYCLIC_INHERITANCE_HIERARCHY!>E.TA<!> {
 
 fun test() {
     C1.TA1()
-    D1<String>().<!CANNOT_INFER_PARAMETER_TYPE, NEW_INFERENCE_NO_INFORMATION_FOR_PARAMETER!>TA1<!>()
+    D1<String>().TA1()
 }

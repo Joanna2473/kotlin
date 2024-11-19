@@ -1,3 +1,4 @@
+// RUN_PIPELINE_TILL: FRONTEND
 // LANGUAGE: +NestedTypeAliases
 
 class Pair<X, Y>(val x: X, val y: Y)

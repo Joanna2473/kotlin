@@ -35,7 +35,7 @@ sealed class FirDeclarationOrigin(
         object PluginFile : Synthetic()
         object Builtins : Synthetic()
         object Error : Synthetic()
-        object TypeAliasConstructor : Synthetic()
+        class TypeAliasConstructor(val isInner: Boolean) : Synthetic()
         object FakeFunction : Synthetic()
         object ForwardDeclaration : Synthetic()
         object ScriptTopLevelDestructuringDeclarationContainer : Synthetic()

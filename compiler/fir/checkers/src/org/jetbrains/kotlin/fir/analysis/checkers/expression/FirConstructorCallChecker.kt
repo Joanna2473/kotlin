@@ -27,7 +27,7 @@ object FirConstructorCallChecker : FirFunctionCallChecker(MppCheckerKind.Common)
         val constructorSymbol = expression.calleeReference.toResolvedConstructorSymbol() ?: return
         val coneType = constructorSymbol.resolvedReturnTypeRef.coneType
 
-        if (constructorSymbol.origin == FirDeclarationOrigin.Synthetic.TypeAliasConstructor && coneType.contains { it is ConeCapturedType }) {
+        if (constructorSymbol.origin is FirDeclarationOrigin.Synthetic.TypeAliasConstructor && coneType.contains { it is ConeCapturedType }) {
             reporter.reportOn(expression.source, FirErrors.CONSTRUCTOR_OR_SUPERTYPE_ON_TYPEALIAS_WITH_TYPE_PROJECTION, context)
         }
 

@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.fir.declarations.FirFunction
 import org.jetbrains.kotlin.fir.declarations.builder.buildConstructedClassTypeParameterRef
 import org.jetbrains.kotlin.fir.declarations.builder.buildConstructorCopy
 import org.jetbrains.kotlin.fir.declarations.builder.buildReceiverParameter
+import org.jetbrains.kotlin.fir.declarations.utils.isInner
 import org.jetbrains.kotlin.fir.languageVersionSettings
 import org.jetbrains.kotlin.fir.resolve.ScopeSession
 import org.jetbrains.kotlin.fir.resolve.defaultType
@@ -48,6 +49,7 @@ class TypeAliasConstructorsSubstitutingScope(
     private val delegatingScope: FirScope,
     private val outerType: ConeClassLikeType?,
     private val abbreviation: ConeClassLikeType = typeAliasSymbol.defaultType(),
+    private val substitutor: ConeSubstitutor = ConeSubstitutor.Empty,
 ) : FirScope() {
     private val aliasedTypeExpansionGloballyEnabled: Boolean = typeAliasSymbol
         .moduleData
@@ -62,7 +64,7 @@ class TypeAliasConstructorsSubstitutingScope(
             processor(
                 buildConstructorCopy(originalConstructorSymbol.fir) {
                     symbol = FirConstructorSymbol(originalConstructorSymbol.callableId)
-                    origin = FirDeclarationOrigin.Synthetic.TypeAliasConstructor
+                    origin = FirDeclarationOrigin.Synthetic.TypeAliasConstructor(isInner = typeAliasSymbol.isInner)
 
                     this.typeParameters.clear()
                     typeParameters.mapTo(this.typeParameters) { buildConstructedClassTypeParameterRef { symbol = it.symbol } }
@@ -73,7 +75,7 @@ class TypeAliasConstructorsSubstitutingScope(
                         )
                     }
 
-                    if (outerType != null) {
+                    if (outerType != null && !typeAliasSymbol.isInner) {
                         // If the matched symbol is a type alias, and the expanded type is a nested class, e.g.,
                         //
                         //   class Outer {
@@ -90,13 +92,13 @@ class TypeAliasConstructorsSubstitutingScope(
                         //
                         //   fun Outer.OI(): OI = ...
                         //
-                        //
+                        // It's not applicable to inner type aliases because they always have correct scope of an outer class.
                         receiverParameter = originalConstructorSymbol.fir.returnTypeRef.withReplacedConeType(outerType).let {
                             buildReceiverParameter {
                                 typeRef = it
                                 symbol = FirReceiverParameterSymbol()
                                 moduleData = originalConstructorSymbol.moduleData
-                                origin = FirDeclarationOrigin.Synthetic.TypeAliasConstructor
+                                origin = FirDeclarationOrigin.Synthetic.TypeAliasConstructor(isInner = false)
                                 containingDeclarationSymbol = this@buildConstructorCopy.symbol
                             }
                         }

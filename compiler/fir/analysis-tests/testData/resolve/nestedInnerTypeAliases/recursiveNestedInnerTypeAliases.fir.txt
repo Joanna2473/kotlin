@@ -66,5 +66,5 @@ FILE: recursiveNestedInnerTypeAliases.kt
     }
     public final fun test(): R|kotlin/Unit| {
         Q|C1|.R|/C2.C2|()
-        R|/D1.D1|<R|kotlin/String|>().R|/D2.D2<CS errors: /D2.D2>#|<<ERROR TYPE REF: Cannot infer argument for type parameter T>>()
+        R|/D1.D1|<R|kotlin/String|>().R|/D2.D2|<R|kotlin/String|>()
     }

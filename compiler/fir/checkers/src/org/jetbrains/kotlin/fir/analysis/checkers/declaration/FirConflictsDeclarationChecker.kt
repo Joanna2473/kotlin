@@ -115,7 +115,7 @@ object FirConflictsDeclarationChecker : FirBasicDeclarationChecker(MppCheckerKin
                 conflictingDeclaration !is FirCallableSymbol<*> -> conflictingDeclaration.source
                 origin == FirDeclarationOrigin.Source -> conflictingDeclaration.source
                 origin == FirDeclarationOrigin.Library -> return@forEach
-                origin == FirDeclarationOrigin.Synthetic.TypeAliasConstructor -> typeAliasForConstructorSource
+                origin is FirDeclarationOrigin.Synthetic.TypeAliasConstructor -> typeAliasForConstructorSource
                 else -> container.source
             }
             if (
@@ -141,7 +141,7 @@ object FirConflictsDeclarationChecker : FirBasicDeclarationChecker(MppCheckerKin
     }
 
     private val FirBasedSymbol<*>.isPrimaryConstructor: Boolean
-        get() = this is FirConstructorSymbol && isPrimary || origin == FirDeclarationOrigin.Synthetic.TypeAliasConstructor
+        get() = this is FirConstructorSymbol && isPrimary || origin is FirDeclarationOrigin.Synthetic.TypeAliasConstructor
 
     private fun checkFile(file: FirFile, inspector: FirDeclarationCollector<FirBasedSymbol<*>>, context: CheckerContext) {
         val packageMemberScope: FirPackageMemberScope =
