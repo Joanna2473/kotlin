@@ -1,22 +1,21 @@
 /*
- * Copyright 2016-2024 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
 
 import kotlinx.validation.api.*
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.io.File
 
-internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
+internal class MultiPlatformSingleJvmTargetTest : AbiValidationBaseTests() {
     private fun BaseKotlinScope.createProjectHierarchyWithPluginOnRoot() {
         settingsGradleKts {
-            resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+            append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
         }
         buildGradleKts {
-            resolve("/examples/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
+            append("/testProject/abi-validation/templates/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
         }
     }
 
@@ -31,17 +30,17 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
 
                 dir("$API_DIR/") {
                     file("testproject.api") {
-                        resolve("/examples/classes/Subsub1Class.dump")
-                        resolve("/examples/classes/Subsub2Class.dump")
+                        append("/testProject/abi-validation/templates/classes/Subsub1Class.dump")
+                        append("/testProject/abi-validation/templates/classes/Subsub2Class.dump")
                     }
                 }
 
                 dir("src/jvmMain/kotlin") {}
                 kotlin("Subsub1Class.kt", "commonMain") {
-                    resolve("/examples/classes/Subsub1Class.kt")
+                    append("/testProject/abi-validation/templates/classes/Subsub1Class.kt")
                 }
                 kotlin("Subsub2Class.kt", "jvmMain") {
-                    resolve("/examples/classes/Subsub2Class.kt")
+                    append("/testProject/abi-validation/templates/classes/Subsub2Class.kt")
                 }
 
             }
@@ -63,17 +62,17 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
 
                 dir("$API_DIR/") {
                     file("testproject.api") {
-                        resolve("/examples/classes/Subsub2Class.dump")
-                        resolve("/examples/classes/Subsub1Class.dump")
+                        append("/testProject/abi-validation/templates/classes/Subsub2Class.dump")
+                        append("/testProject/abi-validation/templates/classes/Subsub1Class.dump")
                     }
                 }
 
                 dir("src/jvmMain/kotlin") {}
                 kotlin("Subsub1Class.kt", "commonMain") {
-                    resolve("/examples/classes/Subsub1Class.kt")
+                    append("/testProject/abi-validation/templates/classes/Subsub1Class.kt")
                 }
                 kotlin("Subsub2Class.kt", "jvmMain") {
-                    resolve("/examples/classes/Subsub2Class.kt")
+                    append("/testProject/abi-validation/templates/classes/Subsub2Class.kt")
                 }
 
             }
@@ -81,7 +80,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
         runner.buildAndFail().apply {
             assertTaskFailure(":jvmApiCheck")
             assertTaskNotRun(":apiCheck")
-            assertThat(output).contains("API check failed for project testproject")
+            Assertions.assertThat(output).contains("API check failed for project testproject")
             assertTaskNotRun(":check")
         }
     }
@@ -98,10 +97,10 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
 
                 dir("src/jvmMain/kotlin") {}
                 kotlin("Subsub1Class.kt", "commonMain") {
-                    resolve("/examples/classes/Subsub1Class.kt")
+                    append("/testProject/abi-validation/templates/classes/Subsub1Class.kt")
                 }
                 kotlin("Subsub2Class.kt", "jvmMain") {
-                    resolve("/examples/classes/Subsub2Class.kt")
+                    append("/testProject/abi-validation/templates/classes/Subsub2Class.kt")
                 }
 
             }
@@ -109,10 +108,10 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
         runner.build().apply {
             assertTaskSuccess(":apiDump")
 
-            val commonExpectedApi = readFileList("/examples/classes/Subsub1Class.dump")
+            val commonExpectedApi = readFileList("/testProject/abi-validation/templates/classes/Subsub1Class.dump")
 
-            val mainExpectedApi = commonExpectedApi + "\n" + readFileList("/examples/classes/Subsub2Class.dump")
-            assertThat(jvmApiDump.readText()).isEqualToIgnoringNewLines(mainExpectedApi)
+            val mainExpectedApi = commonExpectedApi + "\n" + readFileList("/testProject/abi-validation/templates/classes/Subsub2Class.dump")
+            Assertions.assertThat(jvmApiDump.readText()).isEqualToIgnoringNewLines(mainExpectedApi)
         }
     }
 
@@ -120,7 +119,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
     fun testApiDumpPassesForEmptyProject() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
             }
 
             runner {
@@ -138,7 +137,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
     fun testApiCheckPassesForEmptyProject() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
             }
 
             emptyApiFile(projectName = rootProjectDir.name)
@@ -158,7 +157,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
     fun testApiCheckFailsForEmptyProjectWithoutDumpFile() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/multiplatformWithSingleJvmTarget.gradle.kts")
             }
 
             runner {
@@ -168,7 +167,7 @@ internal class MultiPlatformSingleJvmTargetTest : BaseKotlinGradleTest() {
 
         runner.buildAndFail().apply {
             assertTaskFailure(":jvmApiCheck")
-            assertThat(output).contains(
+            Assertions.assertThat(output).contains(
                 "Expected file with API declarations 'api${File.separator}${rootProjectDir.name}.api' does not exist"
             )
         }

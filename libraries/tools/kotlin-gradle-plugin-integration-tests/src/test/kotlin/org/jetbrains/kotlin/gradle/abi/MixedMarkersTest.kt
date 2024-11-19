@@ -1,6 +1,6 @@
 /*
- * Copyright 2016-2022 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
@@ -8,22 +8,22 @@ package kotlinx.validation.test
 import kotlinx.validation.api.*
 import org.junit.Test
 
-class MixedMarkersTest : BaseKotlinGradleTest() {
+class MixedMarkersTest : AbiValidationBaseTests() {
 
     @Test
     fun testMixedMarkers() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/publicMarkers/mixedMarkers.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/publicMarkers/mixedMarkers.gradle.kts")
             }
 
             kotlin("MixedAnnotations.kt") {
-                resolve("/examples/classes/MixedAnnotations.kt")
+                append("/testProject/abi-validation/templates/classes/MixedAnnotations.kt")
             }
 
             apiFile(projectName = rootProjectDir.name) {
-                resolve("/examples/classes/MixedAnnotations.dump")
+                append("/testProject/abi-validation/templates/classes/MixedAnnotations.dump")
             }
 
             runner {

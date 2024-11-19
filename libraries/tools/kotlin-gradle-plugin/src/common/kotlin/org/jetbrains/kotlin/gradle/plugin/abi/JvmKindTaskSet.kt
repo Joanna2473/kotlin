@@ -92,7 +92,7 @@ internal class JvmKindTaskSet(
             it.toolsClasspath.from(toolClasspath)
             it.legacyFormat.convention(useLegacyFormat)
 
-            it.updateTaskName.set(KotlinAbiUpdateTask.SIMPLE_TASK_NAME)
+            it.updateTaskName.set(updateTaskName)
         }
 
         project.tasks.register(updateTaskName, KotlinAbiUpdateTask::class.java) {

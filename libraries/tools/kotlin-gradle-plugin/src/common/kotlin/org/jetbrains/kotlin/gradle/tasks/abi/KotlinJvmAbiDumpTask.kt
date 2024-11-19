@@ -66,7 +66,6 @@ internal abstract class KotlinJvmAbiDumpTask : AbiToolsTask(), KotlinAbiDumpTask
             includedAnnotatedWith.getOrElse(emptySet()),
             excludedAnnotatedWith.getOrElse(emptySet())
         )
-
         tools.jvm.dumpTo(dumpFile.get().asFile, jvmSuits, filters)
     }
 

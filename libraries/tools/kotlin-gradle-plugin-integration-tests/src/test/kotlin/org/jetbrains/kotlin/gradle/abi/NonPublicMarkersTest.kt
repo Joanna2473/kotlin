@@ -1,31 +1,30 @@
 /*
- * Copyright 2016-2022 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
 
 import kotlinx.validation.api.*
-import org.assertj.core.api.Assertions
 import org.junit.*
 import kotlin.test.assertTrue
 
-class NonPublicMarkersTest : BaseKotlinGradleTest() {
+class NonPublicMarkersTest : AbiValidationBaseTests() {
 
     @Test
     fun testIgnoredMarkersOnProperties() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/nonPublicMarkers/markers.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/nonPublicMarkers/markers.gradle.kts")
             }
 
             kotlin("Properties.kt") {
-                resolve("/examples/classes/Properties.kt")
+                append("/testProject/abi-validation/templates/classes/Properties.kt")
             }
 
             apiFile(projectName = rootProjectDir.name) {
-                resolve("/examples/classes/Properties.dump")
+                append("/testProject/abi-validation/templates/classes/Properties.dump")
             }
 
             runner {
@@ -43,21 +42,21 @@ class NonPublicMarkersTest : BaseKotlinGradleTest() {
     fun testIgnoredMarkersOnPropertiesForNativeTargets() {
         val runner = test {
             settingsGradleKts {
-                resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
             }
 
             buildGradleKts {
-                resolve("/examples/gradle/base/withNativePlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/nonPublicMarkers/markers.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/withNativePlugin.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/nonPublicMarkers/markers.gradle.kts")
             }
 
             kotlin("Properties.kt", sourceSet = "commonMain") {
-                resolve("/examples/classes/Properties.kt")
+                append("/testProject/abi-validation/templates/classes/Properties.kt")
             }
 
             commonNativeTargets.forEach {
                 abiFile(projectName = "testproject", target = it) {
-                    resolve("/examples/classes/Properties.klib.dump")
+                    append("/testProject/abi-validation/templates/classes/Properties.klib.dump")
                 }
             }
 
@@ -75,20 +74,20 @@ class NonPublicMarkersTest : BaseKotlinGradleTest() {
     fun testFiltrationByPackageLevelAnnotations() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/nonPublicMarkers/packages.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/nonPublicMarkers/packages.gradle.kts")
             }
             java("annotated/PackageAnnotation.java") {
-                resolve("/examples/classes/PackageAnnotation.java")
+                append("/testProject/abi-validation/templates/classes/PackageAnnotation.java")
             }
             java("annotated/package-info.java") {
-                resolve("/examples/classes/package-info.java")
+                append("/testProject/abi-validation/templates/classes/package-info.java")
             }
             kotlin("ClassFromAnnotatedPackage.kt") {
-                resolve("/examples/classes/ClassFromAnnotatedPackage.kt")
+                append("/testProject/abi-validation/templates/classes/ClassFromAnnotatedPackage.kt")
             }
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
             runner {
                 arguments.add(":apiDump")
@@ -100,7 +99,7 @@ class NonPublicMarkersTest : BaseKotlinGradleTest() {
 
             assertTrue(rootProjectApiDump.exists(), "api dump file should exist")
 
-            val expected = readFileList("/examples/classes/AnotherBuildConfig.dump")
+            val expected = readFileList("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
             Assertions.assertThat(rootProjectApiDump.readText()).isEqualToIgnoringNewLines(expected)
         }
     }
@@ -109,16 +108,16 @@ class NonPublicMarkersTest : BaseKotlinGradleTest() {
     fun testIgnoredMarkersOnConstProperties() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/nonPublicMarkers/markers.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/nonPublicMarkers/markers.gradle.kts")
             }
 
             kotlin("ConstProperty.kt") {
-                resolve("/examples/classes/ConstProperty.kt")
+                append("/testProject/abi-validation/templates/classes/ConstProperty.kt")
             }
 
             apiFile(projectName = rootProjectDir.name) {
-                resolve("/examples/classes/ConstProperty.dump")
+                append("/testProject/abi-validation/templates/classes/ConstProperty.dump")
             }
 
             runner {

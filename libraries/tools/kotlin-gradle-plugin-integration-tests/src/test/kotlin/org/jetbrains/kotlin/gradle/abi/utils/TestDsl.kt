@@ -1,20 +1,27 @@
 /*
- * Copyright 2016-2020 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.api
 
-import kotlinx.validation.ApiValidationExtension
+import kotlinx.validation.test.removeNewLines
+import org.gradle.testkit.runner.BuildResult
 import java.io.*
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
+import org.gradle.util.GradleVersion
 import org.intellij.lang.annotations.Language
+import org.jetbrains.kotlin.gradle.testbase.*
+import kotlin.test.assertContains
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
-public val API_DIR: String = ApiValidationExtension().apiDumpDirectory
+public val API_DIR: String = "api"
 
 private val koverEnabled: Boolean = System.getProperty("kover.enabled").toBoolean()
 
-internal fun BaseKotlinGradleTest.test(
+internal fun AbiValidationBaseTests.test(
     gradleVersion: String = "8.5",
     injectPluginClasspath: Boolean = true,
     fn: BaseKotlinScope.() -> Unit
@@ -53,6 +60,145 @@ internal fun BaseKotlinGradleTest.test(
         runner.addPluginTestRuntimeClasspath()
     }
     return runner
+}
+
+internal fun AbiValidationBaseTests.prepare(
+    gradleVersion: GradleVersion,
+    action: ProjectPreparationScope.() -> Unit = {}
+): AbiValidationTestRunner {
+    val testProject = project(
+        projectName = "abi-validation/empty",
+        gradleVersion = gradleVersion,
+    ) {
+        ProjectPreparationScope(this).action()
+    }
+
+    return AbiValidationTestRunner(testProject)
+}
+
+
+internal class ProjectPreparationScope(private val testProject: TestProject) {
+
+    val buildFile: FileScope = FileScope(testProject.buildGradleKts.toFile())
+
+    fun buildFile(action: FileScope.() -> Unit) {
+        buildFile.action()
+    }
+
+    val jvmAbiFile: FileScope = file("abi/jvm.abi")
+
+    fun jvmAbiFile(action: FileScope.() -> Unit = { append("") }) {
+        jvmAbiFile.action()
+    }
+
+    fun file(path: String): FileScope {
+        return FileScope(testProject.projectPath.resolve(path).toFile())
+    }
+
+    fun FileScope.appendFile(path: String) {
+        append(resource(path))
+    }
+
+    internal fun kotlinFile(
+        pathInProject: String,
+        sourceSet: String = "main",
+        action: FileScope.() -> Unit,
+    ) {
+        require(pathInProject.endsWith(".kt")) {
+            "Kotlin file must end with '.kt', actual '$pathInProject'"
+        }
+        file("src/${sourceSet}/kotlin/$pathInProject").action()
+    }
+
+    fun resource(path: String): File {
+        val resource = AbiValidationBaseTests::class.java.getResource(path)
+            ?: throw IllegalStateException("Could not find resource '$path'")
+        return File(resource.toURI())
+    }
+}
+
+internal class FileScope(private val file: File) {
+    fun append(file: File) {
+        if (!this.file.exists()) {
+            this.file.parentFile.mkdirs()
+            this.file.createNewFile()
+        }
+        this.file.appendText(file.readText())
+    }
+
+    fun append(text: String) {
+        if (!file.exists()) {
+            this.file.parentFile.mkdirs()
+            file.createNewFile()
+        }
+        this.file.appendText(text)
+    }
+}
+
+internal class AbiValidationTestRunner(private val testProject: TestProject) {
+    fun buildAndFail(vararg commands: String, assertions: BuildResultChecker.() -> Unit = {}) {
+        testProject.buildAndFail(*commands) {
+            try {
+                BuildResultChecker(testProject, this).assertions()
+            } catch (e: AssertionError) {
+                e.message
+                throw AssertionError(e.message + "\n\nBUILD LOG " + this.output, e.cause)
+            }
+        }
+    }
+
+    fun build(command: String, vararg additionalCommands: String, assertions: BuildResultChecker.() -> Unit = {}) {
+        val allCommands = listOf(command) + additionalCommands.toList()
+        testProject.build(*allCommands.toTypedArray()) {
+            try {
+                BuildResultChecker(testProject, this).assertions()
+            } catch (e: AssertionError) {
+                val newException = AssertionError(e.message + "\n\nBUILD LOG\n" + this.output, e.cause)
+                newException.stackTrace = e.stackTrace
+                throw newException
+            }
+        }
+    }
+}
+
+internal class BuildResultChecker(private val testProject: TestProject, private val result: BuildResult) {
+    fun assertTaskUpToDate(task: String) {
+        assertEquals(TaskOutcome.UP_TO_DATE, result.task(task)?.outcome)
+    }
+
+    fun assertTaskSuccess(task: String) {
+        assertEquals(TaskOutcome.SUCCESS, result.task(task)?.outcome)
+    }
+
+    internal fun assertTaskFailure(task: String) {
+        assertEquals(TaskOutcome.FAILED, result.task(task)?.outcome)
+    }
+
+    internal fun assertTaskNotExecuted(task: String) {
+        assertNull(result.task(task))
+    }
+
+    val actualJvmAbiFile: File = file("build/abi/jvm.abi")
+
+    fun file(path: String): File {
+        return testProject.projectPath.resolve(path).toFile()
+    }
+
+    fun assertLogContains(substring: String) {
+        assertContains(result.output, substring, message = "It is expected that the log will contain substring $substring")
+    }
+
+    fun resource(path: String): File {
+        val resource = AbiValidationBaseTests::class.java.getResource(path)
+            ?: throw IllegalStateException("Could not find resource '$path'")
+        return File(resource.toURI())
+    }
+
+    fun assertEqualIgnoringNewLines(expected: String, actual: String) {
+        val actualNoLines = actual.removeNewLines()
+        val expectedNoLines = expected.removeNewLines()
+        assertEquals(expectedNoLines, actualNoLines)
+    }
 }
 
 /**
@@ -155,7 +301,7 @@ internal fun BaseKotlinScope.runner(withConfigurationCache: Boolean = true, fn: 
     this.runner = runner
 }
 
-internal fun AppendableScope.resolve(@Language("file-reference") fileName: String) {
+internal fun AppendableScope.append(@Language("file-reference") fileName: String) {
     this.files.add(fileName)
 }
 
@@ -200,7 +346,7 @@ internal class Runner(withConfigurationCache: Boolean = true) {
 }
 
 internal fun readFileList(@Language("file-reference") fileName: String): String {
-    val resource = BaseKotlinGradleTest::class.java.getResource(fileName)
+    val resource = AbiValidationBaseTests::class.java.getResource(fileName)
         ?: throw IllegalStateException("Could not find resource '$fileName'")
     return File(resource.toURI()).readText()
 }

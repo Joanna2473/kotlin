@@ -1,19 +1,19 @@
 /*
- * Copyright 2016-2024 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
 
 import kotlinx.validation.api.*
 import kotlinx.validation.api.buildGradleKts
-import kotlinx.validation.api.resolve
+import kotlinx.validation.api.append
 import kotlinx.validation.api.test
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.Assume
 import org.junit.Test
 
-class JavaVersionsCompatibilityTest : BaseKotlinGradleTest() {
+class JavaVersionsCompatibilityTest : AbiValidationBaseTests() {
     private fun skipInDebug(runner: GradleRunner) {
         Assume.assumeFalse(
             "The test requires a separate Gradle process as it uses a different JVM version, " +
@@ -25,16 +25,16 @@ class JavaVersionsCompatibilityTest : BaseKotlinGradleTest() {
     private fun checkCompatibility(useMaxVersion: Boolean) {
         val runner = test(gradleVersion = "8.5", injectPluginClasspath = false) {
             buildGradleKts {
-                resolve("/examples/gradle/base/jdkCompatibility.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/jdkCompatibility.gradle.kts")
             }
             settingsGradleKts {
-                resolve("/examples/gradle/settings/jdk-provisioning.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/jdk-provisioning.gradle.kts")
             }
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
             apiFile(projectName = rootProjectDir.name) {
-                resolve("/examples/classes/AnotherBuildConfig.dump")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
             }
 
             runner {
@@ -53,16 +53,16 @@ class JavaVersionsCompatibilityTest : BaseKotlinGradleTest() {
     private fun checkCompatibility(jdkVersion: String) {
         val runner = test(gradleVersion = "8.5", injectPluginClasspath = false) {
             buildGradleKts {
-                resolve("/examples/gradle/base/jdkCompatibilityWithExactVersion.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/jdkCompatibilityWithExactVersion.gradle.kts")
             }
             settingsGradleKts {
-                resolve("/examples/gradle/settings/jdk-provisioning.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/jdk-provisioning.gradle.kts")
             }
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
             apiFile(projectName = rootProjectDir.name) {
-                resolve("/examples/classes/AnotherBuildConfig.dump")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
             }
 
             runner {

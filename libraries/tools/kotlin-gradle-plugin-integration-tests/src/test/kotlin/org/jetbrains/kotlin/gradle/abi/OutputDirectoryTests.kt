@@ -1,29 +1,28 @@
 /*
- * Copyright 2016-2024 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
 
 import kotlinx.validation.api.*
 import kotlinx.validation.api.buildGradleKts
-import kotlinx.validation.api.resolve
+import kotlinx.validation.api.append
 import kotlinx.validation.api.test
-import org.assertj.core.api.Assertions
 import org.junit.Test
 import kotlin.test.assertTrue
 
-class OutputDirectoryTests : BaseKotlinGradleTest() {
+class OutputDirectoryTests : AbiValidationBaseTests() {
     @Test
     fun dumpIntoCustomDirectory() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/outputDirectory/different.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/outputDirectory/different.gradle.kts")
             }
 
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
             dir("api") {
                 file("letMeBe.txt") {
@@ -41,7 +40,7 @@ class OutputDirectoryTests : BaseKotlinGradleTest() {
             val dumpFile = rootProjectDir.resolve("custom").resolve("${rootProjectDir.name}.api")
             assertTrue(dumpFile.exists(), "api dump file ${dumpFile.path} should exist")
 
-            val expected = readFileList("/examples/classes/AnotherBuildConfig.dump")
+            val expected = readFileList("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
             Assertions.assertThat(dumpFile.readText()).isEqualToIgnoringNewLines(expected)
 
             val fileInsideDir = rootProjectDir.resolve("api").resolve("letMeBe.txt")
@@ -53,16 +52,16 @@ class OutputDirectoryTests : BaseKotlinGradleTest() {
     fun validateDumpFromACustomDirectory() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/outputDirectory/different.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/outputDirectory/different.gradle.kts")
             }
 
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
             dir("custom") {
                 file("${rootProjectDir.name}.api") {
-                    resolve("/examples/classes/AnotherBuildConfig.dump")
+                    append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
                 }
             }
 
@@ -80,12 +79,12 @@ class OutputDirectoryTests : BaseKotlinGradleTest() {
     fun dumpIntoSubdirectory() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/outputDirectory/subdirectory.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/outputDirectory/subdirectory.gradle.kts")
             }
 
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
 
             runner {
@@ -102,7 +101,7 @@ class OutputDirectoryTests : BaseKotlinGradleTest() {
 
             assertTrue(dumpFile.exists(), "api dump file ${dumpFile.path} should exist")
 
-            val expected = readFileList("/examples/classes/AnotherBuildConfig.dump")
+            val expected = readFileList("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
             Assertions.assertThat(dumpFile.readText()).isEqualToIgnoringNewLines(expected)
         }
     }
@@ -111,17 +110,17 @@ class OutputDirectoryTests : BaseKotlinGradleTest() {
     fun validateDumpFromASubdirectory() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/outputDirectory/subdirectory.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/outputDirectory/subdirectory.gradle.kts")
             }
 
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
             dir("validation") {
                 dir("api") {
                     file("${rootProjectDir.name}.api") {
-                        resolve("/examples/classes/AnotherBuildConfig.dump")
+                        append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
                     }
                 }
             }
@@ -140,12 +139,12 @@ class OutputDirectoryTests : BaseKotlinGradleTest() {
     fun dumpIntoParentDirectory() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/outputDirectory/outer.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/outputDirectory/outer.gradle.kts")
             }
 
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
 
             runner {

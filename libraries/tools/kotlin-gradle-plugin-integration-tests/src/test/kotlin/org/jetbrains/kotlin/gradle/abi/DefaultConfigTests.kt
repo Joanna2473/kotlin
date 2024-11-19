@@ -1,285 +1,129 @@
 /*
- * Copyright 2016-2020 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
 
 import kotlinx.validation.api.*
-import org.assertj.core.api.*
-import org.junit.Assume
-import org.junit.Test
-import java.io.File
-import java.nio.file.Files
+import org.gradle.api.JavaVersion
+import org.gradle.util.GradleVersion
+import org.jetbrains.kotlin.gradle.testbase.GradleTest
+import org.jetbrains.kotlin.gradle.testbase.JdkVersions
+import org.jetbrains.kotlin.gradle.testbase.JvmGradlePluginTests
+import org.junit.jupiter.api.DisplayName
 import kotlin.test.*
 
-internal class DefaultConfigTests : BaseKotlinGradleTest() {
+@JvmGradlePluginTests
+internal class DefaultConfigTests : AbiValidationBaseTests() {
 
-    @Test
-    fun `apiCheck should fail, when there is no api directory, even if there are no Kotlin sources`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-            }
-            runner {
-                arguments.add(":apiCheck")
-            }
-        }
+    @GradleTest
+    @DisplayName("apiCheck should fail, when there is no api directory, even if there are no Kotlin sources")
+    @JdkVersions(versions = [JavaVersion.VERSION_11])
+    fun noReferenceDump(gradleVersion: GradleVersion) {
+        val runner = prepare(gradleVersion)
 
-        val projectName = rootProjectDir.name
-        runner.buildAndFail().apply {
-            Assertions.assertThat(output).contains(
-                "Expected file with API declarations 'api${File.separator}$projectName.api' does not exist."
-            ).contains(
-                "Please ensure that ':apiDump' was executed in order to get an API dump to compare the build against"
+        runner.buildAndFail(":checkAbi") {
+            assertLogContains(
+                "Expected file with ABI declarations 'abi/jvm.abi' does not exist."
             )
-            assertTaskFailure(":apiCheck")
+            assertLogContains(
+                "Please ensure that 'updateAbi' was executed in order to get an ABI dump to compare the build against"
+            )
+            assertTaskFailure(":checkAbi")
         }
     }
 
-    @Test
-    fun `check should fail, when there is no api directory, even if there are no Kotlin sources`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-            }
-
-            runner {
-                arguments.add(":check")
-            }
+    @GradleTest
+    @DisplayName("apiCheck should succeed, when api-File is empty, but no kotlin files are included in SourceSet")
+    fun emptyReferenceDump(gradleVersion: GradleVersion) {
+        val runner = prepare(gradleVersion) {
+            jvmAbiFile()
         }
 
-        runner.buildAndFail().apply {
-            assertTaskFailure(":apiCheck")
-            assertTaskNotRun(":check") // apiCheck fails before we can run check
+        runner.build(":checkAbi") {
+            assertTaskSuccess(":checkAbi")
         }
     }
 
-    @Test
-    fun `apiCheck should succeed, when api-File is empty, but no kotlin files are included in SourceSet`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
+    @GradleTest
+    @DisplayName("apiCheck should succeed when public classes match api file")
+    fun successfulCheck(gradleVersion: GradleVersion) {
+        val runner = prepare(gradleVersion) {
+            kotlinFile("AnotherBuildConfig.kt") {
+                appendFile("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
-
-            emptyApiFile(projectName = rootProjectDir.name)
-
-            runner {
-                arguments.add(":apiCheck")
-            }
+            jvmAbiFile.appendFile("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
         }
 
-        runner.build().apply {
-            assertTaskSuccess(":apiCheck")
+        runner.build(":checkAbi") {
+            assertTaskSuccess(":checkAbi")
         }
     }
 
-    @Test
-    fun `apiCheck should succeed when public classes match api file`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
+    @GradleTest
+    @DisplayName("apiCheck should fail, when a public class is not in api-File")
+    fun differentDumps(gradleVersion: GradleVersion) {
+        val runner = prepare(gradleVersion) {
+            kotlinFile("BuildConfig.kt") {
+                appendFile("/testProject/abi-validation/templates/classes/BuildConfig.kt")
             }
-            kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
-            }
-            apiFile(projectName = rootProjectDir.name) {
-                resolve("/examples/classes/AnotherBuildConfig.dump")
-            }
-
-            runner {
-                arguments.add(":apiCheck")
-            }
+            jvmAbiFile()
         }
 
-        runner.build().apply {
-            assertTaskSuccess(":apiCheck")
-        }
-    }
-
-    @Test
-    fun `apiCheck should succeed when public classes match api file with K2`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPluginK2.gradle.kts")
-            }
-            kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
-            }
-            apiFile(projectName = rootProjectDir.name) {
-                resolve("/examples/classes/AnotherBuildConfig.dump")
-            }
-
-            runner {
-                arguments.add(":apiCheck")
-            }
-        }
-
-        runner.build().apply {
-            assertTaskSuccess(":apiCheck")
-        }
-    }
-
-    @Test
-    fun `apiCheck should fail when public classes match api file ignoring case`() {
-        Assume.assumeTrue(underlyingFsIsCaseSensitive())
-
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-            }
-            kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
-            }
-            apiFile(projectName = rootProjectDir.name.uppercase()) {
-                resolve("/examples/classes/AnotherBuildConfig.dump")
-            }
-
-            runner {
-                arguments.add(":apiCheck")
-            }
-        }
-
-        runner.buildAndFail().apply {
-            assertTaskFailure(":apiCheck")
-        }
-    }
-
-    @Test
-    fun `apiCheck should fail, when a public class is not in api-File`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-            }
-
-            kotlin("BuildConfig.kt") {
-                resolve("/examples/classes/BuildConfig.kt")
-            }
-
-            emptyApiFile(projectName = rootProjectDir.name)
-
-            runner {
-                arguments.add(":apiCheck")
-            }
-        }
-
-        runner.buildAndFail().apply {
+        runner.buildAndFail(":checkAbi") {
             val dumpOutput =
-                    "  @@ -1,1 +1,7 @@\n" +
-                            "  +public final class com/company/BuildConfig {\n" +
-                            "  +\tpublic fun <init> ()V\n" +
-                            "  +\tpublic final fun function ()I\n" +
-                            "  +\tpublic final fun getProperty ()I\n" +
-                            "  +}"
+                "  @@ -1,1 +1,7 @@\n" +
+                        "  +public final class com/company/BuildConfig {\n" +
+                        "  +\tpublic fun <init> ()V\n" +
+                        "  +\tpublic final fun function ()I\n" +
+                        "  +\tpublic final fun getProperty ()I\n" +
+                        "  +}"
 
-            assertTaskFailure(":apiCheck")
-            Assertions.assertThat(output).contains(dumpOutput)
+            assertTaskFailure(":checkAbi")
+            assertLogContains(dumpOutput)
         }
     }
 
-    @Test
-    fun `apiDump should create empty api file when there are no Kotlin sources`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-            }
+    @GradleTest
+    @DisplayName("apiDump should create empty api file when there are no Kotlin sources")
+    fun generateEmptyDump(gradleVersion: GradleVersion) {
+        val runner = prepare(gradleVersion)
 
-            runner {
-                arguments.add(":apiDump")
-            }
-        }
-
-        runner.build().apply {
-            assertTaskSuccess(":apiDump")
-
-            assertTrue(rootProjectApiDump.exists(), "api dump file ${rootProjectApiDump.path} should exist")
-
-            Assertions.assertThat(rootProjectApiDump.readText()).isEqualToIgnoringNewLines("")
+        runner.build(":dumpAbi") {
+            assertTaskSuccess(":dumpAbi")
+            assertTrue(actualJvmAbiFile.exists(), "JVM ABI dump file should exist")
+            assertEquals("", actualJvmAbiFile.readText())
         }
     }
 
-    @Test
-    fun `apiDump should create api file with the name of the project, respecting settings file`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-            }
-            settingsGradleKts {
-                resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
-            }
-
-            runner {
-                arguments.add(":apiDump")
+    @GradleTest
+    @DisplayName("apiDump should dump public classes")
+    fun expectedActualDump(gradleVersion: GradleVersion) {
+        val runner = prepare(gradleVersion) {
+            kotlinFile("AnotherBuildConfig.kt") {
+                appendFile("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
         }
 
-        runner.build().apply {
-            assertTaskSuccess(":apiDump")
+        runner.build("dumpAbi") {
+            assertTaskSuccess(":dumpAbi")
+            assertTrue(actualJvmAbiFile.exists(), "JVM ABI dump file should exist")
 
-            val apiDumpFile = rootProjectDir.resolve("$API_DIR/testproject.api")
-            assertTrue(apiDumpFile.exists(), "api dump file ${apiDumpFile.path} should exist")
-
-            assertFalse(rootProjectApiDump.exists(), "api dump file ${rootProjectApiDump.path} should NOT exist " +
-                "(based on project dir instead of custom name from settings)")
-
-            Assertions.assertThat(apiDumpFile.readText()).isEqualToIgnoringNewLines("")
+            assertEqualIgnoringNewLines(
+                resource("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump").readText(),
+                actualJvmAbiFile.readText()
+            )
         }
     }
 
-    @Test
-    fun `apiDump should dump public classes`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-            }
-            kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
-            }
-
-            runner {
-                arguments.add(":apiDump")
-            }
-        }
-
-        runner.build().apply {
-            assertTaskSuccess(":apiDump")
-
-            assertTrue(rootProjectApiDump.exists(), "api dump file should exist")
-
-            val expected = readFileList("/examples/classes/AnotherBuildConfig.dump")
-            Assertions.assertThat(rootProjectApiDump.readText()).isEqualToIgnoringNewLines(expected)
-        }
-    }
-
-    @Test
-    fun `apiCheck should be run when we run check`() {
-        val runner = test {
-            buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-            }
-
-            emptyApiFile(projectName = rootProjectDir.name)
-
-            runner {
-                arguments.add(":check")
-            }
-        }
-
-        runner.build().apply {
-            assertTaskSuccess(":check")
-            assertTaskSuccess(":apiCheck")
-        }
-    }
-
-
-    private fun underlyingFsIsCaseSensitive(): Boolean {
-        val f = Files.createTempFile("UPPER", "UPPER").toFile()
-        f.deleteOnExit()
-        try {
-            val lower = File(f.absolutePath.lowercase())
-            return !lower.exists()
-        } finally {
-            f.delete()
+    @GradleTest
+    @DisplayName("apiCheck should not be run when we run check")
+    fun checkTaskIsNotCalled(gradleVersion: GradleVersion) {
+        val runner = prepare(gradleVersion)
+        runner.build(":check") {
+            assertTaskUpToDate(":check")
+            assertTaskNotExecuted(":checkAbi")
         }
     }
 }

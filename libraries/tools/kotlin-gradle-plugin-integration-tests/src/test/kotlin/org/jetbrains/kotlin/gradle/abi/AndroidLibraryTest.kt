@@ -1,6 +1,6 @@
 /*
- * Copyright 2016-2022 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
@@ -12,7 +12,7 @@ import org.junit.Test
 import java.io.File
 
 @Ignore // Leftovers after revert of #94
-internal class AndroidLibraryTest : BaseKotlinGradleTest() {
+internal class AndroidLibraryTest : AbiValidationBaseTests() {
 
     // region Kotlin Android Library
 
@@ -86,33 +86,33 @@ internal class AndroidLibraryTest : BaseKotlinGradleTest() {
      */
     private fun BaseKotlinScope.createProjectWithSubModules() {
         settingsGradleKts {
-            resolve("/examples/gradle/settings/settings-android-project.gradle.kts")
+            append("/examples/gradle/settings/settings-android-project.gradle.kts")
         }
         buildGradleKts {
-            resolve("/examples/gradle/base/androidProjectRoot.gradle.kts")
+            append("/examples/gradle/base/androidProjectRoot.gradle.kts")
         }
         initLocalProperties()
 
         dir("kotlin-library") {
             buildGradleKts {
-                resolve("/examples/gradle/base/androidKotlinLibrary.gradle.kts")
+                append("/examples/gradle/base/androidKotlinLibrary.gradle.kts")
             }
             kotlin("KotlinLib.kt") {
-                resolve("/examples/classes/KotlinLib.kt")
+                append("/examples/classes/KotlinLib.kt")
             }
             apiFile(projectName = "kotlin-library") {
-                resolve("/examples/classes/KotlinLib.dump")
+                append("/examples/classes/KotlinLib.dump")
             }
         }
         dir("java-library") {
             buildGradleKts {
-                resolve("/examples/gradle/base/androidJavaLibrary.gradle.kts")
+                append("/examples/gradle/base/androidJavaLibrary.gradle.kts")
             }
             java("JavaLib.java") {
-                resolve("/examples/classes/JavaLib.java")
+                append("/examples/classes/JavaLib.java")
             }
             apiFile(projectName = "java-library") {
-                resolve("/examples/classes/JavaLib.dump")
+                append("/examples/classes/JavaLib.dump")
             }
         }
     }

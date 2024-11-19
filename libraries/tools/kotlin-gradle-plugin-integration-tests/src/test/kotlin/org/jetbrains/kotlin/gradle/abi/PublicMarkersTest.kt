@@ -1,6 +1,6 @@
 /*
- * Copyright 2016-2022 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
@@ -8,32 +8,31 @@ package kotlinx.validation.test
 import kotlinx.validation.api.*
 import kotlinx.validation.api.buildGradleKts
 import kotlinx.validation.api.kotlin
-import kotlinx.validation.api.resolve
+import kotlinx.validation.api.append
 import kotlinx.validation.api.test
-import org.assertj.core.api.Assertions
 import org.junit.Test
 import kotlin.test.assertTrue
 
-class PublicMarkersTest : BaseKotlinGradleTest() {
+class PublicMarkersTest : AbiValidationBaseTests() {
 
     @Test
     fun testPublicMarkers() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/publicMarkers/markers.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/publicMarkers/markers.gradle.kts")
             }
 
             kotlin("ClassWithPublicMarkers.kt") {
-                resolve("/examples/classes/ClassWithPublicMarkers.kt")
+                append("/testProject/abi-validation/templates/classes/ClassWithPublicMarkers.kt")
             }
 
             kotlin("ClassInPublicPackage.kt") {
-                resolve("/examples/classes/ClassInPublicPackage.kt")
+                append("/testProject/abi-validation/templates/classes/ClassInPublicPackage.kt")
             }
 
             apiFile(projectName = rootProjectDir.name) {
-                resolve("/examples/classes/ClassWithPublicMarkers.dump")
+                append("/testProject/abi-validation/templates/classes/ClassWithPublicMarkers.dump")
             }
 
             runner {
@@ -51,24 +50,24 @@ class PublicMarkersTest : BaseKotlinGradleTest() {
     fun testPublicMarkersForNativeTargets() {
         val runner = test {
             settingsGradleKts {
-                resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
             }
 
             buildGradleKts {
-                resolve("/examples/gradle/base/withNativePlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/publicMarkers/markers.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/withNativePlugin.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/publicMarkers/markers.gradle.kts")
             }
 
             kotlin("ClassWithPublicMarkers.kt", sourceSet = "commonMain") {
-                resolve("/examples/classes/ClassWithPublicMarkers.kt")
+                append("/testProject/abi-validation/templates/classes/ClassWithPublicMarkers.kt")
             }
 
             kotlin("ClassInPublicPackage.kt", sourceSet = "commonMain") {
-                resolve("/examples/classes/ClassInPublicPackage.kt")
+                append("/testProject/abi-validation/templates/classes/ClassInPublicPackage.kt")
             }
 
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/ClassWithPublicMarkers.klib.dump")
+                append("/testProject/abi-validation/templates/classes/ClassWithPublicMarkers.klib.dump")
             }
 
             runner {
@@ -85,20 +84,20 @@ class PublicMarkersTest : BaseKotlinGradleTest() {
     fun testFiltrationByPackageLevelAnnotations() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
-                resolve("/examples/gradle/configuration/publicMarkers/packages.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/publicMarkers/packages.gradle.kts")
             }
             java("annotated/PackageAnnotation.java") {
-                resolve("/examples/classes/PackageAnnotation.java")
+                append("/testProject/abi-validation/templates/classes/PackageAnnotation.java")
             }
             java("annotated/package-info.java") {
-                resolve("/examples/classes/package-info.java")
+                append("/testProject/abi-validation/templates/classes/package-info.java")
             }
             kotlin("ClassFromAnnotatedPackage.kt") {
-                resolve("/examples/classes/ClassFromAnnotatedPackage.kt")
+                append("/testProject/abi-validation/templates/classes/ClassFromAnnotatedPackage.kt")
             }
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
             runner {
                 arguments.add(":apiDump")
@@ -110,7 +109,7 @@ class PublicMarkersTest : BaseKotlinGradleTest() {
 
             assertTrue(rootProjectApiDump.exists(), "api dump file should exist")
 
-            val expected = readFileList("/examples/classes/AnnotatedPackage.dump")
+            val expected = readFileList("/testProject/abi-validation/templates/classes/AnnotatedPackage.dump")
             Assertions.assertThat(rootProjectApiDump.readText()).isEqualToIgnoringNewLines(expected)
         }
     }

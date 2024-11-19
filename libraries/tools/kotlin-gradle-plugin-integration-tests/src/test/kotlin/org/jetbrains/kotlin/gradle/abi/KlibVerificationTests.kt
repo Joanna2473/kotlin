@@ -1,24 +1,27 @@
 /*
- * Copyright 2016-2023 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
 
 import kotlinx.validation.api.*
 import kotlinx.validation.api.buildGradleKts
-import kotlinx.validation.api.resolve
+import kotlinx.validation.api.append
 import kotlinx.validation.api.test
-import org.assertj.core.api.Assertions
 import org.gradle.testkit.runner.BuildResult
+import org.gradle.util.GradleVersion
+import org.jetbrains.kotlin.gradle.testbase.GradleTest
+import org.jetbrains.kotlin.gradle.testbase.JvmGradlePluginTests
+import org.jetbrains.kotlin.gradle.testbase.MppGradlePluginTests
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.junit.Assume
 import org.junit.Test
+import org.junit.jupiter.api.DisplayName
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 internal const val BANNED_TARGETS_PROPERTY_NAME = "binary.compatibility.validator.klib.targets.disabled.for.testing"
@@ -39,26 +42,24 @@ private fun KlibVerificationTests.checkKlibDump(
     Assertions.assertThat(generatedDump.readText()).isEqualTo(expected)
 }
 
-internal class KlibVerificationTests : BaseKotlinGradleTest() {
+@MppGradlePluginTests
+internal class KlibVerificationTests : AbiValidationBaseTests() {
     private fun BaseKotlinScope.baseProjectSetting() {
-        settingsGradleKts {
-            resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
-        }
         buildGradleKts {
-            resolve("/examples/gradle/base/withNativePlugin.gradle.kts")
+            append("/testProject/abi-validation/templates/gradle/base/withNativePlugin.gradle.kts")
         }
     }
 
     private fun BaseKotlinScope.additionalBuildConfig(config: String) {
         buildGradleKts {
-            resolve(config)
+            append(config)
         }
     }
 
     private fun BaseKotlinScope.addToSrcSet(pathTestFile: String, sourceSet: String = "commonMain") {
         val fileName = Paths.get(pathTestFile).fileName.toString()
         kotlin(fileName, sourceSet) {
-            resolve(pathTestFile)
+            append(pathTestFile)
         }
     }
 
@@ -78,31 +79,33 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         buildResult.assertTaskSuccess(":apiCheck")
     }
 
-    @Test
-    fun `apiDump for native targets`() {
-        val runner = test {
-            baseProjectSetting()
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
-            runApiDump()
-        }
-
-        checkKlibDump(runner.build(), "/examples/classes/TopLevelDeclarations.klib.with.linux.dump")
-    }
+//    @GradleTest
+//    @DisplayName("apiDump for native targets")
+//    fun dumpNativeTargets(gradleVersion: GradleVersion) {
+//        val runner = prepare(gradleVersion) {
+//            baseProjectSetting()
+//            kotlinFile("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
+//            addToSrcSet()
+//            runApiDump()
+//        }
+//
+//        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.with.linux.dump")
+//    }
 
     @Test
     fun `apiDump for native targets in K2`() {
         val runner = test {
             settingsGradleKts {
-                resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
             }
             buildGradleKts {
-                resolve("/examples/gradle/base/withNativePluginK2.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/withNativePluginK2.gradle.kts")
             }
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             runApiDump()
         }
 
-        checkKlibDump(runner.build(), "/examples/classes/TopLevelDeclarations.klib.with.linux.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.with.linux.dump")
     }
 
     @Test
@@ -110,10 +113,10 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         val runner = test {
             baseProjectSetting()
 
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
 
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/TopLevelDeclarations.klib.dump")
+                append("/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.dump")
             }
 
             runApiCheck()
@@ -126,9 +129,9 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiCheck for native targets should fail when a class is not in a dump`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/BuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/BuildConfig.kt")
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/Empty.klib.dump")
+                append("/testProject/abi-validation/templates/classes/Empty.klib.dump")
             }
             runApiCheck()
         }
@@ -147,15 +150,15 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiDump should include target-specific sources`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
-            addToSrcSet("/examples/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
             runApiDump()
         }
 
         runner.build().apply {
             checkKlibDump(
                 this,
-                "/examples/classes/AnotherBuildConfigLinuxArm64Extra.klib.dump"
+                "/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64Extra.klib.dump"
             )
         }
     }
@@ -164,18 +167,18 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiDump with native targets along with JVM target`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/base/enableJvmInWithNativePlugin.gradle.kts")
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/base/enableJvmInWithNativePlugin.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             runApiDump()
         }
 
         runner.build().apply {
-            checkKlibDump(this, "/examples/classes/AnotherBuildConfig.klib.dump")
+            checkKlibDump(this, "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
 
             val jvmApiDump = rootProjectDir.resolve("$API_DIR/testproject.api")
             assertTrue(jvmApiDump.exists(), "No API dump for JVM")
 
-            val jvmExpected = readFileList("/examples/classes/AnotherBuildConfig.dump")
+            val jvmExpected = readFileList("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
             Assertions.assertThat(jvmApiDump.readText()).isEqualTo(jvmExpected)
         }
     }
@@ -184,75 +187,75 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiDump should ignore a class listed in ignoredClasses`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/ignoredClasses/oneValidFullyQualifiedClass.gradle.kts")
-            addToSrcSet("/examples/classes/BuildConfig.kt")
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/ignoredClasses/oneValidFullyQualifiedClass.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/BuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             runApiDump()
         }
 
-        checkKlibDump(runner.build(), "/examples/classes/AnotherBuildConfig.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
     }
 
     @Test
     fun `apiDump should succeed if a class listed in ignoredClasses is not found`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/ignoredClasses/oneValidFullyQualifiedClass.gradle.kts")
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/ignoredClasses/oneValidFullyQualifiedClass.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             runApiDump()
         }
 
-        checkKlibDump(runner.build(), "/examples/classes/AnotherBuildConfig.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
     }
 
     @Test
     fun `apiDump should ignore all entities from a package listed in ingoredPackages`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/ignoredPackages/oneValidPackage.gradle.kts")
-            addToSrcSet("/examples/classes/BuildConfig.kt")
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
-            addToSrcSet("/examples/classes/SubPackage.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/ignoredPackages/oneValidPackage.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/BuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/SubPackage.kt")
             runApiDump()
         }
 
-        checkKlibDump(runner.build(), "/examples/classes/AnotherBuildConfig.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
     }
 
     @Test
     fun `apiDump should ignore all entities annotated with non-public markers`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/nonPublicMarkers/klib.gradle.kts")
-            addToSrcSet("/examples/classes/HiddenDeclarations.kt")
-            addToSrcSet("/examples/classes/NonPublicMarkers.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/nonPublicMarkers/klib.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/HiddenDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/NonPublicMarkers.kt")
             runApiDump()
         }
 
-        checkKlibDump(runner.build(), "/examples/classes/HiddenDeclarations.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/HiddenDeclarations.klib.dump")
     }
 
     @Test
     fun `apiDump should not dump subclasses excluded via ignoredClasses`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/ignoreSubclasses/ignore.gradle.kts")
-            addToSrcSet("/examples/classes/Subclasses.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/ignoreSubclasses/ignore.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/Subclasses.kt")
             runApiDump()
         }
 
-        checkKlibDump(runner.build(), "/examples/classes/Subclasses.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/Subclasses.klib.dump")
     }
 
     @Test
     fun `apiCheck for native targets using v1 signatures`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/signatures/v1.gradle.kts")
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/signatures/v1.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
 
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/TopLevelDeclarations.klib.v1.dump")
+                append("/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.v1.dump")
             }
 
             runApiCheck()
@@ -265,8 +268,8 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiDump for native targets should fail when using invalid signature version`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/signatures/invalid.gradle.kts")
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/signatures/invalid.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             runApiDump()
         }
 
@@ -280,12 +283,12 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         Assume.assumeTrue(HostManager().isEnabled(KonanTarget.MACOS_ARM64))
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/appleTargets/targets.gradle.kts")
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/appleTargets/targets.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             runApiDump()
         }
 
-        checkKlibDump(runner.build(), "/examples/classes/TopLevelDeclarations.klib.all.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.all.dump")
     }
 
     @Test
@@ -293,10 +296,10 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         Assume.assumeTrue(HostManager().isEnabled(KonanTarget.MACOS_ARM64))
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/appleTargets/targets.gradle.kts")
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/appleTargets/targets.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/TopLevelDeclarations.klib.all.dump")
+                append("/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.all.dump")
             }
             runApiCheck()
         }
@@ -308,9 +311,9 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiCheck should not fail if a target is not supported`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/TopLevelDeclarations.klib.dump")
+                append("/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.dump")
             }
             runner {
                 arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
@@ -325,10 +328,10 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiCheck should ignore unsupported targets by default`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             abiFile(projectName = "testproject") {
                 // note that the regular dump is used, where linuxArm64 is presented
-                resolve("/examples/classes/TopLevelDeclarations.klib.dump")
+                append("/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.dump")
             }
             runner {
                 arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
@@ -343,11 +346,11 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiCheck should fail for unsupported targets with strict mode turned on`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/unsupported/enforce.gradle.kts")
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/unsupported/enforce.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             abiFile(projectName = "testproject") {
                 // note that the regular dump is used, where linuxArm64 is presented
-                resolve("/examples/classes/TopLevelDeclarations.klib.dump")
+                append("/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.dump")
             }
             runner {
                 arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
@@ -364,8 +367,8 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `klibDump should infer a dump for unsupported target from similar enough target`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
-            addToSrcSet("/examples/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
             runner {
                 arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
                 arguments.add(":klibApiDump")
@@ -373,7 +376,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         }
 
         checkKlibDump(
-            runner.build(), "/examples/classes/TopLevelDeclarations.klib.with.linux.dump",
+            runner.build(), "/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.with.linux.dump",
             dumpTask = ":klibApiDump"
         )
     }
@@ -382,11 +385,11 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `check sorting for target-specific declarations`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
-            addToSrcSet("/examples/classes/TopLevelDeclarationsExp.kt")
-            addToSrcSet("/examples/classes/TopLevelDeclarationsLinuxOnly.kt", "linuxMain")
-            addToSrcSet("/examples/classes/TopLevelDeclarationsMingwOnly.kt", "mingwMain")
-            addToSrcSet("/examples/classes/TopLevelDeclarationsAndroidOnly.kt", "androidNativeMain")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarationsExp.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarationsLinuxOnly.kt", "linuxMain")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarationsMingwOnly.kt", "mingwMain")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarationsAndroidOnly.kt", "androidNativeMain")
 
 
             runner {
@@ -395,7 +398,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         }
 
         checkKlibDump(
-            runner.build(), "/examples/classes/TopLevelDeclarations.klib.diverging.dump",
+            runner.build(), "/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.diverging.dump",
             dumpTask = ":klibApiDump"
         )
     }
@@ -404,14 +407,14 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `infer a dump for a target with custom name`() {
         val runner = test {
             settingsGradleKts {
-                resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
             }
             buildGradleKts {
-                resolve("/examples/gradle/base/withNativePluginAndNoTargets.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/withNativePluginAndNoTargets.gradle.kts")
             }
-            additionalBuildConfig("/examples/gradle/configuration/grouping/clashingTargetNames.gradle.kts")
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
-            addToSrcSet("/examples/classes/AnotherBuildConfigLinuxArm64.kt", "linuxMain")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/grouping/clashingTargetNames.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64.kt", "linuxMain")
             runner {
                 arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linux")
                 arguments.add(":klibApiDump")
@@ -419,7 +422,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         }
 
         checkKlibDump(
-            runner.build(), "/examples/classes/TopLevelDeclarations.klib.with.guessed.linux.dump",
+            runner.build(), "/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.with.guessed.linux.dump",
             dumpTask = ":klibApiDump"
         )
     }
@@ -428,13 +431,13 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `klibDump should fail when the only target in the project is disabled`() {
         val runner = test {
             settingsGradleKts {
-                resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
             }
             buildGradleKts {
-                resolve("/examples/gradle/base/withNativePluginAndSingleTarget.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/withNativePluginAndSingleTarget.gradle.kts")
             }
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
-            addToSrcSet("/examples/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
             runner {
                 arguments.add("-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64")
                 arguments.add(":klibApiDump")
@@ -454,7 +457,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `klibDump if all klib-targets are unavailable`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             runner {
                 arguments.add(
                     "-P$BANNED_TARGETS_PROPERTY_NAME=linuxArm64,linuxX64,mingwX64," +
@@ -475,10 +478,10 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `klibCheck should not fail if all klib-targets are unavailable`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             abiFile(projectName = "testproject") {
                 // note that the regular dump is used, where linuxArm64 is presented
-                resolve("/examples/classes/TopLevelDeclarations.klib.dump")
+                append("/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.dump")
             }
             runner {
                 arguments.add(
@@ -498,11 +501,11 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `klibCheck should fail with strict validation if all klib-targets are unavailable`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/unsupported/enforce.gradle.kts")
-            addToSrcSet("/examples/classes/TopLevelDeclarations.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/unsupported/enforce.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/TopLevelDeclarations.kt")
             abiFile(projectName = "testproject") {
                 // note that the regular dump is used, where linuxArm64 is presented
-                resolve("/examples/classes/TopLevelDeclarations.klib.dump")
+                append("/testProject/abi-validation/templates/classes/TopLevelDeclarations.klib.dump")
             }
             runner {
                 arguments.add(
@@ -522,16 +525,16 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `target name clashing with a group name`() {
         val runner = test {
             settingsGradleKts {
-                resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
             }
             buildGradleKts {
-                resolve("/examples/gradle/base/withNativePluginAndNoTargets.gradle.kts")
-                resolve("/examples/gradle/configuration/grouping/clashingTargetNames.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/withNativePluginAndNoTargets.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/grouping/clashingTargetNames.gradle.kts")
             }
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
-            addToSrcSet("/examples/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
             kotlin("AnotherBuildConfigLinuxX64.kt", "linuxMain") {
-                resolve("/examples/classes/AnotherBuildConfigLinuxArm64.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64.kt")
             }
             runner {
                 arguments.add(":klibApiDump")
@@ -539,7 +542,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         }
 
         checkKlibDump(
-            runner.build(), "/examples/classes/AnotherBuildConfig.klib.clash.dump",
+            runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.clash.dump",
             dumpTask = ":klibApiDump"
         )
     }
@@ -548,20 +551,20 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `target name grouping with custom target names`() {
         val runner = test {
             settingsGradleKts {
-                resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
             }
             buildGradleKts {
-                resolve("/examples/gradle/base/withNativePluginAndNoTargets.gradle.kts")
-                resolve("/examples/gradle/configuration/grouping/customTargetNames.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/withNativePluginAndNoTargets.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/configuration/grouping/customTargetNames.gradle.kts")
             }
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             runner {
                 arguments.add(":klibApiDump")
             }
         }
 
         checkKlibDump(
-            runner.build(), "/examples/classes/AnotherBuildConfig.klib.custom.dump",
+            runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.custom.dump",
             dumpTask = ":klibApiDump"
         )
     }
@@ -570,10 +573,10 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `target name grouping`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
-            addToSrcSet("/examples/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64.kt", "linuxArm64Main")
             kotlin("AnotherBuildConfigLinuxX64.kt", "linuxX64Main") {
-                resolve("/examples/classes/AnotherBuildConfigLinuxArm64.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64.kt")
             }
             runner {
                 arguments.add(":klibApiDump")
@@ -581,7 +584,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         }
 
         checkKlibDump(
-            runner.build(), "/examples/classes/AnotherBuildConfigLinux.klib.grouping.dump",
+            runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfigLinux.klib.grouping.dump",
             dumpTask = ":klibApiDump"
         )
     }
@@ -590,22 +593,22 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiDump should work with web targets`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/nonNativeKlibTargets/targets.gradle.kts")
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/nonNativeKlibTargets/targets.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             runApiDump()
         }
 
-        checkKlibDump(runner.build(), "/examples/classes/AnotherBuildConfig.klib.web.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.web.dump")
     }
 
     @Test
     fun `apiCheck should work with web targets`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/nonNativeKlibTargets/targets.gradle.kts")
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/nonNativeKlibTargets/targets.gradle.kts")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/AnotherBuildConfig.klib.web.dump")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.web.dump")
             }
             runApiCheck()
         }
@@ -617,15 +620,15 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `check dump is updated on added declaration`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             runApiDump()
         }
-        checkKlibDump(runner.build(), "/examples/classes/AnotherBuildConfig.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
 
         // Update the source file by adding a declaration
         val updatedSourceFile = File(
             this::class.java.getResource(
-                "/examples/classes/AnotherBuildConfigModified.kt"
+                "/testProject/abi-validation/templates/classes/AnotherBuildConfigModified.kt"
             )!!.toURI()
         )
         val existingSource = runner.projectDir.resolve(
@@ -633,22 +636,22 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         )
         Files.write(existingSource.toPath(), updatedSourceFile.readBytes())
 
-        checkKlibDump(runner.build(), "/examples/classes/AnotherBuildConfigModified.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfigModified.klib.dump")
     }
 
     @Test
     fun `check dump is updated on a declaration added to some source sets`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             runApiDump()
         }
-        checkKlibDump(runner.build(), "/examples/classes/AnotherBuildConfig.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
 
         // Update the source file by adding a declaration
         val updatedSourceFile = File(
             this::class.java.getResource(
-                "/examples/classes/AnotherBuildConfigLinuxArm64.kt"
+                "/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64.kt"
             )!!.toURI()
         )
         val existingSource = runner.projectDir.resolve(
@@ -657,16 +660,16 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         existingSource.parentFile.mkdirs()
         Files.write(existingSource.toPath(), updatedSourceFile.readBytes())
 
-        checkKlibDump(runner.build(), "/examples/classes/AnotherBuildConfigLinuxArm64Extra.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfigLinuxArm64Extra.klib.dump")
     }
 
     @Test
     fun `re-validate dump after sources updated`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/AnotherBuildConfig.klib.dump")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
             }
             runApiCheck()
         }
@@ -675,7 +678,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
         // Update the source file by adding a declaration
         val updatedSourceFile = File(
             this::class.java.getResource(
-                "/examples/classes/AnotherBuildConfigModified.kt"
+                "/testProject/abi-validation/templates/classes/AnotherBuildConfigModified.kt"
             )!!.toURI()
         )
         val existingSource = runner.projectDir.resolve(
@@ -692,9 +695,9 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `validation should fail on target rename`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/AnotherBuildConfig.klib.renamedTarget.dump")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.renamedTarget.dump")
             }
             runApiCheck()
         }
@@ -710,7 +713,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiDump should not fail for empty project`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
             runApiDump()
         }
 
@@ -726,9 +729,9 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiDump should dump empty file if the project does not contain sources anymore`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/AnotherBuildConfig.klib.dump")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
             }
             runApiDump()
         }
@@ -745,18 +748,18 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiDump should not fail if there is only one target`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt", sourceSet = "linuxX64Main")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt", sourceSet = "linuxX64Main")
             runApiDump()
         }
-        checkKlibDump(runner.build(), "/examples/classes/AnotherBuildConfig.klib.linuxX64Only.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.linuxX64Only.dump")
     }
 
     @Test
     fun `apiCheck should fail for empty project without a dump file`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
             runApiCheck()
         }
         runner.buildAndFail().apply {
@@ -771,7 +774,7 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiCheck should not fail for empty project with an empty dump file`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt", sourceSet = "commonTest")
             abiFile("testproject") {
                 // empty dump file
             }
@@ -786,21 +789,21 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiDump for a project with generated sources only`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/generatedSources/generatedSources.gradle.kts")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/generatedSources/generatedSources.gradle.kts")
             runner {
                 arguments.add(":apiDump")
             }
         }
-        checkKlibDump(runner.build(), "/examples/classes/GeneratedSources.klib.dump")
+        checkKlibDump(runner.build(), "/testProject/abi-validation/templates/classes/GeneratedSources.klib.dump")
     }
 
     @Test
     fun `apiCheck for a project with generated sources only`() {
         val runner = test {
             baseProjectSetting()
-            additionalBuildConfig("/examples/gradle/configuration/generatedSources/generatedSources.gradle.kts")
+            additionalBuildConfig("/testProject/abi-validation/templates/gradle/configuration/generatedSources/generatedSources.gradle.kts")
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/GeneratedSources.klib.dump")
+                append("/testProject/abi-validation/templates/classes/GeneratedSources.klib.dump")
             }
             runner {
                 arguments.add(":apiCheck")
@@ -813,10 +816,10 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiCheck should fail after a source set was removed`() {
         val runner = test {
             baseProjectSetting()
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt", "linuxX64Main")
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt", "linuxArm64Main")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt", "linuxX64Main")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt", "linuxArm64Main")
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/AnotherBuildConfig.klib.dump")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
             }
             runApiCheck()
         }
@@ -829,16 +832,16 @@ internal class KlibVerificationTests : BaseKotlinGradleTest() {
     fun `apiCheck should fail after target removal`() {
         val runner = test {
             settingsGradleKts {
-                resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
             }
             // only a single native target is defined there
             buildGradleKts {
-                resolve("/examples/gradle/base/withNativePluginAndSingleTarget.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/withNativePluginAndSingleTarget.gradle.kts")
             }
-            addToSrcSet("/examples/classes/AnotherBuildConfig.kt")
+            addToSrcSet("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             // dump was created for multiple native targets
             abiFile(projectName = "testproject") {
-                resolve("/examples/classes/AnotherBuildConfig.klib.dump")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.klib.dump")
             }
             runApiCheck()
         }

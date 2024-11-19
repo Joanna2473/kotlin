@@ -1,24 +1,22 @@
 /*
- * Copyright 2016-2021 JetBrains s.r.o.
- * Use of this source code is governed by the Apache 2.0 License that can be found in the LICENSE.txt file.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package kotlinx.validation.test
 
 import kotlinx.validation.api.*
-import org.assertj.core.api.Assertions.assertThat
-import org.gradle.testkit.runner.GradleRunner
+import kotlinx.validation.test.Assertions.assertThat
 import org.junit.Test
 import java.io.File
-import java.io.InputStreamReader
 
-internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
+internal class MultipleJvmTargetsTest : AbiValidationBaseTests() {
     private fun BaseKotlinScope.createProjectHierarchyWithPluginOnRoot() {
         settingsGradleKts {
-            resolve("/examples/gradle/settings/settings-name-testproject.gradle.kts")
+            append("/testProject/abi-validation/templates/gradle/settings/settings-name-testproject.gradle.kts")
         }
         buildGradleKts {
-            resolve("/examples/gradle/base/multiplatformWithJvmTargets.gradle.kts")
+            append("/testProject/abi-validation/templates/gradle/base/multiplatformWithJvmTargets.gradle.kts")
         }
     }
 
@@ -32,23 +30,23 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
 
             dir("$API_DIR/jvm/") {
                 file("testproject.api") {
-                    resolve("/examples/classes/Subsub1Class.dump")
-                    resolve("/examples/classes/Subsub2Class.dump")
+                    append("/testProject/abi-validation/templates/classes/Subsub1Class.dump")
+                    append("/testProject/abi-validation/templates/classes/Subsub2Class.dump")
                 }
             }
 
             dir("$API_DIR/anotherJvm/") {
                 file("testproject.api") {
-                    resolve("/examples/classes/Subsub1Class.dump")
+                    append("/testProject/abi-validation/templates/classes/Subsub1Class.dump")
                 }
             }
 
             dir("src/jvmMain/kotlin") {}
             kotlin("Subsub1Class.kt", "commonMain") {
-                resolve("/examples/classes/Subsub1Class.kt")
+                append("/testProject/abi-validation/templates/classes/Subsub1Class.kt")
             }
             kotlin("Subsub2Class.kt", "jvmMain") {
-                resolve("/examples/classes/Subsub2Class.kt")
+                append("/testProject/abi-validation/templates/classes/Subsub2Class.kt")
             }
 
         }
@@ -71,23 +69,23 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
 
             dir("$API_DIR/jvm/") {
                 file("testproject.api") {
-                    resolve("/examples/classes/Subsub2Class.dump")
-                    resolve("/examples/classes/Subsub1Class.dump")
+                    append("/testProject/abi-validation/templates/classes/Subsub2Class.dump")
+                    append("/testProject/abi-validation/templates/classes/Subsub1Class.dump")
                 }
             }
 
             dir("$API_DIR/anotherJvm/") {
                 file("testproject.api") {
-                    resolve("/examples/classes/Subsub2Class.dump")
+                    append("/testProject/abi-validation/templates/classes/Subsub2Class.dump")
                 }
             }
 
             dir("src/jvmMain/kotlin") {}
             kotlin("Subsub1Class.kt", "commonMain") {
-                resolve("/examples/classes/Subsub1Class.kt")
+                append("/testProject/abi-validation/templates/classes/Subsub1Class.kt")
             }
             kotlin("Subsub2Class.kt", "jvmMain") {
-                resolve("/examples/classes/Subsub2Class.kt")
+                append("/testProject/abi-validation/templates/classes/Subsub2Class.kt")
             }
 
         }
@@ -112,10 +110,10 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
 
             dir("src/jvmMain/kotlin") {}
             kotlin("Subsub1Class.kt", "commonMain") {
-                resolve("/examples/classes/Subsub1Class.kt")
+                append("/testProject/abi-validation/templates/classes/Subsub1Class.kt")
             }
             kotlin("Subsub2Class.kt", "jvmMain") {
-                resolve("/examples/classes/Subsub2Class.kt")
+                append("/testProject/abi-validation/templates/classes/Subsub2Class.kt")
             }
 
         }
@@ -124,10 +122,10 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
             assertTaskSuccess(":jvmApiDump")
             assertTaskSuccess(":anotherJvmApiDump")
 
-            val anotherExpectedApi = readFileList("/examples/classes/Subsub1Class.dump")
+            val anotherExpectedApi = readFileList("/testProject/abi-validation/templates/classes/Subsub1Class.dump")
             assertThat(anotherApiDump.readText()).isEqualToIgnoringNewLines(anotherExpectedApi)
 
-            val mainExpectedApi = anotherExpectedApi + "\n" + readFileList("/examples/classes/Subsub2Class.dump")
+            val mainExpectedApi = anotherExpectedApi + "\n" + readFileList("/testProject/abi-validation/templates/classes/Subsub2Class.dump")
             assertThat(jvmApiDump.readText()).isEqualToIgnoringNewLines(mainExpectedApi)
         }
     }
@@ -138,16 +136,16 @@ internal class MultipleJvmTargetsTest : BaseKotlinGradleTest() {
     fun testValidationAfterTargetRemoval() {
         val runner = test {
             buildGradleKts {
-                resolve("/examples/gradle/base/withPlugin.gradle.kts")
+                append("/testProject/abi-validation/templates/gradle/base/kotlinJvm.gradle.kts")
             }
             kotlin("AnotherBuildConfig.kt") {
-                resolve("/examples/classes/AnotherBuildConfig.kt")
+                append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.kt")
             }
             // let's pretend, there were multiple targets before
             for (tgtName in listOf("jvm", "anotherJvm")) {
                 dir("$API_DIR/$tgtName/") {
                     file("${rootProjectDir.name.lowercase()}.api") {
-                        resolve("/examples/classes/AnotherBuildConfig.dump")
+                        append("/testProject/abi-validation/templates/classes/AnotherBuildConfig.dump")
                     }
                 }
             }

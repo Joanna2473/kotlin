@@ -48,8 +48,8 @@ internal abstract class KotlinAbiCheckTaskImpl : AbiToolsTask(), KotlinAbiCheckT
         if (!referenceDumpFile.exists()) {
             error(
                 "Expected file with ABI declarations '${referenceDumpFile.relativeTo(rootDir)}' does not exist.\n" +
-                        "Please ensure that ':apiDump' was executed in order to get " +
-                        "an API dump to compare the build against"
+                        "Please ensure that '${updateTaskName.get()}' was executed in order to get " +
+                        "an ABI dump to compare the build against"
             )
         }
         if (!actualDumpFile.exists()) {
