@@ -1204,6 +1204,12 @@ public class SourceGetOrBuildFirTestGenerated extends AbstractSourceGetOrBuildFi
     }
 
     @Test
+    @TestMetadata("multipleLabels.kt")
+    public void testMultipleLabels() {
+      runTest("analysis/low-level-api-fir/testData/getOrBuildFir/invalidCode/multipleLabels.kt");
+    }
+
+    @Test
     @TestMetadata("secondaryConstructor.kt")
     public void testSecondaryConstructor() {
       runTest("analysis/low-level-api-fir/testData/getOrBuildFir/invalidCode/secondaryConstructor.kt");

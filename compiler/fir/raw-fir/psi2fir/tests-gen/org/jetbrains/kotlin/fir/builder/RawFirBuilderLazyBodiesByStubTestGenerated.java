@@ -815,6 +815,11 @@ public class RawFirBuilderLazyBodiesByStubTestGenerated extends AbstractRawFirBu
       public void testLongStringTemplateEntryWithTwoExpressions() {
         runTest("compiler/fir/raw-fir/psi2fir/testData/rawBuilder/expressions/invalidCode/longStringTemplateEntryWithTwoExpressions.kt");
       }
+
+      @TestMetadata("multipleLabels.kt")
+      public void testMultipleLabels() {
+        runTest("compiler/fir/raw-fir/psi2fir/testData/rawBuilder/expressions/invalidCode/multipleLabels.kt");
+      }
     }
   }
 }

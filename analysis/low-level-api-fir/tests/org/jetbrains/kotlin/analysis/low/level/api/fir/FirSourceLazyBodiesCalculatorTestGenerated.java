@@ -899,6 +899,12 @@ public class FirSourceLazyBodiesCalculatorTestGenerated extends AbstractFirSourc
       public void testLongStringTemplateEntryWithTwoExpressions() {
         runTest("compiler/fir/raw-fir/psi2fir/testData/rawBuilder/expressions/invalidCode/longStringTemplateEntryWithTwoExpressions.kt");
       }
+
+      @Test
+      @TestMetadata("multipleLabels.kt")
+      public void testMultipleLabels() {
+        runTest("compiler/fir/raw-fir/psi2fir/testData/rawBuilder/expressions/invalidCode/multipleLabels.kt");
+      }
     }
   }
 }
