@@ -151,6 +151,19 @@ class DurableFunctionKeyTransformer(
         })
     }
 
+    fun realizeFunctionKeyMetaAnnotations(moduleFragment: IrModuleFragment) {
+        moduleFragment.transformChildrenVoid(object : IrElementTransformerVoid() {
+            override fun visitSimpleFunction(declaration: IrSimpleFunction): IrStatement {
+                val functionKey = context.irTrace[DURABLE_FUNCTION_KEY, declaration] ?: return declaration
+                if (!declaration.hasComposableAnnotation()) return declaration
+                if (declaration.hasAnnotation(ComposeClassIds.FunctionKeyMeta)) return declaration
+
+                declaration.annotations += irKeyMetaAnnotation(functionKey)
+                return declaration
+            }
+        })
+    }
+
     var currentKeys = mutableListOf<KeyInfo>()
 
     private val keyMetaAnnotation =
