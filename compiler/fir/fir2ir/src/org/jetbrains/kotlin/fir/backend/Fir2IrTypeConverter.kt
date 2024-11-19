@@ -106,6 +106,15 @@ class Fir2IrTypeConverter(
     ): IrType {
         return when (this) {
             is ConeErrorType -> {
+                delegatedType?.let {
+                    return it.toIrType(
+                        typeOrigin, annotations,
+                        hasFlexibleNullability,
+                        hasFlexibleMutability,
+                        hasFlexibleArrayElementVariance,
+                        addRawTypeAnnotation
+                    )
+                }
                 when (val diagnostic = diagnostic) {
                     is ConeUnresolvedError -> createErrorType(diagnostic.qualifier, isMarkedNullable)
                     else -> createErrorType(diagnostic.reason, isMarkedNullable)

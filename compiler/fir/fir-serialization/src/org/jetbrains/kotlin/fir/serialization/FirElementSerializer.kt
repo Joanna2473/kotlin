@@ -978,6 +978,11 @@ class FirElementSerializer private constructor(
         when (type) {
             is ConeDefinitelyNotNullType -> return typeProto(type.original, toSuper, correspondingTypeRef, isDefinitelyNotNullType = true)
             is ConeErrorType -> {
+                type.delegatedType?.let {
+                    return typeOrTypealiasProto(
+                        it, toSuper, correspondingTypeRef, isDefinitelyNotNullType, isAbbreviation, abbreviationOnly
+                    )
+                }
                 extension.serializeErrorType(type, builder)
                 return builder
             }

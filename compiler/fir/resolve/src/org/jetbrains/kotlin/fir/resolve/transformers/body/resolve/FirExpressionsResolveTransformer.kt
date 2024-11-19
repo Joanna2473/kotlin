@@ -1420,7 +1420,7 @@ open class FirExpressionsResolveTransformer(transformer: FirAbstractBodyResolveT
             is FirThisReference -> lastDispatchReceiver?.type as? ConeClassLikeType
             is FirSuperReference -> reference.superTypeRef
                 .coneTypeSafe<ConeClassLikeType>()
-                ?.takeIf { it !is ConeErrorType }
+                ?.let { if (it !is ConeErrorType) it else it.delegatedType as? ConeClassLikeType }
                 ?.fullyExpandedType(session)
             else -> null
         }

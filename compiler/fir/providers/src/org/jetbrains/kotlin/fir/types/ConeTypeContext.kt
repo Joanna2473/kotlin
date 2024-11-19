@@ -95,7 +95,7 @@ interface ConeTypeContext : TypeSystemContext, TypeSystemOptimizationContext, Ty
 
     override fun KotlinTypeMarker.isError(): Boolean {
         assert(this is ConeKotlinType)
-        return this is ConeErrorType || this is ConeErrorType || this.typeConstructor().isError() ||
+        return (this is ConeErrorType && this.delegatedType == null) || this.typeConstructor().isError() ||
                 (this is ConeClassLikeType && this.lookupTag is ConeClassLikeErrorLookupTag)
     }
 
