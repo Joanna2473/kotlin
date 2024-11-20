@@ -28,13 +28,13 @@ import java.io.File
 
 abstract class AbstractYarnPlugin : Plugin<Project>, HasPlatformDisambiguate {
 
-    abstract fun nodeJsRootApply(project: Project)
+    protected abstract fun nodeJsRootApply(project: Project)
 
-    abstract fun nodeJsRootExtension(project: Project): NodeJsRootExtension
+    protected abstract fun nodeJsRootExtension(project: Project): NodeJsRootExtension
 
-    abstract fun nodeJsEnvSpec(project: Project): NodeJsEnvSpec
+    protected abstract fun nodeJsEnvSpec(project: Project): NodeJsEnvSpec
 
-    abstract fun lockFileDirectory(projectDirectory: File): File
+    protected abstract fun lockFileDirectory(projectDirectory: File): File
 
     override fun apply(project: Project): Unit = project.run {
         MultiplePluginDeclarationDetector.detect(project)

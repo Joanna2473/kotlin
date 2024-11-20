@@ -33,15 +33,15 @@ import kotlin.reflect.KClass
 
 abstract class AbstractNodeJsRootPlugin : Plugin<Project>, HasPlatformDisambiguate {
 
-    abstract val rootDirectoryName: String
+    protected abstract val rootDirectoryName: String
 
-    abstract fun lockFileDirectory(projectDirectory: Directory): Directory
+    protected abstract fun lockFileDirectory(projectDirectory: Directory): Directory
 
-    abstract fun singleNodeJsPluginApply(project: Project): NodeJsEnvSpec
+    protected abstract fun singleNodeJsPluginApply(project: Project): NodeJsEnvSpec
 
-    abstract val yarnPlugin: KClass<out Plugin<Project>>
+    protected abstract val yarnPlugin: KClass<out Plugin<Project>>
 
-    abstract val platformType: KotlinPlatformType
+    protected abstract val platformType: KotlinPlatformType
 
     override fun apply(project: Project) {
         MultiplePluginDeclarationDetector.detect(project)
