@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.NameUtils
 import org.jetbrains.kotlin.name.SpecialNames
 
 class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrComponents by c {
@@ -320,6 +321,43 @@ class Fir2IrClassifiersGenerator(private val c: Fir2IrComponents) : Fir2IrCompon
                 metadata = FirMetadataSource.CodeFragment(codeFragment)
                 setParent(containingFile)
                 addDeclarationToParent(this, containingFile)
+                typeParameters = emptyList()
+                setThisReceiver(c, emptyList())
+                superTypes = listOf(builtins.anyType)
+            }
+        }
+        return irClass
+    }
+
+    // ------------------------------------ REPL snippets ------------------------------------
+
+    fun createEarlierSnippetClass(snippet: FirReplSnippet, containingPackageFragment: IrPackageFragment, symbol: IrClassSymbol): IrClass {
+        val irClass = snippet.convertWithOffsets { startOffset, endOffset ->
+            IrFactoryImpl.createClass(
+                startOffset,
+                endOffset,
+                IrDeclarationOrigin.REPL_FROM_OTHER_SNIPPET,
+                snippet.name.let { // TODO: abstract name calculation to some single place
+                    if (it.isSpecial) {
+                        NameUtils.getScriptNameForFile(it.asStringStripSpecialMarkers().removePrefix("script-"))
+                    } else it
+                },
+                DescriptorVisibilities.PUBLIC,
+                symbol,
+                ClassKind.OBJECT,
+                Modality.FINAL,
+                isExternal = true,
+                isCompanion = false,
+                isInner = false,
+                isData = false,
+                isValue = false,
+                isExpect = false,
+                isFun = false,
+                hasEnumEntries = false,
+            ).apply {
+                metadata = FirMetadataSource.ReplSnippet(snippet)
+                setParent(containingPackageFragment)
+                addDeclarationToParent(this, containingPackageFragment)
                 typeParameters = emptyList()
                 setThisReceiver(c, emptyList())
                 superTypes = listOf(builtins.anyType)

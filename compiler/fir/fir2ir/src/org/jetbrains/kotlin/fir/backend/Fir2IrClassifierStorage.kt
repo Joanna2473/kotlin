@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.fir.expressions.FirAnonymousObjectExpression
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.resolve.toClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirReplSnippetSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirTypeAliasSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirTypeParameterSymbol
 import org.jetbrains.kotlin.fir.symbols.lazyResolveToPhase
@@ -47,6 +48,8 @@ class Fir2IrClassifierStorage(
     private val enumEntryCache: MutableMap<FirEnumEntry, IrEnumEntrySymbol> = commonMemberStorage.enumEntryCache
 
     private val codeFragmentCache: MutableMap<FirCodeFragment, IrClass> = mutableMapOf()
+
+    private val earlierSnippetsCache: MutableMap<FirReplSnippetSymbol, IrClass> = mutableMapOf()
 
     private val fieldsForContextReceivers: MutableMap<IrClass, List<IrField>> = mutableMapOf()
 
@@ -420,4 +423,18 @@ class Fir2IrClassifierStorage(
             codeFragmentCache[codeFragment] = it
         }
     }
+
+    // ------------------------------------ REPL snippets ------------------------------------
+
+    fun getCachedEarlierSnippetClass(snippetSymbol: FirReplSnippetSymbol): IrClass? {
+        return earlierSnippetsCache[snippetSymbol]
+    }
+
+    fun createAndCacheEarlierSnippetClass(snippetSymbol: FirReplSnippetSymbol, containingPackageFragment: IrPackageFragment): IrClass {
+        val symbol = createClassSymbol()
+        return classifiersGenerator.createEarlierSnippetClass(snippetSymbol.fir, containingPackageFragment, symbol).also {
+            earlierSnippetsCache[snippetSymbol] = it
+        }
+    }
+
 }
