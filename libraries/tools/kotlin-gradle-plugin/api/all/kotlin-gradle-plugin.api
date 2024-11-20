@@ -3875,6 +3875,8 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrSubTar
 	public fun distribution (Lorg/gradle/api/Action;)V
 	public final fun getDisambiguationClassifier ()Ljava/lang/String;
 	public fun getName ()Ljava/lang/String;
+	protected final fun getNodeJsEnvSpec ()Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
+	protected final fun getNodeJsRoot ()Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
 	public final fun getProject ()Lorg/gradle/api/Project;
 	public final fun getTarget ()Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrTarget;
 	public final fun getTestRuns ()Lorg/gradle/api/NamedDomainObjectContainer;
@@ -4024,6 +4026,31 @@ public final class org/jetbrains/kotlin/gradle/targets/js/ir/WebpackConfigurator
 	public fun setupRun (Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrCompilation;)V
 }
 
+public abstract class org/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsPlugin : org/gradle/api/Plugin, org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
+	protected abstract fun nodeJsRootApply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
+}
+
+public abstract class org/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsRootPlugin : org/gradle/api/Plugin, org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsRootPlugin$Companion;
+	public static final field TASKS_GROUP_NAME Ljava/lang/String;
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
+	protected abstract fun getPlatformType ()Lorg/jetbrains/kotlin/gradle/plugin/KotlinPlatformType;
+	protected abstract fun getRootDirectoryName ()Ljava/lang/String;
+	protected abstract fun getYarnPlugin ()Lkotlin/reflect/KClass;
+	protected abstract fun lockFileDirectory (Lorg/gradle/api/file/Directory;)Lorg/gradle/api/file/Directory;
+	protected abstract fun singleNodeJsPluginApply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsRootPlugin$Companion {
+}
+
 public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnv : org/jetbrains/kotlin/gradle/targets/js/AbstractEnv {
 	public fun <init> (ZLorg/jetbrains/kotlin/gradle/tasks/internal/CleanableStore;Ljava/io/File;Ljava/io/File;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Z
@@ -4065,20 +4092,17 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpe
 public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec$Companion {
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsExec : org/gradle/api/tasks/AbstractExecTask, org/jetbrains/kotlin/gradle/targets/js/npm/RequiresNpmDependencies {
+public abstract class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsExec : org/gradle/api/tasks/AbstractExecTask, org/jetbrains/kotlin/gradle/targets/js/npm/RequiresNpmDependencies {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsExec$Companion;
-	public field nodeJsRoot Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
 	public fun <init> (Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrCompilation;)V
 	protected fun exec ()V
 	public final fun getCompilation ()Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrCompilation;
 	public final fun getInputFileProperty ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun getNodeArgs ()Ljava/util/List;
-	public final fun getNodeJsRoot ()Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
 	public final fun getNpmProject ()Lorg/jetbrains/kotlin/gradle/targets/js/npm/NpmProject;
 	public fun getRequiredNpmDependencies ()Ljava/util/Set;
 	public final fun getSourceMapStackTraces ()Z
 	public final fun setNodeArgs (Ljava/util/List;)V
-	public final fun setNodeJsRoot (Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;)V
 	public final fun setSourceMapStackTraces (Z)V
 }
 
@@ -4091,12 +4115,25 @@ public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsExec$Comp
 	public static synthetic fun register$default (Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsExec$Companion;Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrCompilation;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/gradle/api/tasks/TaskProvider;
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsPlugin : org/gradle/api/Plugin {
-	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsPlugin$Companion;
-	public static final field TASKS_GROUP_NAME Ljava/lang/String;
+public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsForWasmPlugin : org/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsPlugin {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsForWasmPlugin$Companion;
 	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/Project;)V
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+	protected fun nodeJsRootApply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsForWasmPlugin$Companion : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
+	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
+	public final fun getKotlinNodeJsEnvSpec (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+}
+
+public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsPlugin : org/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsPlugin {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsPlugin$Companion;
+	public fun <init> ()V
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+	protected fun nodeJsRootApply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsPlugin$Companion {
@@ -4104,11 +4141,13 @@ public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsPlugin$Co
 	public final fun getKotlinNodeJsEnvSpec (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension {
+public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension$Companion;
 	public static final field EXTENSION_NAME Ljava/lang/String;
 	public field resolver Lorg/jetbrains/kotlin/gradle/targets/js/npm/resolver/KotlinRootNpmResolver;
-	public fun <init> (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function0;)V
+	public fun <init> (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function0;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function0;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
 	public final fun getCommand ()Ljava/lang/String;
 	public final fun getDownload ()Z
 	public final fun getDownloadBaseUrl ()Ljava/lang/String;
@@ -4122,6 +4161,7 @@ public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension {
 	public final fun getNpmInstallTaskProvider ()Lorg/gradle/api/tasks/TaskProvider;
 	public final fun getPackageJsonUmbrellaTaskProvider ()Lorg/gradle/api/tasks/TaskProvider;
 	public final fun getPackageManagerExtension ()Lorg/gradle/api/provider/Property;
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
 	public final fun getProject ()Lorg/gradle/api/Project;
 	public final fun getProjectPackagesDirectory ()Lorg/gradle/api/provider/Provider;
 	public final fun getResolver ()Lorg/jetbrains/kotlin/gradle/targets/js/npm/resolver/KotlinRootNpmResolver;
@@ -4146,16 +4186,40 @@ public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension {
 public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension$Companion {
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootPlugin : org/gradle/api/Plugin {
-	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootPlugin$Companion;
-	public static final field TASKS_GROUP_NAME Ljava/lang/String;
+public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootForWasmPlugin : org/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsRootPlugin {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootForWasmPlugin$Companion;
 	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/Project;)V
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+	protected fun getPlatformType ()Lorg/jetbrains/kotlin/gradle/plugin/KotlinPlatformType;
+	protected fun getRootDirectoryName ()Ljava/lang/String;
+	protected fun getYarnPlugin ()Lkotlin/reflect/KClass;
+	protected fun lockFileDirectory (Lorg/gradle/api/file/Directory;)Lorg/gradle/api/file/Directory;
+	protected fun singleNodeJsPluginApply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootForWasmPlugin$Companion : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
+	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
+	public final fun getKotlinNodeJsRootExtension (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
+	public final fun getKotlinNpmResolutionManager (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+	public final fun getWasmPlatform ()Ljava/lang/String;
+}
+
+public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootPlugin : org/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsRootPlugin {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootPlugin$Companion;
+	public fun <init> ()V
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+	protected fun getPlatformType ()Lorg/jetbrains/kotlin/gradle/plugin/KotlinPlatformType;
+	protected fun getRootDirectoryName ()Ljava/lang/String;
+	protected fun getYarnPlugin ()Lkotlin/reflect/KClass;
+	protected fun lockFileDirectory (Lorg/gradle/api/file/Directory;)Lorg/gradle/api/file/Directory;
+	protected fun singleNodeJsPluginApply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootPlugin$Companion {
 	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
+	public final fun getJsPlatform ()Ljava/lang/String;
 	public final fun getKotlinNodeJsRootExtension (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
 	public final fun getKotlinNpmResolutionManager (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 }
@@ -4251,7 +4315,7 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/npm/GradleNodeModul
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/npm/GradleNodeModulesCache$Companion {
-	public final fun registerIfAbsent (Lorg/gradle/api/Project;Ljava/io/File;Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
+	public final fun registerIfAbsent (Lorg/gradle/api/Project;Ljava/io/File;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
 }
 
 public abstract class org/jetbrains/kotlin/gradle/targets/js/npm/KotlinNpmResolutionManager : org/gradle/api/services/BuildService {
@@ -4264,7 +4328,7 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/npm/KotlinNpmResolu
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/npm/KotlinNpmResolutionManager$Companion {
-	public final fun registerIfAbsent (Lorg/gradle/api/Project;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
+	public final fun registerIfAbsent (Lorg/gradle/api/Project;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
 }
 
 public abstract interface class org/jetbrains/kotlin/gradle/targets/js/npm/KotlinNpmResolutionManager$Parameters : org/gradle/api/services/BuildServiceParameters {
@@ -4663,6 +4727,17 @@ public final class org/jetbrains/kotlin/gradle/targets/js/npm/NpmRangeVisitor : 
 public final class org/jetbrains/kotlin/gradle/targets/js/npm/NpmRangeVisitor$Companion {
 }
 
+public final class org/jetbrains/kotlin/gradle/targets/js/npm/NpmResolverForWasmPlugin : org/gradle/api/Plugin {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/npm/NpmResolverForWasmPlugin$Companion;
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/js/npm/NpmResolverForWasmPlugin$Companion {
+	public final fun apply (Lorg/gradle/api/Project;)V
+}
+
 public final class org/jetbrains/kotlin/gradle/targets/js/npm/NpmResolverPlugin : org/gradle/api/Plugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/npm/NpmResolverPlugin$Companion;
 	public fun <init> ()V
@@ -4980,13 +5055,7 @@ public final class org/jetbrains/kotlin/gradle/targets/js/npm/resolver/KotlinRoo
 	public final fun addProject (Lorg/gradle/api/Project;)V
 	public final fun alreadyResolvedMessage (Ljava/lang/String;)Ljava/lang/String;
 	public final fun getCompilations ()Ljava/util/Collection;
-	public final fun getProjectPackagesDir ()Lorg/gradle/api/provider/Provider;
 	public final fun getProjectResolvers ()Ljava/util/Map;
-	public final fun getRootProjectDir ()Ljava/io/File;
-	public final fun getRootProjectName ()Ljava/lang/String;
-	public final fun getRootProjectVersion ()Ljava/lang/String;
-	public final fun getTasksRequirements ()Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/TasksRequirements;
-	public final fun getVersions ()Lorg/jetbrains/kotlin/gradle/targets/js/NpmVersions;
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/npm/resolver/KotlinRootNpmResolverKt {
@@ -5012,17 +5081,14 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/npm/tasks/KotlinNpm
 public final class org/jetbrains/kotlin/gradle/targets/js/npm/tasks/KotlinNpmCachesSetup$Companion {
 }
 
-public abstract class org/jetbrains/kotlin/gradle/targets/js/npm/tasks/KotlinNpmInstallTask : org/gradle/api/DefaultTask, org/jetbrains/kotlin/gradle/targets/js/npm/UsesKotlinNpmResolutionManager {
+public abstract class org/jetbrains/kotlin/gradle/targets/js/npm/tasks/KotlinNpmInstallTask : org/gradle/api/DefaultTask, org/jetbrains/kotlin/gradle/targets/js/npm/NodeJsEnvironmentTask, org/jetbrains/kotlin/gradle/targets/js/npm/UsesKotlinNpmResolutionManager {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/npm/tasks/KotlinNpmInstallTask$Companion;
 	public static final field NAME Ljava/lang/String;
 	public fun <init> ()V
-	public final fun getAdditionalFiles ()Lorg/gradle/api/file/FileCollection;
+	public abstract fun getAdditionalFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun getArgs ()Ljava/util/List;
-	public final fun getNodeModules ()Lorg/gradle/api/provider/Provider;
-	public final fun getPackageJsonFiles ()Ljava/util/List;
-	public final fun getPreparedFiles ()Ljava/util/Collection;
-	public final fun getYarnLock ()Ljava/io/File;
-	public final fun getYarnLockFile ()Lorg/gradle/api/provider/Provider;
+	public abstract fun getNodeModules ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getPreparedFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun resolve ()V
 }
 
@@ -5043,13 +5109,11 @@ public final class org/jetbrains/kotlin/gradle/targets/js/npm/tasks/KotlinPackag
 	public final fun create (Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrCompilation;)Lorg/gradle/api/tasks/TaskProvider;
 }
 
-public abstract class org/jetbrains/kotlin/gradle/targets/js/npm/tasks/RootPackageJsonTask : org/gradle/api/DefaultTask, org/jetbrains/kotlin/gradle/targets/js/npm/UsesKotlinNpmResolutionManager {
+public abstract class org/jetbrains/kotlin/gradle/targets/js/npm/tasks/RootPackageJsonTask : org/gradle/api/DefaultTask, org/jetbrains/kotlin/gradle/targets/js/npm/NodeJsEnvironmentTask, org/jetbrains/kotlin/gradle/targets/js/npm/UsesKotlinNpmResolutionManager {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/npm/tasks/RootPackageJsonTask$Companion;
 	public static final field NAME Ljava/lang/String;
 	public fun <init> ()V
-	public final fun getPackageJsonFiles ()Ljava/util/List;
-	public final fun getRootPackageJson ()Ljava/io/File;
-	public final fun getRootPackageJsonFile ()Lorg/gradle/api/provider/Provider;
+	public final fun getRootPackageJsonFile ()Lorg/gradle/api/provider/Property;
 	public final fun resolve ()V
 }
 
@@ -5288,9 +5352,8 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/typescript/TypeScri
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/typescript/TypeScriptValidationTask$Companion;
 	public static final field NAME Ljava/lang/String;
 	public fun <init> (Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrCompilation;)V
-	public fun getCompilation ()Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrCompilation;
+	public final fun getCompilation ()Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrCompilation;
 	public abstract fun getInputDir ()Lorg/gradle/api/file/DirectoryProperty;
-	protected final fun getNodeJs ()Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
 	public fun getRequiredNpmDependencies ()Ljava/util/Set;
 	public abstract fun getValidationStrategy ()Lorg/gradle/api/provider/Property;
 	public final fun run ()V
@@ -5675,6 +5738,17 @@ public final class org/jetbrains/kotlin/gradle/targets/js/webpack/WebpackLogClie
 public final class org/jetbrains/kotlin/gradle/targets/js/webpack/WebpackLogClient$Companion {
 }
 
+public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnPlugin : org/gradle/api/Plugin, org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
+	protected abstract fun lockFileDirectory (Ljava/io/File;)Ljava/io/File;
+	protected abstract fun nodeJsEnvSpec (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
+	protected abstract fun nodeJsRootApply (Lorg/gradle/api/Project;)V
+	protected abstract fun nodeJsRootExtension (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
+}
+
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/LockCopyTaskKt {
 	public static final fun fromLockFileMismatchReport (Lorg/jetbrains/kotlin/gradle/targets/js/npm/LockFileMismatchReport;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnLockMismatchReport;
 }
@@ -5742,6 +5816,22 @@ public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnEnvironment :
 	public fun toString ()Ljava/lang/String;
 }
 
+public class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnForWasmPlugin : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnPlugin {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnForWasmPlugin$Companion;
+	public fun <init> ()V
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+	protected fun lockFileDirectory (Ljava/io/File;)Ljava/io/File;
+	protected fun nodeJsEnvSpec (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
+	protected fun nodeJsRootApply (Lorg/gradle/api/Project;)V
+	protected fun nodeJsRootExtension (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnForWasmPlugin$Companion : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
+	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension;
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+}
+
 public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnLockCopyTask : org/jetbrains/kotlin/gradle/targets/js/npm/LockCopyTask {
 	public fun <init> ()V
 }
@@ -5762,15 +5852,18 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnLockStoreT
 	public final fun getYarnLockMismatchReport ()Lorg/gradle/api/provider/Provider;
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin : org/gradle/api/Plugin {
+public class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnPlugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin$Companion;
 	public static final field RESTORE_YARN_LOCK_NAME Ljava/lang/String;
 	public static final field STORE_YARN_LOCK_NAME Ljava/lang/String;
 	public static final field UPGRADE_YARN_LOCK Ljava/lang/String;
 	public static final field YARN_LOCK_MISMATCH_MESSAGE Ljava/lang/String;
 	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/Project;)V
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+	protected fun lockFileDirectory (Ljava/io/File;)Ljava/io/File;
+	protected fun nodeJsEnvSpec (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsEnvSpec;
+	protected fun nodeJsRootApply (Lorg/gradle/api/Project;)V
+	protected fun nodeJsRootExtension (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin$Companion {

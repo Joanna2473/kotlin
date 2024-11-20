@@ -73,7 +73,7 @@ abstract class NodeJsEnvSpec : EnvSpec<NodeJsEnv>() {
         get() = project.tasks.withType(NodeJsSetupTask::class.java)
             .named(extensionName(NodeJsSetupTask.NAME))
 
-    fun extensionName(baseName: String) =
+    private fun extensionName(baseName: String) =
         lowerCamelCaseName(platformDisambiguate.orNull.orEmpty(), baseName)
 
     companion object {

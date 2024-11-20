@@ -7,7 +7,7 @@ package org.jetbrains.kotlin.gradle.targets.js
 
 import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 
-interface HasPlatformDisambiguate {
+internal interface HasPlatformDisambiguate {
     val platformDisambiguate: String?
 
     fun extensionName(baseName: String): String =

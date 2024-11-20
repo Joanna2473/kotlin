@@ -18,12 +18,12 @@ import java.io.File
 import java.io.Serializable
 
 class KotlinRootNpmResolver internal constructor(
-    val rootProjectName: String,
-    val rootProjectVersion: String,
-    val tasksRequirements: TasksRequirements,
-    val versions: NpmVersions,
-    val rootProjectDir: File,
-    val platform: KotlinPlatformType,
+    private val rootProjectName: String,
+    private val rootProjectVersion: String,
+    internal val tasksRequirements: TasksRequirements,
+    internal val versions: NpmVersions,
+    internal val rootProjectDir: File,
+    internal val platform: KotlinPlatformType,
 ) : Serializable {
 
     internal var resolution: KotlinRootNpmResolution? = null

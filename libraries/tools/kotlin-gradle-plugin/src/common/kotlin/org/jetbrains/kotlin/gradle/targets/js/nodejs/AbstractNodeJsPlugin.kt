@@ -15,7 +15,7 @@ import org.jetbrains.kotlin.gradle.utils.providerWithLazyConvention
 
 abstract class AbstractNodeJsPlugin : Plugin<Project>, HasPlatformDisambiguate {
 
-    abstract fun nodeJsRootApply(project: Project): NodeJsRootExtension
+    protected abstract fun nodeJsRootApply(project: Project): NodeJsRootExtension
 
     override fun apply(project: Project) {
         MultiplePluginDeclarationDetector.detect(project)
