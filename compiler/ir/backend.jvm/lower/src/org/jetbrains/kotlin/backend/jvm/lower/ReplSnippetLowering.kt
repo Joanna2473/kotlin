@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
+import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrComposite
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
@@ -50,9 +51,9 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
             while (iterator.hasNext()) {
                 val declaration = iterator.next()
                 if (declaration is IrReplSnippet) {
-                    val scriptClass = prepareReplSnippetClass(irFile, declaration)
+                    val snippetClass = prepareReplSnippetClass(irFile, declaration)
                     snippets.add(declaration)
-                    iterator.set(scriptClass)
+                    iterator.set(snippetClass)
                 }
             }
         }
@@ -105,14 +106,12 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
         )
         val lambdaPatcher = ScriptFixLambdasTransformer(irSnippetClass)
 
-        patchDeclarationsDispatchReceiver(irSnippet.body.statements, context, scriptTransformer.targetClassReceiver.type)
-
         irSnippetClass.thisReceiver = scriptTransformer.targetClassReceiver
-        irSnippetClass.declarations.add(createConstructor(irSnippetClass, irSnippet))
+        irSnippetClass.declarations.add(createConstructor(irSnippetClass))
 
         fun <E : IrElement> E.patchStatementForClass(): IrElement {
             val rootContext =
-                ScriptLikeToClassTransformerContext.makeRootContext(irSnippetClass.thisReceiver?.symbol, isInScriptConstructor = false)
+                ScriptLikeToClassTransformerContext.makeRootContext(valueParameterForScriptThis = null, isInScriptConstructor = false)
             return transform(scriptTransformer, rootContext)
                 .transform(lambdaPatcher, ScriptFixLambdasTransformerContext())
         }
@@ -153,11 +152,11 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                         }
                         +(it.patchStatementForClass() as IrStatement)
                     }
-                    val flattenedStatements = irSnippet.body.statements.flatMap { scriptStatement ->
-                        if (scriptStatement is IrComposite) {
-                            scriptStatement.statements
+                    val flattenedStatements = irSnippet.body.statements.flatMap { snippetStatement ->
+                        if (snippetStatement is IrComposite) {
+                            snippetStatement.statements
                         } else {
-                            listOf(scriptStatement)
+                            listOf(snippetStatement)
                         }
                     }
                     lastExpression = flattenedStatements.lastOrNull() as? IrExpression
@@ -166,12 +165,21 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                         if (statement == lastExpression) {
                             +irReturn(patchedStatement as IrExpression)
                         } else {
-                            +patchedStatement
-                            if (patchedStatement is IrVariable) {
-                                +irCall(mapPut).apply {
-                                    dispatchReceiver = IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, replStateParameter.symbol)
-                                    putValueArgument(0, irString(patchedStatement.name.asString()))
-                                    putValueArgument(1, IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, patchedStatement.symbol))
+                            when (patchedStatement) {
+                                is IrSimpleFunction -> {
+                                    patchedStatement.visibility = DescriptorVisibilities.PUBLIC
+                                    irSnippetClass.declarations.add(patchedStatement)
+                                }
+                                is IrVariable -> {
+                                    +patchedStatement
+                                    +irCall(mapPut).apply {
+                                        dispatchReceiver = IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, replStateParameter.symbol)
+                                        putValueArgument(0, irString(patchedStatement.name.asString()))
+                                        putValueArgument(1, IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, patchedStatement.symbol))
+                                    }
+                                }
+                                else -> {
+                                    +patchedStatement
                                 }
                             }
                         }
@@ -183,10 +191,7 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
         irSnippetClass.annotations += (irSnippetClass.parent as IrFile).annotations
     }
 
-    private fun createConstructor(
-        irSnippetClass: IrClass,
-        irSnippet: IrReplSnippet,
-    ): IrConstructor =
+    private fun createConstructor(irSnippetClass: IrClass): IrConstructor =
         with(IrFunctionBuilder().apply {
             isPrimary = true
             returnType = irSnippetClass.thisReceiver!!.type as IrSimpleType
@@ -206,12 +211,11 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                 containerSource = containerSource,
             )
         }.also { irConstructor ->
-            irConstructor.body =  context.createIrBuilder(irConstructor.symbol).irBlockBody {
+            irConstructor.body = context.createIrBuilder(irConstructor.symbol).irBlockBody {
                 +irDelegatingConstructorCall(context.irBuiltIns.anyClass.owner.constructors.single())
             }
             irConstructor.parent = irSnippetClass
         }
-
 }
 
 private class ReplSnippetsToClassesSymbolRemapper : SymbolRemapper.Empty() {
@@ -240,6 +244,16 @@ internal class ReplSnippetToClassTransformer(
         irSnippet.createThisReceiverParameter(context, IrDeclarationOrigin.INSTANCE_RECEIVER, type)
             .transform(this, ScriptLikeToClassTransformerContext(null, null, null, false))
     }
+
+    override fun visitSimpleFunction(
+        declaration: IrSimpleFunction,
+        data: ScriptLikeToClassTransformerContext,
+    ): IrSimpleFunction {
+        if (declaration.parent == irSnippet || declaration.parent == irTargetClass) {
+            declaration.visibility = DescriptorVisibilities.PUBLIC
+        }
+        return super.visitSimpleFunction(declaration, data)
+    }
 }
 
 private fun makeImplicitReceiversFieldsWithParameters(irSnippetClass: IrClass, typeRemapper: SimpleTypeRemapper, irSnippet: IrReplSnippet) =
@@ -267,7 +281,7 @@ private fun makeImplicitReceiversFieldsWithParameters(irSnippetClass: IrClass, t
             val typeName = param.type.classFqName?.shortName()?.identifierOrNullIfSpecial
             add(
                 createField(
-                    Name.identifier("\$\$implicitReceiver_${typeName ?: param.index.toString()}"),
+                    Name.identifier($$$"$$implicitReceiver_$$${typeName ?: param.index.toString()}"),
                     param.type
                 ) to param
             )
