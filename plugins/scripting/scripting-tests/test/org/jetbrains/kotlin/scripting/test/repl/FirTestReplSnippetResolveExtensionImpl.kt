@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.copy
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.declarations.builder.buildPropertyCopy
+import org.jetbrains.kotlin.fir.declarations.builder.buildSimpleFunctionCopy
 import org.jetbrains.kotlin.fir.declarations.utils.originalReplSnippetSymbol
 import org.jetbrains.kotlin.fir.extensions.FirReplHistoryProvider
 import org.jetbrains.kotlin.fir.extensions.FirReplSnippetResolveExtension
@@ -23,7 +24,10 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirReplSnippetSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirVariableSymbol
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.name.NameUtils
 import kotlin.script.experimental.host.ScriptingHostConfiguration
 
 class FirTestReplSnippetResolveExtensionImpl(
@@ -47,7 +51,7 @@ class FirTestReplSnippetResolveExtensionImpl(
             snippet.fir.body.statements.forEach {
                 when (it) {
                     is FirProperty -> properties.put(it.name, it.createCopyForState(snippet).symbol)
-                    is FirSimpleFunction -> functions.getOrPut(it.name, { ArrayList() }).add(it.symbol)
+                    is FirSimpleFunction -> functions.getOrPut(it.name, { ArrayList() }).add(it.createCopyForState(snippet).symbol)
                     is FirRegularClass -> classLikes.put(it.name, it.symbol)
                     is FirTypeAlias -> classLikes.put(it.name, it.symbol)
                 }
@@ -65,6 +69,18 @@ class FirTestReplSnippetResolveExtensionImpl(
             origin = FirDeclarationOrigin.FromOtherReplSnippet
             status = this@createCopyForState.status.copy(visibility = Visibilities.Local)
             this.symbol = FirPropertySymbol(this@createCopyForState.symbol.callableId)
+        }.also {
+            it.originalReplSnippetSymbol = snippet
+        }
+    }
+
+    private fun FirSimpleFunction.createCopyForState(snippet: FirReplSnippetSymbol): FirSimpleFunction {
+        return buildSimpleFunctionCopy(this) {
+            origin = FirDeclarationOrigin.FromOtherReplSnippet
+            status = this@createCopyForState.status.copy(visibility = Visibilities.Public)
+            // TODO: either make this transformation here but configure/retain target script name somewhere, or abstract it away, or make it on lowering
+            val snippetTargetName = NameUtils.getScriptNameForFile(snippet.name.asStringStripSpecialMarkers().removePrefix("script-"))
+            this.symbol = FirNamedFunctionSymbol(CallableId(FqName.ROOT, FqName(snippetTargetName.asString()), this@createCopyForState.symbol.callableId.callableName))
         }.also {
             it.originalReplSnippetSymbol = snippet
         }
