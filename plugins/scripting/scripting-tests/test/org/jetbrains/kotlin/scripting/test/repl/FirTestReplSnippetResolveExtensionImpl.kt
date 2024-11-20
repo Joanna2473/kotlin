@@ -67,7 +67,7 @@ class FirTestReplSnippetResolveExtensionImpl(
     private fun FirProperty.createCopyForState(snippet: FirReplSnippetSymbol): FirProperty {
         return buildPropertyCopy(this) {
             origin = FirDeclarationOrigin.FromOtherReplSnippet
-            status = this@createCopyForState.status.copy(visibility = Visibilities.Local)
+            status = this@createCopyForState.status.copy(visibility = Visibilities.Local, isStatic = true)
             this.symbol = FirPropertySymbol(this@createCopyForState.symbol.callableId)
         }.also {
             it.originalReplSnippetSymbol = snippet
@@ -77,7 +77,7 @@ class FirTestReplSnippetResolveExtensionImpl(
     private fun FirSimpleFunction.createCopyForState(snippet: FirReplSnippetSymbol): FirSimpleFunction {
         return buildSimpleFunctionCopy(this) {
             origin = FirDeclarationOrigin.FromOtherReplSnippet
-            status = this@createCopyForState.status.copy(visibility = Visibilities.Public)
+            status = this@createCopyForState.status.copy(visibility = Visibilities.Public, isStatic = true)
             // TODO: either make this transformation here but configure/retain target script name somewhere, or abstract it away, or make it on lowering
             val snippetTargetName = NameUtils.getScriptNameForFile(snippet.name.asStringStripSpecialMarkers().removePrefix("script-"))
             this.symbol = FirNamedFunctionSymbol(CallableId(FqName.ROOT, FqName(snippetTargetName.asString()), this@createCopyForState.symbol.callableId.callableName))

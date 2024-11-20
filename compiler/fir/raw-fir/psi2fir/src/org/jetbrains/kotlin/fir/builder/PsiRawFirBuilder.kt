@@ -1450,11 +1450,6 @@ open class PsiRawFirBuilder(
                                             val firProperty = convertProperty(declaration, null, forceLocal = true)
                                             statements.add(firProperty)
                                         }
-                                        is KtFunction -> {
-                                            val firFunction = declaration.toFirStatement() as FirFunction
-                                            firFunction.replaceStatus(firFunction.status.copy(isStatic = true))
-                                            statements.add(firFunction)
-                                        }
                                         else -> {
                                             val firStatement = declaration.toFirStatement()
                                             if (firStatement is FirDeclaration) {
