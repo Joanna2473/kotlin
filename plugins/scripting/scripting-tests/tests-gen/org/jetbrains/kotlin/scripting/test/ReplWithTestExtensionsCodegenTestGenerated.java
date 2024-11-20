@@ -31,6 +31,12 @@ public class ReplWithTestExtensionsCodegenTestGenerated extends AbstractReplWith
   }
 
   @Test
+  @TestMetadata("simple_pure_function.repl.kts")
+  public void testSimple_pure_function_repl() {
+    runTest("plugins/scripting/scripting-tests/testData/codegen/repl/simple_pure_function.repl.kts");
+  }
+
+  @Test
   @TestMetadata("single_snippet.repl.kts")
   public void testSingle_snippet_repl() {
     runTest("plugins/scripting/scripting-tests/testData/codegen/repl/single_snippet.repl.kts");
