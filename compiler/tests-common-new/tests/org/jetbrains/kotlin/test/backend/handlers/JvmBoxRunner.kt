@@ -346,7 +346,7 @@ fun generatedTestClassLoader(
     }
 }
 
-private fun computeTestRuntimeClasspath(testServices: TestServices, rootModule: TestModule): MutableList<File> {
+fun computeTestRuntimeClasspath(testServices: TestServices, rootModule: TestModule): MutableList<File> {
     val visited = mutableSetOf<TestModule>()
     val result = mutableListOf<File>()
 

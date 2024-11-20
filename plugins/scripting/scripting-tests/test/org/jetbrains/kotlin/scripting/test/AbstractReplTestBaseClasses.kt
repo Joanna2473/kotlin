@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.scripting.test
 
 import org.jetbrains.kotlin.KtPsiSourceFile
+import org.jetbrains.kotlin.codegen.ClassFileFactory
 import org.jetbrains.kotlin.codegen.GeneratedClassLoader
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -15,10 +16,11 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.scripting.test.repl.TestReplCompilerPluginRegistrar
 import org.jetbrains.kotlin.test.FirParser
 import org.jetbrains.kotlin.test.backend.handlers.JvmBinaryArtifactHandler
-import org.jetbrains.kotlin.test.backend.handlers.generatedTestClassLoader
+import org.jetbrains.kotlin.test.backend.handlers.computeTestRuntimeClasspath
 import org.jetbrains.kotlin.test.builders.TestConfigurationBuilder
 import org.jetbrains.kotlin.test.builders.jvmArtifactsHandlersStep
 import org.jetbrains.kotlin.test.directives.ConfigurationDirectives.WITH_STDLIB
+import org.jetbrains.kotlin.test.directives.LanguageSettingsDirectives.PREFER_IN_TEST_OVER_STDLIB
 import org.jetbrains.kotlin.test.directives.configureFirParser
 import org.jetbrains.kotlin.test.frontend.fir.FirReplFrontendFacade
 import org.jetbrains.kotlin.test.model.BinaryArtifacts
@@ -29,6 +31,9 @@ import org.jetbrains.kotlin.test.runners.codegen.AbstractFirScriptAndReplCodegen
 import org.jetbrains.kotlin.test.runners.enableLazyResolvePhaseChecking
 import org.jetbrains.kotlin.test.services.EnvironmentConfigurator
 import org.jetbrains.kotlin.test.services.TestServices
+import org.jetbrains.kotlin.test.services.compilerConfigurationProvider
+import org.jetbrains.kotlin.test.services.configuration.JvmEnvironmentConfigurator.Companion.TEST_CONFIGURATION_KIND_KEY
+import org.jetbrains.kotlin.test.services.standardLibrariesPathProvider
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 
@@ -76,16 +81,18 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
 
     private var scriptProcessed = false
     private val replState: MutableMap<String, Any?> = mutableMapOf()
+    private var currentReplClassloader: GeneratedClassLoader? = null
 
     override fun processModule(module: TestModule, info: BinaryArtifacts.Jvm) {
         val fileInfos = info.fileInfos.ifEmpty { return }
-        val classLoader = generatedTestClassLoader(testServices, module, info.classFileFactory)
-        try {
+        currentReplClassloader = generatedReplSnippetTestClassLoader(testServices, module, info.classFileFactory, currentReplClassloader)
+        // TODO: restore disposal, but after all snippets
+//        try {
             for (fileInfo in fileInfos) {
                 when (val sourceFile = fileInfo.sourceFile) {
                     is KtPsiSourceFile -> (sourceFile.psiFile as? KtFile)?.let { ktFile ->
                         ktFile.script?.fqName?.let { scriptFqName ->
-                            runAndCheckSnippet(ktFile, scriptFqName, classLoader)
+                            runAndCheckSnippet(ktFile, scriptFqName, currentReplClassloader!!)
                             scriptProcessed = true
                         }
                     }
@@ -94,9 +101,9 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
                     }
                 }
             }
-        } finally {
-            classLoader.dispose()
-        }
+//        } finally {
+//            classLoader.dispose()
+//        }
     }
 
     private fun runAndCheckSnippet(
@@ -123,6 +130,33 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
             assertions.fail { "Can't find script to test" }
         }
     }
+}
+
+fun generatedReplSnippetTestClassLoader(
+    testServices: TestServices,
+    module: TestModule,
+    classFileFactory: ClassFileFactory,
+    previousSnippetClassLoader: GeneratedClassLoader?,
+): GeneratedClassLoader {
+    val configuration = testServices.compilerConfigurationProvider.getCompilerConfiguration(module)
+    val classpath = computeTestRuntimeClasspath(testServices, module)
+    var parentClassLoader: ClassLoader? = previousSnippetClassLoader
+    if (PREFER_IN_TEST_OVER_STDLIB in module.directives) {
+        val libPathProvider = testServices.standardLibrariesPathProvider
+        classpath += libPathProvider.runtimeJarForTests()
+        if (configuration[TEST_CONFIGURATION_KIND_KEY]?.withReflection == true) {
+            classpath += libPathProvider.reflectJarForTests()
+        }
+        classpath += libPathProvider.scriptRuntimeJarForTests()
+        classpath += libPathProvider.kotlinTestJarForTests()
+    } else if (parentClassLoader == null) {
+        parentClassLoader = if (configuration[TEST_CONFIGURATION_KIND_KEY]?.withReflection == true) {
+            testServices.standardLibrariesPathProvider.getRuntimeAndReflectJarClassLoader()
+        } else {
+            testServices.standardLibrariesPathProvider.getRuntimeJarClassLoader()
+        }
+    }
+    return GeneratedClassLoader(classFileFactory, parentClassLoader, *classpath.map { it.toURI().toURL() }.toTypedArray())
 }
 
 private fun captureOut(body: () -> Unit): String {
