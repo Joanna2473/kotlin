@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.fir.references.FirResolvedNamedReference
 import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirReplSnippetSymbol
 import org.jetbrains.kotlin.fir.visitors.FirDefaultVisitorVoid
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
@@ -32,7 +33,9 @@ class Fir2IrReplSnippetConfiguratorExtensionImpl(
     override fun Fir2IrComponents.prepareSnippet(firReplSnippet: FirReplSnippet, irSnippet: IrReplSnippet) {
         val propertiesFromOtherSnippets = mutableListOf<FirPropertySymbol>()
         val functionsFromOtherSnippets = mutableListOf<Pair<FirReplSnippetSymbol, FirNamedFunctionSymbol>>()
-        CollectAccessToOtherSnippets(propertiesFromOtherSnippets, functionsFromOtherSnippets).visitReplSnippet(firReplSnippet)
+        val classesFromOtherSnippets = mutableListOf<Pair<FirReplSnippetSymbol, FirRegularClassSymbol>>()
+
+        CollectAccessToOtherSnippets(propertiesFromOtherSnippets, functionsFromOtherSnippets, classesFromOtherSnippets).visitReplSnippet(firReplSnippet)
 
         propertiesFromOtherSnippets.forEach { firPropertySymbol ->
             irSnippet.propertiesFromOtherSnippets.add(
@@ -42,7 +45,10 @@ class Fir2IrReplSnippetConfiguratorExtensionImpl(
                 )
             )
         }
-        functionsFromOtherSnippets.mapTo(HashSet()) { it.first }.forEach {
+        val usedOtherSnippets = HashSet<FirReplSnippetSymbol>()
+        functionsFromOtherSnippets.mapTo(usedOtherSnippets) { it.first }
+        classesFromOtherSnippets.mapTo(usedOtherSnippets) { it.first }
+        usedOtherSnippets.forEach {
             val packageFragment = declarationStorage.getIrExternalPackageFragment(it.packageFqName(), it.moduleData)
             classifierStorage.createAndCacheEarlierSnippetClass(it, packageFragment)
         }
@@ -58,6 +64,15 @@ class Fir2IrReplSnippetConfiguratorExtensionImpl(
                 allowLazyDeclarationsCreation = true
             )
         }
+
+        classesFromOtherSnippets.forEach { (snippetSymbol, classSymbol) ->
+            val originalSnippet = classifierStorage.getCachedEarlierSnippetClass(snippetSymbol)
+            classifierStorage.createAndCacheIrClass(
+                classSymbol.fir,
+                originalSnippet!!,
+                predefinedOrigin = IrDeclarationOrigin.REPL_FROM_OTHER_SNIPPET
+            )
+        }
     }
 
     companion object {
@@ -69,7 +84,8 @@ class Fir2IrReplSnippetConfiguratorExtensionImpl(
 
 private class CollectAccessToOtherSnippets(
     val properties: MutableList<FirPropertySymbol>,
-    val functionsFromOtherSnippets: MutableList<Pair<FirReplSnippetSymbol, FirNamedFunctionSymbol>>
+    val functionsFromOtherSnippets: MutableList<Pair<FirReplSnippetSymbol, FirNamedFunctionSymbol>>,
+    val classesFromOtherSnippets: MutableList<Pair<FirReplSnippetSymbol, FirRegularClassSymbol>> = mutableListOf()
 ) : FirDefaultVisitorVoid() {
 
     override fun visitElement(element: FirElement) {
@@ -84,6 +100,8 @@ private class CollectAccessToOtherSnippets(
             originalSnippet == null -> {}
             symbol is FirPropertySymbol -> properties.add(symbol)
             symbol is FirNamedFunctionSymbol ->  functionsFromOtherSnippets.add(originalSnippet to symbol)
+            symbol is FirRegularClassSymbol -> classesFromOtherSnippets.add(originalSnippet to symbol)
+            else -> {}
         }
     }
 }
