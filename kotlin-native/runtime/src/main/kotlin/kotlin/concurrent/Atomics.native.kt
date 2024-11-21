@@ -27,31 +27,31 @@ import kotlin.native.concurrent.*
 public actual class AtomicInt public actual constructor(
         @get:Deprecated("To read the atomic value use load().", ReplaceWith("this.load()"))
         @set:Deprecated("To atomically set the new value use store(newValue: Int).", ReplaceWith("this.store(newValue)"))
-        public @Volatile var value: Int
+        @Volatile public var value: Int
 ) {
     /**
-     * Atomically gets the value of the atomic.
+     * Atomically loads the value from this [AtomicInt].
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun load(): Int = this::value.atomicGetField()
 
     /**
-     * Atomically sets the value of the atomic to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into this [AtomicInt].
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
-    public actual fun store(newValue: Int) { this::value.atomicSetField(value) }
+    public actual fun store(newValue: Int): Unit = this::value.atomicSetField(value)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] and returns the old value.
+     * Atomically stores the [new value][newValue] into this [AtomicInt] and returns the old value.
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun exchange(newValue: Int): Int = this::value.getAndSetField(newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue],
+     * Atomically stores the given [new value][newValue] into this [AtomicInt] if the current value equals the [expected value][expectedValue],
      * returns true if the operation was successful and false only if the current value was not equal to the expected value.
      *
      * This operation has so-called strong semantics,
@@ -62,7 +62,7 @@ public actual class AtomicInt public actual constructor(
     public actual fun compareAndSet(expectedValue: Int, newValue: Int): Boolean = this::value.compareAndSetField(expectedValue, newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue]
+     * Atomically stores the given [new value][newValue] into this [AtomicInt] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
      * This operation has so-called strong semantics,
@@ -73,14 +73,14 @@ public actual class AtomicInt public actual constructor(
     public actual fun compareAndExchange(expectedValue: Int, newValue: Int): Int = this::value.compareAndExchangeField(expectedValue, newValue)
 
     /**
-     * Atomically adds the [given value][delta] to the current value and returns the old value.
+     * Atomically adds the [given value][delta] to the current value of this [AtomicInt] and returns the old value.
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun fetchAndAdd(delta: Int): Int = this::value.getAndAddField(delta)
 
     /**
-     * Atomically adds the [given value][delta] to the current value and returns the new value.
+     * Atomically adds the [given value][delta] to the current value of this [AtomicInt] and returns the new value.
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
@@ -129,7 +129,7 @@ public actual class AtomicInt public actual constructor(
     public fun getAndDecrement(): Int = this::value.getAndAddField(-1)
 
     /**
-     * Returns the string representation of the underlying [Int] value.
+     * Returns the string representation of the [Int] value stored in this [AtomicInt].
      *
      * This operation does not provide any atomicity guarantees.
      */
@@ -151,31 +151,31 @@ public actual class AtomicInt public actual constructor(
 public actual class AtomicLong public actual constructor(
         @get:Deprecated("To read the atomic value use load().", ReplaceWith("this.load()"))
         @set:Deprecated("To atomically set the new value use store(newValue: Long).", ReplaceWith("this.store(newValue)"))
-        public @Volatile var value: Long
+        @Volatile public var value: Long
 )  {
     /**
-     * Atomically gets the value of the atomic.
+     * Atomically loads the value from this [AtomicLong].
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun load(): Long = this::value.atomicGetField()
 
     /**
-     * Atomically sets the value of the atomic to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into this [AtomicLong].
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
-    public actual fun store(newValue: Long) { this::value.atomicSetField(value) }
+    public actual fun store(newValue: Long): Unit = this::value.atomicSetField(value)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] and returns the old value.
+     * Atomically stores the [new value][newValue] into this [AtomicLong] and returns the old value.
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun exchange(newValue: Long): Long = this::value.getAndSetField(newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue],
+     * Atomically stores the given [new value][newValue] into this [AtomicLong] if the current value equals the [expected value][expectedValue],
      * returns true if the operation was successful and false only if the current value was not equal to the expected value.
      *
      * This operation has so-called strong semantics,
@@ -186,7 +186,7 @@ public actual class AtomicLong public actual constructor(
     public actual fun compareAndSet(expectedValue: Long, newValue: Long): Boolean = this::value.compareAndSetField(expectedValue, newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue]
+     * Atomically stores the given [new value][newValue] into this [AtomicLong] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
      * This operation has so-called strong semantics,
@@ -197,14 +197,14 @@ public actual class AtomicLong public actual constructor(
     public actual fun compareAndExchange(expectedValue: Long, newValue: Long): Long = this::value.compareAndExchangeField(expectedValue, newValue)
 
     /**
-     * Atomically adds the [given value][delta] to the current value and returns the old value.
+     * Atomically adds the [given value][delta] to the current value of this [AtomicLong] and returns the old value.
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun fetchAndAdd(delta: Long): Long = this::value.getAndAddField(delta)
 
     /**
-     * Atomically adds the [given value][delta] to the current value and returns the new value.
+     * Atomically adds the [given value][delta] to the current value of this [AtomicLong] and returns the new value.
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
@@ -273,28 +273,28 @@ public actual class AtomicLong public actual constructor(
 public actual class AtomicBoolean actual constructor(private var value: Boolean) {
 
     /**
-     * Atomically gets the value of the atomic.
+     * Atomically loads the value from this [AtomicBoolean].
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun load(): Boolean = this::value.atomicGetField()
 
     /**
-     * Atomically sets the value of the atomic to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into this [AtomicBoolean].
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
-    public actual fun store(newValue: Boolean) { this::value.atomicSetField(newValue) }
+    public actual fun store(newValue: Boolean): Unit = this::value.atomicSetField(newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] and returns the old value.
+     * Atomically stores the given [new value][newValue] into this [AtomicBoolean] and returns the old value.
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun exchange(newValue: Boolean): Boolean = this::value.getAndSetField(newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue],
+     * Atomically stores the given [new value][newValue] into this [AtomicBoolean] if the current value equals the [expected value][expectedValue],
      * returns true if the operation was successful and false only if the current value was not equal to the expected value.
      *
      * This operation has so-called strong semantics,
@@ -305,7 +305,7 @@ public actual class AtomicBoolean actual constructor(private var value: Boolean)
     public actual fun compareAndSet(expectedValue: Boolean, newValue: Boolean): Boolean = this::value.compareAndSetField(expectedValue, newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue]
+     * Atomically stores the given [new value][newValue] into this [AtomicBoolean] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
      * This operation has so-called strong semantics,
@@ -338,32 +338,32 @@ public actual class AtomicBoolean actual constructor(private var value: Boolean)
 public actual class AtomicReference<T> actual constructor(
         @get:Deprecated("To read the atomic value use load().", ReplaceWith("this.load()"))
         @set:Deprecated("To atomically set the new value use store(newValue: T).", ReplaceWith("this.store(newValue)"))
-        public @Volatile actual var value: T
+        @Volatile public actual var value: T
 ) {
 
     /**
-     * Atomically gets the value of the atomic.
+     * Atomically loads the value from this [AtomicReference].
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun load(): T = this::value.atomicGetField()
 
     /**
-     * Atomically sets the value of the atomic to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into this [AtomicReference].
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
-    public actual fun store(newValue: T) { this::value.atomicSetField(newValue) }
+    public actual fun store(newValue: T): Unit = this::value.atomicSetField(newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] and returns the old value.
+     * Atomically stores the given [new value][newValue] into this [AtomicReference] and returns the old value.
      */
     @SinceKotlin("2.1")
     @ExperimentalStdlibApi
     public actual fun exchange(newValue: T): T = this::value.getAndSetField(newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue],
+     * Atomically stores the given [new value][newValue] into this [AtomicReference] if the current value equals the [expected value][expectedValue],
      * returns true if the operation was successful and false only if the current value was not equal to the expected value.
      *
      * This operation has so-called strong semantics,
@@ -374,7 +374,7 @@ public actual class AtomicReference<T> actual constructor(
     public actual fun compareAndSet(expectedValue: T, newValue: T): Boolean = this::value.compareAndSetField(expectedValue, newValue)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue]
+     * Atomically stores the given [new value][newValue] into this [AtomicReference] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
      * This operation has so-called strong semantics,

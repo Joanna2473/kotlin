@@ -31,7 +31,7 @@ public actual class AtomicIntArray {
     public actual val size: Int get() = array.size
 
     /**
-     * Atomically gets the value of the element at the given [index].
+     * Atomically loads the value from the element of this [AtomicIntArray] at the given [index].
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicIntegerArray.get].
      *
@@ -40,7 +40,7 @@ public actual class AtomicIntArray {
     public actual fun loadAt(index: Int): Int
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index].
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicIntegerArray.set].
      *
@@ -49,7 +49,7 @@ public actual class AtomicIntArray {
     public actual fun storeAt(index: Int, newValue: Int)
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * and returns the old value of the element.
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicIntegerArray.getAndSet].
@@ -59,7 +59,7 @@ public actual class AtomicIntArray {
     public actual fun exchangeAt(index: Int, newValue: Int): Int
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * if the current value equals the [expected value][expectedValue].
      * Returns true if the operation was successful and false only if the current value of the element was not equal to the expected value.
      *
@@ -72,7 +72,7 @@ public actual class AtomicIntArray {
     public actual fun compareAndSetAt(index: Int, expectedValue: Int, newValue: Int): Boolean
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
      * Comparison of values is done by value.
@@ -88,7 +88,7 @@ public actual class AtomicIntArray {
     public actual fun compareAndExchangeAt(index: Int, expectedValue: Int, newValue: Int): Int
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the old value of the element.
+     * Atomically adds the given [delta] the element of this [AtomicIntArray] at the given [index] by and returns the old value of the element.
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicIntegerArray.getAndAdd].
      *
@@ -97,7 +97,7 @@ public actual class AtomicIntArray {
     public actual fun fetchAndAddAt(index: Int, delta: Int): Int
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the new value of the element.
+     * Atomically adds the given [delta] the element of this [AtomicIntArray] at the given [index] by and returns the new value of the element.
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicIntegerArray.addAndGet].
      *
@@ -139,7 +139,7 @@ public actual class AtomicLongArray {
     public actual val size: Int get() = array.size
 
     /**
-     * Atomically gets the value of the element at the given [index].
+     * Atomically loads the value from the element of this [AtomicLongArray] at the given [index].
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicLongArray.get].
      *
@@ -148,7 +148,7 @@ public actual class AtomicLongArray {
     public actual fun loadAt(index: Int): Long
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index].
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicLongArray.set].
      *
@@ -157,7 +157,7 @@ public actual class AtomicLongArray {
     public actual fun storeAt(index: Int, newValue: Long)
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * and returns the old value of the element.
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicLongArray.getAndSet].
@@ -167,7 +167,7 @@ public actual class AtomicLongArray {
     public actual fun exchangeAt(index: Int, newValue: Long): Long
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * if the current value equals the [expected value][expectedValue].
      * Returns true if the operation was successful and false only if the current value of the element was not equal to the expected value.
      *
@@ -180,7 +180,7 @@ public actual class AtomicLongArray {
     public actual fun compareAndSetAt(index: Int, expectedValue: Long, newValue: Long): Boolean
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
      * Comparison of values is done by value.
@@ -196,7 +196,7 @@ public actual class AtomicLongArray {
     public actual fun compareAndExchangeAt(index: Int, expectedValue: Long, newValue: Long): Long
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the old value of the element.
+     * Atomically adds the given [delta] to the element of this [AtomicLongArray] at the given [index] and returns the old value of the element.
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicLongArray.getAndAdd].
      *
@@ -205,7 +205,7 @@ public actual class AtomicLongArray {
     public actual fun fetchAndAddAt(index: Int, delta: Long): Long
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the new value of the element.
+     * Atomically adds the given [delta] to the element of this [AtomicLongArray] at the given [index] and returns the new value of the element.
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicLongArray.addAndGet].
      *
@@ -240,7 +240,7 @@ public actual class AtomicArray<T> {
     public actual val size: Int
 
     /**
-     * Atomically gets the value of the element at the given [index].
+     * Atomically loads the value from the element of this [AtomicArray] at the given [index].
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicReferenceArray.get].
      *
@@ -249,7 +249,7 @@ public actual class AtomicArray<T> {
     public actual fun loadAt(index: Int): T
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index].
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicReferenceArray.set].
      *
@@ -258,7 +258,7 @@ public actual class AtomicArray<T> {
     public actual fun storeAt(index: Int, newValue: T)
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * and returns the old value of the element.
      *
      * Has the same memory effects as [java.util.concurrent.atomic.AtomicReferenceArray.getAndSet].
@@ -268,7 +268,7 @@ public actual class AtomicArray<T> {
     public actual fun exchangeAt(index: Int, newValue: T): T
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * if the current value equals the [expected value][expectedValue].
      * Returns true if the operation was successful and false only if the current value of the element was not equal to the expected value.
      *
@@ -281,7 +281,7 @@ public actual class AtomicArray<T> {
     public actual fun compareAndSetAt(index: Int, expectedValue: T, newValue: T): Boolean
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
      * Comparison of values is done by value.

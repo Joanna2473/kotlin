@@ -27,22 +27,22 @@ import kotlin.internal.ActualizeByJvmBuiltinProvider
 @ActualizeByJvmBuiltinProvider
 public expect class AtomicInt public constructor(value: Int) {
     /**
-     * Atomically gets the value of the atomic.
+     * Atomically loads the value from this [AtomicInt].
      */
     public fun load(): Int
 
     /**
-     * Atomically sets the value of the atomic to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into this [AtomicInt].
      */
     public fun store(newValue: Int)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] and returns the old value.
+     * Atomically stores the given [new value][newValue] into this [AtomicInt] and returns the old value.
      */
     public fun exchange(newValue: Int): Int
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue],
+     * Atomically stores the given [new value][newValue] into this [AtomicInt] if the current value equals the [expected value][expectedValue],
      * returns true if the operation was successful and false only if the current value was not equal to the expected value.
      *
      * This operation has so-called strong semantics,
@@ -53,7 +53,7 @@ public expect class AtomicInt public constructor(value: Int) {
     public fun compareAndSet(expectedValue: Int, newValue: Int): Boolean
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue]
+     * Atomically stores the given [new value][newValue] into this [AtomicInt] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
      * This operation has so-called strong semantincs,
@@ -64,12 +64,12 @@ public expect class AtomicInt public constructor(value: Int) {
     public fun compareAndExchange(expectedValue: Int, newValue: Int): Int
 
     /**
-     * Atomically adds the [given value][delta] to the current value and returns the old value.
+     * Atomically adds the [given value][delta] to the current value of this [AtomicInt] and returns the old value.
      */
     public fun fetchAndAdd(delta: Int): Int
 
     /**
-     * Atomically adds the [given value][delta] to the current value and returns the new value.
+     * Atomically adds the [given value][delta] to the current value of this [AtomicInt] and returns the new value.
      */
     public fun addAndFetch(delta: Int): Int
 
@@ -82,42 +82,42 @@ public expect class AtomicInt public constructor(value: Int) {
 }
 
 /**
- * Atomically adds the [given value][delta] to the current value.
+ * Atomically adds the [given value][delta] to the current value of this [AtomicInt].
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public operator fun AtomicInt.plusAssign(delta: Int): Unit { this.addAndFetch(delta) }
 
 /**
- * Atomically subtracts the [given value][delta] from the current value.
+ * Atomically subtracts the [given value][delta] from the current value of this [AtomicInt].
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public operator fun AtomicInt.minusAssign(delta: Int): Unit { this.addAndFetch(-delta) }
 
 /**
- * Atomically increments the current value by one and returns the old value.
+ * Atomically increments the current value of this [AtomicInt] by one and returns the old value.
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public fun AtomicInt.fetchAndIncrement(): Int = this.fetchAndAdd(1)
 
 /**
- * Atomically increments the current value by one and returns the new value.
+ * Atomically increments the current value of this [AtomicInt] by one and returns the new value.
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public fun AtomicInt.incrementAndFetch(): Int = this.addAndFetch(1)
 
 /**
- * Atomically decrements the current value by one and returns the new value.
+ * Atomically decrements the current value of this [AtomicInt] by one and returns the new value.
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public fun AtomicInt.decrementAndFetch(): Int = this.addAndFetch(-1)
 
 /**
- * Atomically decrements the current value by one and returns the old value.
+ * Atomically decrements the current value of this [AtomicInt] by one and returns the old value.
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
@@ -141,22 +141,22 @@ public fun AtomicInt.fetchAndDecrement(): Int = this.fetchAndAdd(-1)
 @ExperimentalStdlibApi
 public expect class AtomicLong public constructor(value: Long) {
     /**
-     * Atomically gets the value of the atomic.
+     * Atomically loads the value from this [AtomicLong].
      */
     public fun load(): Long
 
     /**
-     * Atomically sets the value of the atomic to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into this [AtomicLong].
      */
     public fun store(newValue: Long)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] and returns the old value.
+     * Atomically stores the given [new value][newValue] into this [AtomicLong]. and returns the old value.
      */
     public fun exchange(newValue: Long): Long
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue],
+     * Atomically stores the given [new value][newValue] into this [AtomicLong] if the current value equals the [expected value][expectedValue],
      * returns true if the operation was successful and false only if the current value was not equal to the expected value.
      *
      * This operation has so-called strong semantics,
@@ -167,7 +167,7 @@ public expect class AtomicLong public constructor(value: Long) {
     public fun compareAndSet(expectedValue: Long, newValue: Long): Boolean
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue]
+     * Atomically stores the given [new value][newValue] into this [AtomicLong] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
      * This operation has so-called strong semantics,
@@ -178,12 +178,12 @@ public expect class AtomicLong public constructor(value: Long) {
     public fun compareAndExchange(expectedValue: Long, newValue: Long): Long
 
     /**
-     * Atomically adds the [given value][delta] to the current value and returns the old value.
+     * Atomically adds the [given value][delta] to the current value of this [AtomicLong] and returns the old value.
      */
     public fun fetchAndAdd(delta: Long): Long
 
     /**
-     * Atomically adds the [given value][delta] to the current value and returns the new value.
+     * Atomically adds the [given value][delta] to the current value of this [AtomicLong] and returns the new value.
      */
     public fun addAndFetch(delta: Long): Long
 
@@ -196,42 +196,42 @@ public expect class AtomicLong public constructor(value: Long) {
 }
 
 /**
- * Atomically adds the [given value][delta] to the current value.
+ * Atomically adds the [given value][delta] to the current value of this [AtomicLong].
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public operator fun AtomicLong.plusAssign(delta: Long): Unit { this.addAndFetch(delta) }
 
 /**
- * Atomically subtracts the [given value][delta] from the current value.
+ * Atomically subtracts the [given value][delta] from the current value of this [AtomicLong].
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public operator fun AtomicLong.minusAssign(delta: Long): Unit { this.addAndFetch(-delta) }
 
 /**
- * Atomically increments the current value by one and returns the old value.
+ * Atomically increments the current value of this [AtomicLong] by one and returns the old value.
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public fun AtomicLong.fetchAndIncrement(): Long = this.fetchAndAdd(1)
 
 /**
- * Atomically increments the current value by one and returns the new value.
+ * Atomically increments the current value of this [AtomicLong] by one and returns the new value.
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public fun AtomicLong.incrementAndFetch(): Long = this.addAndFetch(1)
 
 /**
- * Atomically decrements the current value by one and returns the new value.
+ * Atomically decrements the current value of this [AtomicLong] by one and returns the new value.
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
 public fun AtomicLong.decrementAndFetch(): Long = this.addAndFetch(-1)
 
 /**
- * Atomically decrements the current value by one and returns the old value.
+ * Atomically decrements the current value of this [AtomicLong] by one and returns the old value.
  */
 @SinceKotlin("2.1")
 @ExperimentalStdlibApi
@@ -255,22 +255,22 @@ public fun AtomicLong.fetchAndDecrement(): Long = this.fetchAndAdd(-1)
 @ActualizeByJvmBuiltinProvider
 public expect class AtomicBoolean public constructor(value: Boolean) {
     /**
-     * Atomically gets the value of the atomic.
+     * Atomically loads the value from this [AtomicBoolean].
      */
     public fun load(): Boolean
 
     /**
-     * Atomically sets the value of the atomic to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into this [AtomicBoolean].
      */
     public fun store(newValue: Boolean)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] and returns the old value.
+     * Atomically stores the given [new value][newValue] into this [AtomicBoolean] and returns the old value.
      */
     public fun exchange(newValue: Boolean): Boolean
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue],
+     * Atomically stores the given [new value][newValue] into this [AtomicBoolean] if the current value equals the [expected value][expectedValue],
      * returns true if the operation was successful and false only if the current value was not equal to the expected value.
      *
      * This operation has so-called strong semantics,
@@ -281,7 +281,7 @@ public expect class AtomicBoolean public constructor(value: Boolean) {
     public fun compareAndSet(expectedValue: Boolean, newValue: Boolean): Boolean
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue]
+     * Atomically stores the given [new value][newValue] into this [AtomicBoolean] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
      * This operation has so-called strong semantics,
@@ -315,22 +315,22 @@ public expect class AtomicBoolean public constructor(value: Boolean) {
 @ActualizeByJvmBuiltinProvider
 public expect class AtomicReference<T> public constructor(value: T) {
     /**
-     * Atomically gets the value of the atomic.
+     * Atomically loads the value from this [AtomicReference].
      */
     public fun load(): T
 
     /**
-     * Atomically sets the value of the atomic to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into this [AtomicReference].
      */
     public fun store(newValue: T)
 
     /**
-     * Atomically sets the value to the given [new value][newValue] and returns the old value.
+     * Atomically stores the given [new value][newValue] into this [AtomicReference]. and returns the old value.
      */
     public fun exchange(newValue: T): T
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue],
+     * Atomically stores the given [new value][newValue] into this [AtomicReference] if the current value equals the [expected value][expectedValue],
      * returns true if the operation was successful and false only if the current value was not equal to the expected value.
      *
      * This operation has so-called strong semantics,
@@ -341,7 +341,7 @@ public expect class AtomicReference<T> public constructor(value: T) {
     public fun compareAndSet(expectedValue: T, newValue: T): Boolean
 
     /**
-     * Atomically sets the value to the given [new value][newValue] if the current value equals the [expected value][expectedValue]
+     * Atomically stores the given [new value][newValue] into this [AtomicReference] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
      * This operation has so-called strong semantics,

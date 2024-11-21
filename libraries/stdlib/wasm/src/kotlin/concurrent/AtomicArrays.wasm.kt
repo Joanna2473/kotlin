@@ -38,7 +38,7 @@ public actual class AtomicIntArray {
     public actual val size: Int get() = array.size
 
     /**
-     * Atomically gets the value of the element at the given [index].
+     * Atomically loads the value from the element of this [AtomicIntArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -48,7 +48,7 @@ public actual class AtomicIntArray {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -58,7 +58,7 @@ public actual class AtomicIntArray {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
@@ -71,7 +71,7 @@ public actual class AtomicIntArray {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * if the current value equals the [expected value][expectedValue].
      * Returns true if the operation was successful and false only if the current value of the element was not equal to the expected value.
      *
@@ -87,7 +87,7 @@ public actual class AtomicIntArray {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
      * Comparison of values is done by value.
@@ -104,7 +104,7 @@ public actual class AtomicIntArray {
     }
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the old value of the element.
+     * Atomically adds the given [delta] the element of this [AtomicIntArray] at the given [index] by and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -116,7 +116,7 @@ public actual class AtomicIntArray {
     }
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the new value of the element.
+     * Atomically adds the given [delta] the element of this [AtomicIntArray] at the given [index] by and returns the new value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -169,7 +169,7 @@ public actual class AtomicLongArray {
     public actual val size: Int get() = array.size
 
     /**
-     * Atomically gets the value of the element at the given [index].
+     * Atomically loads the value from the element of this [AtomicLongArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -179,7 +179,7 @@ public actual class AtomicLongArray {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -189,7 +189,7 @@ public actual class AtomicLongArray {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
@@ -202,7 +202,7 @@ public actual class AtomicLongArray {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * if the current value equals the [expected value][expectedValue].
      * Returns true if the operation was successful and false only if the current value of the element was not equal to the expected value.
      *
@@ -218,7 +218,7 @@ public actual class AtomicLongArray {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
      * Comparison of values is done by value.
@@ -235,7 +235,7 @@ public actual class AtomicLongArray {
     }
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the old value of the element.
+     * Atomically adds the given [delta] the element of this [AtomicLongArray] at the given [index] by and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -247,7 +247,7 @@ public actual class AtomicLongArray {
     }
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the new value of the element.
+     * Atomically adds the given [delta] the element of this [AtomicLongArray] at the given [index] by and returns the new value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -291,7 +291,7 @@ public actual class AtomicArray<T> {
     public actual val size: Int get() = array.size
 
     /**
-     * Atomically gets the value of the element at the given [index].
+     * Atomically loads the value from the element of this [AtomicArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -301,7 +301,7 @@ public actual class AtomicArray<T> {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -311,7 +311,7 @@ public actual class AtomicArray<T> {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
@@ -324,7 +324,7 @@ public actual class AtomicArray<T> {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * if the current value equals the [expected value][expectedValue].
      * Returns true if the operation was successful and false only if the current value of the element was not equal to the expected value.
      *
@@ -340,7 +340,7 @@ public actual class AtomicArray<T> {
     }
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
      * Comparison of values is done by value.

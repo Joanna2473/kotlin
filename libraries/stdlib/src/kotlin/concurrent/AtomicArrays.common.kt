@@ -43,21 +43,21 @@ public expect class AtomicIntArray {
     public val size: Int
 
     /**
-     * Atomically gets the value of the element at the given [index].
+     * Atomically loads the value from the element of this [AtomicIntArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
     public fun loadAt(index: Int): Int
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
     public fun storeAt(index: Int, newValue: Int)
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
@@ -65,7 +65,7 @@ public expect class AtomicIntArray {
     public fun exchangeAt(index: Int, newValue: Int): Int
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * if the current value equals the [expected value][expectedValue].
      * Returns true if the operation was successful and false only if the current value of the element was not equal to the expected value.
      *
@@ -79,7 +79,7 @@ public expect class AtomicIntArray {
     public fun compareAndSetAt(index: Int, expectedValue: Int, newValue: Int): Boolean
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
      * This operation has so-called strong semantics,
@@ -92,14 +92,14 @@ public expect class AtomicIntArray {
     public fun compareAndExchangeAt(index: Int, expectedValue: Int, newValue: Int): Int
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the old value of the element.
+     * Atomically adds the given [delta] to the element of this [AtomicIntArray] at the given [index] and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
     public fun fetchAndAddAt(index: Int, delta: Int): Int
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the new value of the element.
+     * Atomically adds the given [delta] to the element of this [AtomicIntArray] at the given [index] and returns the new value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -132,7 +132,7 @@ public inline fun AtomicIntArray(size: Int, init: (Int) -> Int): AtomicIntArray 
 }
 
 /**
- * Atomically increments the element at the given [index] by one and returns the old value of the element.
+ * Atomically increments the element of this [AtomicIntArray] at the given [index] by one and returns the old value of the element.
  *
  * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
  */
@@ -141,7 +141,7 @@ public inline fun AtomicIntArray(size: Int, init: (Int) -> Int): AtomicIntArray 
 public fun AtomicIntArray.fetchAndIncrementAt(index: Int): Int = this.fetchAndAddAt(index, 1)
 
 /**
- * Atomically increments the element at the given [index] by one and returns the new value of the element.
+ * Atomically increments the element of this [AtomicIntArray] at the given [index] by one and returns the new value of the element.
  *
  * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
  */
@@ -150,7 +150,7 @@ public fun AtomicIntArray.fetchAndIncrementAt(index: Int): Int = this.fetchAndAd
 public fun AtomicIntArray.incrementAndFetchAt(index: Int): Int = this.addAndFetchAt(index, 1)
 
 /**
- * Atomically decrements the element at the given [index] by one and returns the new value of the element.
+ * Atomically decrements the element of this [AtomicIntArray] at the given [index] by one and returns the new value of the element.
  *
  * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
  */
@@ -159,7 +159,7 @@ public fun AtomicIntArray.incrementAndFetchAt(index: Int): Int = this.addAndFetc
 public fun AtomicIntArray.decrementAndFetchAt(index: Int): Int = this.addAndFetchAt(index, -1)
 
 /**
- * Atomically decrements the element at the given [index] by one and returns the old value of the element.
+ * Atomically decrements the element of this [AtomicIntArray] at the given [index] by one and returns the old value of the element.
  *
  * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
  */
@@ -201,21 +201,21 @@ public expect class AtomicLongArray {
     public val size: Int
 
     /**
-     * Atomically gets the value of the element at the given [index].
+     * Atomically loads the value from the element of this [AtomicLongArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
     public fun loadAt(index: Int): Long
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
     public fun storeAt(index: Int, newValue: Long)
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
@@ -223,7 +223,7 @@ public expect class AtomicLongArray {
     public fun exchangeAt(index: Int, newValue: Long): Long
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * if the current value equals the [expected value][expectedValue].
      * Returns true if the operation was successful and false only if the current value of the element was not equal to the expected value.
      *
@@ -237,7 +237,7 @@ public expect class AtomicLongArray {
     public fun compareAndSetAt(index: Int, expectedValue: Long, newValue: Long): Boolean
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
      * This operation has so-called strong semantics,
@@ -250,14 +250,14 @@ public expect class AtomicLongArray {
     public fun compareAndExchangeAt(index: Int, expectedValue: Long, newValue: Long): Long
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the old value of the element.
+     * Atomically adds the given [delta] to the element of this [AtomicLongArray] at the given [index] and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
     public fun fetchAndAddAt(index: Int, delta: Long): Long
 
     /**
-     * Atomically adds the given [delta] to the element at the given [index] and returns the new value of the element.
+     * Atomically adds the given [delta] to the element of this [AtomicLongArray] at the given [index] and returns the new value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
@@ -290,7 +290,7 @@ public inline fun AtomicLongArray(size: Int, init: (Int) -> Long): AtomicLongArr
 }
 
 /**
- * Atomically increments the element at the given [index] by one and returns the old value of the element.
+ * Atomically increments the element of this [AtomicLongArray] at the given [index] by one and returns the old value of the element.
  *
  * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
  */
@@ -299,7 +299,7 @@ public inline fun AtomicLongArray(size: Int, init: (Int) -> Long): AtomicLongArr
 public fun AtomicLongArray.fetchAndIncrementAt(index: Int): Long = this.fetchAndAddAt(index, 1)
 
 /**
- * Atomically increments the element at the given [index] by one and returns the new value of the element.
+ * Atomically increments the element of this [AtomicLongArray] at the given [index] by one and returns the new value of the element.
  *
  * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
  */
@@ -308,7 +308,7 @@ public fun AtomicLongArray.fetchAndIncrementAt(index: Int): Long = this.fetchAnd
 public fun AtomicLongArray.incrementAndFetchAt(index: Int): Long = this.addAndFetchAt(index, 1)
 
 /**
- * Atomically decrements the element at the given [index] by one and returns the new value of the element.
+ * Atomically decrements the element of this [AtomicLongArray] at the given [index] by one and returns the new value of the element.
  *
  * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
  */
@@ -317,7 +317,7 @@ public fun AtomicLongArray.incrementAndFetchAt(index: Int): Long = this.addAndFe
 public fun AtomicLongArray.decrementAndFetchAt(index: Int): Long = this.addAndFetchAt(index, -1)
 
 /**
- * Atomically decrements the element at the given [index] by one and returns the old value of the element.
+ * Atomically decrements the element of this [AtomicLongArray] at the given [index] by one and returns the old value of the element.
  *
  * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
  */
@@ -354,21 +354,21 @@ public expect class AtomicArray<T> {
     public val size: Int
 
     /**
-     * Atomically gets the value of the element at the given [index].
+     * Atomically loads the value from the element of this [AtomicArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
     public fun loadAt(index: Int): T
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue].
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index].
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
      */
     public fun storeAt(index: Int, newValue: T)
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * and returns the old value of the element.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
@@ -376,7 +376,7 @@ public expect class AtomicArray<T> {
     public fun exchangeAt(index: Int, newValue: T): T
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * if the current value equals the [expected value][expectedValue].
      * Returns true if the operation was successful and false only if the current value of the element was not equal to the expected value.
      *
@@ -390,7 +390,7 @@ public expect class AtomicArray<T> {
     public fun compareAndSetAt(index: Int, expectedValue: T, newValue: T): Boolean
 
     /**
-     * Atomically sets the value of the element at the given [index] to the [new value][newValue]
+     * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
      * This operation has so-called strong semantics,
