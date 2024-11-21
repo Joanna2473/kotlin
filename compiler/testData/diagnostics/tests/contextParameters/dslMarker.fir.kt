@@ -27,6 +27,7 @@ fun annotatedFunctionType(f: @Dsl (C.() -> Unit)) {}
 fun annotatedFunctionTypeWithContext(f: @Dsl (context(C) Other.() -> Unit)) {}
 
 fun <A, R> context(context: A, block: context(A) () -> R): R = block(context)
+fun <A, B, R> context(context: A, context2: B, block: context(A, B) () -> R): R = block(context, context2)
 
 val contextFunctionTypeVal: context(DslReceiver) () -> Unit = {}
 
@@ -69,6 +70,10 @@ fun test() {
 
     annotatedFunctionTypeWithContext {
         // NO DSL_SCOPE_VIOLATION because receiver and context parameter come from the same scope
+        contextFun()
+    }
+
+    context(DslReceiver(), Other()) {
         contextFun()
     }
 }
