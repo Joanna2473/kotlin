@@ -46,6 +46,12 @@ fun qux(
 
     with("") {
         with(1) {
+            f1("", 1)
+            f2("", 1, true)
+            f3("", 1, true)
+            f4("", 1, "")
+            f5("", 1, "", true)
+
             f1()
             f2(true)
             f3(true)
@@ -65,6 +71,12 @@ fun qux(
 
     context("") {
         with(1) {
+            f1("", 1)
+            f2("", 1, true)
+            f3("", 1, true)
+            f4("", 1, "")
+            f5("", 1, "", true)
+
             f1()
             f2(true)
         }

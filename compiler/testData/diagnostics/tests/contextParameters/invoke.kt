@@ -46,6 +46,12 @@ fun qux(
 
     with("") {
         with(1) {
+            f1("", 1)
+            f2("", 1, true)
+            f3("", 1, true)
+            f4("", 1, "")
+            f5("", 1, "", true)
+
             f1<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>()<!>
             f2(<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!><!CONSTANT_EXPECTED_TYPE_MISMATCH!>true<!>)<!>
             f3(<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!><!CONSTANT_EXPECTED_TYPE_MISMATCH!>true<!>)<!>
@@ -65,6 +71,12 @@ fun qux(
 
     context("") {
         with(1) {
+            f1("", 1)
+            f2("", 1, true)
+            f3("", 1, true)
+            f4("", 1, "")
+            f5("", 1, "", true)
+
             f1<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>()<!>
             f2(<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!><!CONSTANT_EXPECTED_TYPE_MISMATCH!>true<!>)<!>
         }
