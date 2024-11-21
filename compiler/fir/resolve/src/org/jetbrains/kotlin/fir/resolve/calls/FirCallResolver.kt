@@ -552,6 +552,7 @@ class FirCallResolver(
             components.file,
             components.containingDeclarations,
             resolutionMode = ResolutionMode.ContextIndependent,
+            implicitInvokeMode = ImplicitInvokeMode.None,
         )
     }
 
@@ -681,6 +682,7 @@ class FirCallResolver(
         components.file,
         components.containingDeclarations,
         resolutionMode = ResolutionMode.ContextIndependent,
+        implicitInvokeMode = ImplicitInvokeMode.None,
     )
 
     private fun runResolutionForGivenSymbol(callInfo: CallInfo, symbol: FirBasedSymbol<*>): ResolutionResult {

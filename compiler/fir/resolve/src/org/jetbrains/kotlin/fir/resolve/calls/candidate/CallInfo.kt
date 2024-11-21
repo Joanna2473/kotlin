@@ -46,7 +46,7 @@ open class CallInfo(
 
     val resolutionMode: ResolutionMode,
     val origin: FirFunctionCallOrigin = FirFunctionCallOrigin.Regular,
-    val implicitInvokeMode: ImplicitInvokeMode = ImplicitInvokeMode.None,
+    val implicitInvokeMode: ImplicitInvokeMode,
 ) : AbstractCallInfo() {
     override val isImplicitInvoke: Boolean
         get() = implicitInvokeMode != ImplicitInvokeMode.None
@@ -117,7 +117,8 @@ class CallableReferenceInfo(
     callSite, CallKind.CallableReference, name, explicitReceiver, FirEmptyArgumentList,
     isUsedAsGetClassReceiver = false, typeArguments = emptyList(),
     session, containingFile, containingDeclarations,
-    candidateForCommonInvokeReceiver = null, resolutionMode = ResolutionMode.ContextIndependent, origin
+    candidateForCommonInvokeReceiver = null, resolutionMode = ResolutionMode.ContextIndependent, origin,
+    implicitInvokeMode = ImplicitInvokeMode.None,
 ) {
     override fun copy(
         callKind: CallKind,

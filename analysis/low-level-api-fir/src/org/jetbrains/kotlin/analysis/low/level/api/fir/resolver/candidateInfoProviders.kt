@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.fir.resolve.calls.ImplicitReceiverValue
 import org.jetbrains.kotlin.fir.resolve.calls.ReceiverValue
 import org.jetbrains.kotlin.fir.resolve.calls.candidate.CallInfo
 import org.jetbrains.kotlin.fir.resolve.calls.candidate.CallKind
+import org.jetbrains.kotlin.fir.resolve.calls.candidate.ImplicitInvokeMode
 import org.jetbrains.kotlin.fir.resolve.calls.candidate.buildCallKindWithCustomResolutionSequence
 import org.jetbrains.kotlin.fir.types.coneType
 import org.jetbrains.kotlin.fir.types.receiverType
@@ -55,6 +56,7 @@ abstract class AbstractCandidateInfoProvider(
             resolutionMode = ResolutionMode.ContextIndependent,
             isUsedAsGetClassReceiver = false,
             session = firSession,
+            implicitInvokeMode = ImplicitInvokeMode.None,
         )
     }
 

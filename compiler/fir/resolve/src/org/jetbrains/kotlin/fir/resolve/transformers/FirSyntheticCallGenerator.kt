@@ -420,6 +420,7 @@ class FirSyntheticCallGenerator(
         containingFile = components.file,
         containingDeclarations = components.containingDeclarations,
         resolutionMode = resolutionMode,
+        implicitInvokeMode = ImplicitInvokeMode.None,
     )
 
     private fun generateSyntheticSelectTypeParameter(
