@@ -3,13 +3,15 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 @file:OptIn(ExperimentalStdlibApi::class)
+
 package test.concurrent
 
 import kotlin.concurrent.*
 import kotlin.test.*
 
 class AtomicIntArrayTest {
-    @Test fun ctor() {
+    @Test
+    fun ctor() {
         val arr1 = AtomicIntArray(6)
         assertEquals(0, arr1.loadAt(4))
         assertEquals(6, arr1.size)
@@ -26,7 +28,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun getter() {
+    @Test
+    fun getter() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         for (i in 0 until atomicIntArr.size) {
             assertEquals(i * 10, atomicIntArr.loadAt(i), "getter: FAIL $i")
@@ -43,7 +46,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun setter() {
+    @Test
+    fun setter() {
         val atomicIntArr = AtomicIntArray(10)
         for (i in 0 until atomicIntArr.size) {
             atomicIntArr.storeAt(i, i * 10)
@@ -63,7 +67,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun addAndFetchAt() {
+    @Test
+    fun addAndFetchAt() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         assertEquals(110, atomicIntArr.addAndFetchAt(1, 100), "addAndFetchAt: FAIL 1")
         assertEquals(110, atomicIntArr.loadAt(1), "addAndFetchAt: FAIL 2")
@@ -81,7 +86,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun compareAndExchange() {
+    @Test
+    fun compareAndExchange() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         val res1 = atomicIntArr.compareAndExchangeAt(2, 20, 222) // success
         assertTrue(res1 == 20 && atomicIntArr.loadAt(2) == 222, "compareAndExchange: FAIL 1")
@@ -103,7 +109,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun compareAndSetAt() {
+    @Test
+    fun compareAndSetAt() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         val res1 = atomicIntArr.compareAndSetAt(2, 20, 222) // success
         assertTrue(res1 && atomicIntArr.loadAt(2) == 222, "compareAndSetAt: FAIL 1")
@@ -125,7 +132,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun exchangeAt() {
+    @Test
+    fun exchangeAt() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         assertEquals(20, atomicIntArr.exchangeAt(2, 200), "exchangeAt: FAIL 1")
         assertEquals(200, atomicIntArr.exchangeAt(2, 2000), "exchangeAt: FAIL 2")
@@ -142,7 +150,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun fetchAndAddAt() {
+    @Test
+    fun fetchAndAddAt() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         assertEquals(10, atomicIntArr.fetchAndAddAt(1, 100), "fetchAndAddAt: FAIL 1")
         assertEquals(110, atomicIntArr.loadAt(1), "fetchAndAddAt: FAIL 2")
@@ -160,7 +169,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun fetchAndIncrementAt() {
+    @Test
+    fun fetchAndIncrementAt() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         assertEquals(10, atomicIntArr.fetchAndIncrementAt(1), "fetchAndIncrementAt: FAIL 1")
         assertEquals(11, atomicIntArr.loadAt(1), "fetchAndIncrementAt: FAIL 2")
@@ -178,7 +188,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun incrementAndFetchAt() {
+    @Test
+    fun incrementAndFetchAt() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         assertEquals(11, atomicIntArr.incrementAndFetchAt(1), "incrementAndFetchAt: FAIL 1")
         assertEquals(11, atomicIntArr.loadAt(1), "incrementAndFetchAt: FAIL 2")
@@ -196,7 +207,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun fetchAndDecrementAt() {
+    @Test
+    fun fetchAndDecrementAt() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         assertEquals(10, atomicIntArr.fetchAndDecrementAt(1), "fetchAndDecrementAt: FAIL 1")
         assertEquals(9, atomicIntArr.loadAt(1), "fetchAndDecrementAt: FAIL 2")
@@ -214,7 +226,8 @@ class AtomicIntArrayTest {
         }
     }
 
-    @Test fun decrementAndFetchAt() {
+    @Test
+    fun decrementAndFetchAt() {
         val atomicIntArr = AtomicIntArray(10) { i: Int -> i * 10 }
         assertEquals(9, atomicIntArr.decrementAndFetchAt(1), "decrementAndFetchAt: FAIL 1")
         assertEquals(9, atomicIntArr.loadAt(1), "decrementAndFetchAt: FAIL 2")
@@ -234,7 +247,8 @@ class AtomicIntArrayTest {
 }
 
 class AtomicLongArrayTest {
-    @Test fun ctor() {
+    @Test
+    fun ctor() {
         val arr1 = AtomicLongArray(6)
         assertEquals(arr1.loadAt(4), 0L)
         assertEquals(arr1.size, 6)
@@ -250,7 +264,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun getter() {
+    @Test
+    fun getter() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         for (i in 0 until atomicLongArr.size) {
             assertEquals(i * 10L, atomicLongArr.loadAt(i), "getter: FAIL $i")
@@ -267,7 +282,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun setter() {
+    @Test
+    fun setter() {
         val atomicLongArr = AtomicLongArray(10)
         for (i in 0 until atomicLongArr.size) {
             atomicLongArr.storeAt(i, i * 10L)
@@ -287,7 +303,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun addAndFetchAt() {
+    @Test
+    fun addAndFetchAt() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         assertEquals(110L, atomicLongArr.addAndFetchAt(1, 100L), "addAndFetchAt: FAIL 1")
         assertEquals(110L, atomicLongArr.loadAt(1), "addAndFetchAt: FAIL 2")
@@ -305,7 +322,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun compareAndExchangeAt() {
+    @Test
+    fun compareAndExchangeAt() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         val res1 = atomicLongArr.compareAndExchangeAt(2, 20L, 222L) // success
         assertTrue(res1 == 20L && atomicLongArr.loadAt(2) == 222L, "compareAndExchangeAt: FAIL 1")
@@ -327,7 +345,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun compareAndSetAt() {
+    @Test
+    fun compareAndSetAt() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         val res1 = atomicLongArr.compareAndSetAt(2, 20L, 222L) // success
         assertTrue(res1 && atomicLongArr.loadAt(2) == 222L, "compareAndSetAt: FAIL 1")
@@ -349,7 +368,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun exchangeAt() {
+    @Test
+    fun exchangeAt() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         assertEquals(20L, atomicLongArr.exchangeAt(2, 200L), "exchangeAt: FAIL 1")
         assertEquals(200L, atomicLongArr.exchangeAt(2, 2000L), "exchangeAt: FAIL 2")
@@ -366,7 +386,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun fetchAndAddAt() {
+    @Test
+    fun fetchAndAddAt() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         assertEquals(10L, atomicLongArr.fetchAndAddAt(1, 100L), "fetchAndAddAt: FAIL 1")
         assertEquals(110L, atomicLongArr.loadAt(1), "fetchAndAddAt: FAIL 2")
@@ -384,7 +405,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun fetchAndIncrementAt() {
+    @Test
+    fun fetchAndIncrementAt() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         assertEquals(10L, atomicLongArr.fetchAndIncrementAt(1), "fetchAndIncrementAt: FAIL 1")
         assertEquals(11L, atomicLongArr.loadAt(1), "fetchAndIncrementAt: FAIL 2")
@@ -402,7 +424,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun incrementAndFetchAt() {
+    @Test
+    fun incrementAndFetchAt() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         assertEquals(11L, atomicLongArr.incrementAndFetchAt(1), "incrementAndFetchAt: FAIL 1")
         assertEquals(11L, atomicLongArr.loadAt(1), "incrementAndFetchAt: FAIL 2")
@@ -420,7 +443,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun fetchAndDecrementAt() {
+    @Test
+    fun fetchAndDecrementAt() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         assertEquals(10L, atomicLongArr.fetchAndDecrementAt(1), "fetchAndDecrementAt: FAIL 1")
         assertEquals(9L, atomicLongArr.loadAt(1), "fetchAndDecrementAt: FAIL 2")
@@ -438,7 +462,8 @@ class AtomicLongArrayTest {
         }
     }
 
-    @Test fun decrementAndFetchAt() {
+    @Test
+    fun decrementAndFetchAt() {
         val atomicLongArr = AtomicLongArray(10) { i: Int -> i * 10L }
         assertEquals(9L, atomicLongArr.decrementAndFetchAt(1), "decrementAndFetchAt: FAIL 1")
         assertEquals(9L, atomicLongArr.loadAt(1), "decrementAndFetchAt: FAIL 2")
@@ -458,7 +483,8 @@ class AtomicLongArrayTest {
 }
 
 class AtomicArrayTest {
-    @Test fun ctor() {
+    @Test
+    fun ctor() {
         val arr2 = AtomicArray<Data?>(10) { null }
         assertEquals(arr2.loadAt(4), null)
         assertEquals(arr2.size, 10)
@@ -471,7 +497,8 @@ class AtomicArrayTest {
         }
     }
 
-    @Test fun getter() {
+    @Test
+    fun getter() {
         val refArr = AtomicArray<Data?>(10) { i -> Data(i) }
         for (i in 0 until refArr.size) {
             assertEquals(Data(i), refArr.loadAt(i), "getter: FAIL $i")
@@ -488,7 +515,8 @@ class AtomicArrayTest {
         }
     }
 
-    @Test fun setter() {
+    @Test
+    fun setter() {
         val refArr = AtomicArray<Data?>(10) { null }
         for (i in 0 until refArr.size) {
             refArr.storeAt(i, Data(i))
@@ -508,7 +536,8 @@ class AtomicArrayTest {
         }
     }
 
-    @Test fun compareAndExchangeAt() {
+    @Test
+    fun compareAndExchangeAt() {
         val refArr = AtomicArray<Data?>(10) { null }
         val newValue = Data(1)
         val res1 = refArr.compareAndExchangeAt(3, null, newValue)
@@ -529,7 +558,8 @@ class AtomicArrayTest {
         }
     }
 
-    @Test fun compareAndSetAt() {
+    @Test
+    fun compareAndSetAt() {
         val refArr = AtomicArray<Data?>(10) { null }
         val newValue = Data(1)
         val res1 = refArr.compareAndSetAt(3, null, newValue)
@@ -550,7 +580,8 @@ class AtomicArrayTest {
         }
     }
 
-    @Test fun exchangeAt() {
+    @Test
+    fun exchangeAt() {
         val refArr = AtomicArray<Data?>(10) { null }
         val res4 = refArr.exchangeAt(4, Data(1))
         assertEquals(null, res4, "exchangeAt: FAIL 1")
