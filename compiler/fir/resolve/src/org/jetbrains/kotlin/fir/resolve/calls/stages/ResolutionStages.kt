@@ -40,7 +40,6 @@ import org.jetbrains.kotlin.resolve.calls.inference.model.ConstraintKind
 import org.jetbrains.kotlin.resolve.calls.inference.model.NewConstraintSystemImpl
 import org.jetbrains.kotlin.resolve.calls.inference.model.SimpleConstraintSystemConstraintPosition
 import org.jetbrains.kotlin.resolve.calls.inference.runTransaction
-import org.jetbrains.kotlin.resolve.calls.tasks.ExplicitReceiverKind.DISPATCH_RECEIVER
 import org.jetbrains.kotlin.resolve.calls.tower.CandidateApplicability
 import org.jetbrains.kotlin.resolve.deprecation.DeprecationLevelValue
 import org.jetbrains.kotlin.resolve.descriptorUtil.DYNAMIC_EXTENSION_FQ_NAME
@@ -553,19 +552,29 @@ internal object MapArguments : ResolutionStage() {
             return
         }
 
-        // We enforce the following invariant:
-        // If the call-site is an implicit invoke-call with receiver,
-        // and the function type has both, context parameters and a receiver,
-        // then we MUST pass context arguments implicitly.
-        // Otherwise, we would allow calling `f: context(String, Int) Boolean.() -> Unit` with `"".f(1, true)`.
-        // See compiler/fir/analysis-tests/testData/resolve/contextParameters/invoke.kt
-        if (callInfo.implicitInvokeMode == ImplicitInvokeMode.ReceiverAsArgument &&
+        if (mapping.diagnostics.isEmpty()) {
+            checkForInconsistentContextArguments(candidate, sink)
+        }
+
+        candidate.initializeMapping(arguments, mapping, function, sink)
+    }
+
+    /**
+     * We enforce the following invariant:
+     * If the call-site is an implicit invoke-call with receiver,
+     * and the function type has both, context parameters and a receiver,
+     * then we MUST pass context arguments implicitly.
+     * Otherwise, we would allow calling `f: context(String, Int) Boolean.() -> Unit` with `"".f(1, true)`.
+     * See compiler/testData/diagnostics/tests/contextParameters/invoke.fir.kt
+     */
+    private fun checkForInconsistentContextArguments(
+        candidate: Candidate, sink: CheckerSink,
+    ) {
+        if (candidate.callInfo.implicitInvokeMode == ImplicitInvokeMode.ReceiverAsArgument &&
             candidate.dispatchReceiver?.expression?.resolvedType?.hasContextReceivers == true
         ) {
             sink.reportDiagnostic(InconsistentContextArguments)
         }
-
-        candidate.initializeMapping(arguments, mapping, function, sink)
     }
 
     private suspend fun Candidate.tryMappingWithContextArguments(
