@@ -29800,6 +29800,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       }
 
       @Test
+      @TestMetadata("filterByEntriesFail.kt")
+      public void testFilterByEntriesFail() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/filterByEntriesFail.kt");
+      }
+
+      @Test
       @TestMetadata("incorrectJava.kt")
       public void testIncorrectJava() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/incorrectJava.kt");
@@ -29916,12 +29922,6 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
     @TestMetadata("compiler/fir/analysis-tests/testData/resolve/withExpectedType")
     @TestDataPath("$PROJECT_ROOT")
     public class WithExpectedType {
-      @Test
-      @TestMetadata("enum.kt")
-      public void testEnum() {
-        runTest("compiler/fir/analysis-tests/testData/resolve/withExpectedType/enum.kt");
-      }
-
       @Test
       @TestMetadata("nested.kt")
       public void testNested() {

@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.fir.diagnostics.*
 import org.jetbrains.kotlin.fir.expressions.*
 import org.jetbrains.kotlin.fir.expressions.builder.buildResolvedReifiedParameterReference
 import org.jetbrains.kotlin.fir.getPrimaryConstructorSymbol
+import org.jetbrains.kotlin.fir.languageVersionSettings
 import org.jetbrains.kotlin.fir.references.*
 import org.jetbrains.kotlin.fir.references.builder.buildBackingFieldReference
 import org.jetbrains.kotlin.fir.references.builder.buildDelayedNameReference
@@ -169,6 +170,30 @@ class FirCallResolver(
             }
         }
 
+        return collector.allCandidates.map { candidate ->
+            OverloadCandidate(candidate, isInBestCandidates = candidate in result.candidates)
+        }
+    }
+
+    fun collectAllPropertyCandidates(
+        qualifiedAccess: FirQualifiedAccessExpression,
+        name: Name,
+        containingDeclarations: List<FirDeclaration> = transformer.components.containingDeclarations,
+        resolutionContext: ResolutionContext = transformer.resolutionContext,
+        resolutionMode: ResolutionMode,
+    ): List<OverloadCandidate> {
+        require(qualifiedAccess !is FirFunctionCall)
+        val collector = AllCandidatesCollector(components, components.resolutionStageRunner)
+        var result = collectCandidates(
+            qualifiedAccess = qualifiedAccess,
+            name = name,
+            origin = FirFunctionCallOrigin.Regular,
+            containingDeclarations = containingDeclarations,
+            resolutionContext = resolutionContext,
+            collector = collector,
+            resolutionMode = resolutionMode,
+            forceCallKind = CallKind.VariableAccess,
+        )
         return collector.allCandidates.map { candidate ->
             OverloadCandidate(candidate, isInBestCandidates = candidate in result.candidates)
         }
@@ -352,7 +377,8 @@ class FirCallResolver(
         val reducedCandidates = result.candidates
         if (!acceptCandidates(reducedCandidates)) return qualifiedAccess
 
-        val mayDelay = resolutionMode is ResolutionMode.ContextDependentWithInfo && resolutionMode.isFunctionArgument
+        val mayDelay = session.languageVersionSettings.supportsContextSensitiveResolution &&
+                resolutionMode is ResolutionMode.ContextDependentWithInfo && resolutionMode.isFunctionArgument
         val nameReference = when {
             reducedCandidates.isEmpty() && qualifiedAccess.explicitReceiver == null && mayDelay ->
                 buildDelayedNameReference {

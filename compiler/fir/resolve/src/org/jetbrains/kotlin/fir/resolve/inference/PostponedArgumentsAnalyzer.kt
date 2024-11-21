@@ -79,9 +79,10 @@ class PostponedArgumentsAnalyzer(
 
             is ConeDelayedReferenceAtom -> {
                 argument.analyzed = true
-                val mode = argument.expectedType
-                    ?.let { ResolutionMode.WithExpectedType(it.toFirResolvedTypeRef()) }
-                    ?: ResolutionMode.ContextIndependent
+                val mode = when (val expectedType = argument.expectedType) {
+                    null -> ResolutionMode.ContextIndependent
+                    else -> ResolutionMode.WithExpectedType(expectedType.toFirResolvedTypeRef())
+                }
                 val expr = argument.expression
                 callResolver.resolveVariableAccessAndSelectCandidate(expr, false, false, expr, mode)
             }

@@ -25181,6 +25181,12 @@ public class TieredBackendJvmLightTreeTestGenerated extends AbstractTieredBacken
       }
 
       @Test
+      @TestMetadata("filterByEntries.kt")
+      public void testFilterByEntries() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/filterByEntries.kt");
+      }
+
+      @Test
       @TestMetadata("functionCall.kt")
       public void testFunctionCall() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/functionCall.kt");
@@ -25259,6 +25265,17 @@ public class TieredBackendJvmLightTreeTestGenerated extends AbstractTieredBacken
       @TestMetadata("superAccessToJavaField.kt")
       public void testSuperAccessToJavaField() {
         runTest("compiler/fir/analysis-tests/testData/resolve/visibility/superAccessToJavaField.kt");
+      }
+    }
+
+    @Nested
+    @TestMetadata("compiler/fir/analysis-tests/testData/resolve/withExpectedType")
+    @TestDataPath("$PROJECT_ROOT")
+    public class WithExpectedType {
+      @Test
+      @TestMetadata("enum.kt")
+      public void testEnum() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/withExpectedType/enum.kt");
       }
     }
   }

@@ -10,8 +10,11 @@ import org.jetbrains.kotlin.builtins.functions.FunctionTypeKind
 import org.jetbrains.kotlin.builtins.functions.isBasicFunctionOrKFunction
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
+import org.jetbrains.kotlin.fir.declarations.FirRegularClass
+import org.jetbrains.kotlin.fir.declarations.staticScope
 import org.jetbrains.kotlin.fir.expressions.*
 import org.jetbrains.kotlin.fir.references.FirDelayedNameReference
+import org.jetbrains.kotlin.fir.resolve.singleDefiniteType
 import org.jetbrains.kotlin.fir.resolve.calls.*
 import org.jetbrains.kotlin.fir.resolve.calls.candidate.Candidate
 import org.jetbrains.kotlin.fir.resolve.calls.candidate.CheckerSink
@@ -23,7 +26,16 @@ import org.jetbrains.kotlin.fir.resolve.inference.extractLambdaInfoFromFunctionT
 import org.jetbrains.kotlin.fir.resolve.inference.model.ConeArgumentConstraintPosition
 import org.jetbrains.kotlin.fir.resolve.inference.model.ConeExplicitTypeParameterConstraintPosition
 import org.jetbrains.kotlin.fir.resolve.inference.model.ConeReceiverConstraintPosition
+import org.jetbrains.kotlin.fir.resolve.toRegularClassSymbol
+import org.jetbrains.kotlin.fir.scopes.FirContainingNamesAwareScope
+import org.jetbrains.kotlin.fir.scopes.FirFilteringNamesAwareScope
+import org.jetbrains.kotlin.fir.scopes.getProperties
 import org.jetbrains.kotlin.fir.symbols.ConeTypeParameterLookupTag
+import org.jetbrains.kotlin.fir.symbols.impl.FirCallableSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirEnumEntrySymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirFieldSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirVariableSymbol
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.types.impl.ConeTypeParameterTypeImpl
 import org.jetbrains.kotlin.name.StandardClassIds
@@ -102,16 +114,13 @@ internal object ArgumentCheckingProcessor {
     // -------------------------------------------- Real implementation --------------------------------------------
 
     private fun ArgumentContext.resolveArgumentExpression(atom: ConeResolutionAtom) {
+        val expression = atom.expression
         when (atom) {
-            is ConeResolutionAtomWithPostponedChild -> when (atom.expression) {
-                is FirAnonymousFunctionExpression -> preprocessLambdaArgument(atom)
-                is FirCallableReferenceAccess -> preprocessCallableReference(atom)
-                is FirQualifiedAccessExpression -> if (atom.expression.calleeReference is FirDelayedNameReference) {
-                    val expression = atom.expression
-                    val postponedAtom = ConeDelayedReferenceAtom(expression, expectedType)
-                    atom.subAtom = postponedAtom
-                    candidate.addPostponedAtom(postponedAtom)
-                }
+            is ConeResolutionAtomWithPostponedChild -> when {
+                expression is FirAnonymousFunctionExpression -> preprocessLambdaArgument(atom)
+                expression is FirCallableReferenceAccess -> preprocessCallableReference(atom)
+                expression is FirQualifiedAccessExpression && expression.calleeReference is FirDelayedNameReference ->
+                    preprocessDelayedReference(atom)
             }
 
             is ConeSimpleLeafResolutionAtom, is ConeAtomWithCandidate -> resolvePlainExpressionArgument(atom)
@@ -310,6 +319,39 @@ internal object ArgumentCheckingProcessor {
     private fun ArgumentContext.preprocessLambdaArgument(atom: ConeResolutionAtomWithPostponedChild): ConePostponedResolvedAtom {
         createLambdaWithTypeVariableAsExpectedTypeAtomIfNeeded(atom)?.let { return it }
         return createResolvedLambdaAtom(atom, duringCompletion = false, returnTypeVariable = null)
+    }
+
+    private fun ArgumentContext.preprocessDelayedReference(atom: ConeResolutionAtomWithPostponedChild) {
+        val expression = atom.expression
+        require(expression is FirQualifiedAccessExpression)
+        val reference = expression.calleeReference
+        require(reference is FirDelayedNameReference)
+
+        val postponedAtom = ConeDelayedReferenceAtom(expression, expectedType)
+        atom.subAtom = postponedAtom
+        candidate.addPostponedAtom(postponedAtom)
+
+        val contextClass: FirRegularClass? = expectedType?.singleDefiniteType(session)?.toRegularClassSymbol(session)?.fir
+        if (contextClass == null) return
+
+        val propertyFilter = { symbol: FirCallableSymbol<*> ->
+            (symbol is FirPropertySymbol && symbol.receiverParameter == null) || (symbol is FirFieldSymbol) || (symbol is FirEnumEntrySymbol)
+        }
+
+        fun FirContainingNamesAwareScope?.getProperties(): List<FirVariableSymbol<*>> {
+            if (this == null) return emptyList()
+            return FirFilteringNamesAwareScope(this, propertyFilter).getProperties(reference.name)
+        }
+
+        val staticProperties = contextClass.staticScope(session, context.bodyResolveComponents.scopeSession).getProperties()
+        val companionValue = contextClass.companionObjectSymbol?.fir?.let {
+            ImplicitDispatchReceiverValue(it.symbol, session, context.bodyResolveComponents.scopeSession, filter = propertyFilter)
+        }
+        val companionProperties = companionValue?.scope(session, context.bodyResolveComponents.scopeSession).getProperties()
+
+        if (staticProperties.isEmpty() && companionProperties.isEmpty()) {
+            reportDiagnostic(ResolvedWithLowPriority)
+        }
     }
 
     private fun ArgumentContext.createLambdaWithTypeVariableAsExpectedTypeAtomIfNeeded(

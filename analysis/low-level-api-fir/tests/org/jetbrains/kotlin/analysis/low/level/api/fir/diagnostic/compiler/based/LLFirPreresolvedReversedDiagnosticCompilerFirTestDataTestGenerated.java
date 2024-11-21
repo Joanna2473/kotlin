@@ -5426,6 +5426,18 @@ public class LLFirPreresolvedReversedDiagnosticCompilerFirTestDataTestGenerated 
       }
 
       @Test
+      @TestMetadata("filterByEntries.kt")
+      public void testFilterByEntries() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/filterByEntries.kt");
+      }
+
+      @Test
+      @TestMetadata("filterByEntriesFail.kt")
+      public void testFilterByEntriesFail() {
+        runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/filterByEntriesFail.kt");
+      }
+
+      @Test
       @TestMetadata("functionCall.kt")
       public void testFunctionCall() {
         runTest("compiler/fir/analysis-tests/testData/resolve/unqualifiedEnum/functionCall.kt");
