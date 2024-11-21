@@ -9,8 +9,6 @@ import kotlinx.cinterop.NativePtr
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlin.native.internal.*
 import kotlin.reflect.*
-import kotlin.concurrent.*
-import kotlin.native.concurrent.*
 
 /**
  * An [Int] value that may be updated atomically.
@@ -64,9 +62,6 @@ public actual class AtomicInt public actual constructor(
     /**
      * Atomically stores the given [new value][newValue] into this [AtomicInt] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
-     *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
      *
      * Comparison of values is done by value.
      */
@@ -152,7 +147,7 @@ public actual class AtomicLong public actual constructor(
         @get:Deprecated("To read the atomic value use load().", ReplaceWith("this.load()"))
         @set:Deprecated("To atomically set the new value use store(newValue: Long).", ReplaceWith("this.store(newValue)"))
         @Volatile public var value: Long
-)  {
+) {
     /**
      * Atomically loads the value from this [AtomicLong].
      */
@@ -188,9 +183,6 @@ public actual class AtomicLong public actual constructor(
     /**
      * Atomically stores the given [new value][newValue] into this [AtomicLong] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
-     *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
      *
      * Comparison of values is done by value.
      */
@@ -308,9 +300,6 @@ public actual class AtomicBoolean actual constructor(private var value: Boolean)
      * Atomically stores the given [new value][newValue] into this [AtomicBoolean] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
-     *
      * Comparison of values is done by value.
      */
     public actual fun compareAndExchange(expectedValue: Boolean, newValue: Boolean): Boolean = this::value.compareAndExchangeField(expectedValue, newValue)
@@ -376,9 +365,6 @@ public actual class AtomicReference<T> actual constructor(
     /**
      * Atomically stores the given [new value][newValue] into this [AtomicReference] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
-     *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
      *
      * Comparison of values is done by reference.
      */
@@ -467,7 +453,7 @@ public class AtomicNativePtr(
 }
 
 
-private fun idString(value: Any) = "${value.hashCode().toUInt().toString(16)}"
+private fun idString(value: Any) = value.hashCode().toUInt().toString(16)
 
 private fun debugString(value: Any?): String {
     if (value == null) return "null"
@@ -602,7 +588,7 @@ internal external fun KMutableProperty0<Short>.getAndAddField(delta: Short): Sho
  */
 @PublishedApi
 @TypedIntrinsic(IntrinsicType.GET_AND_ADD_FIELD)
-internal external fun KMutableProperty0<Int>.getAndAddField(newValue: Int): Int
+internal external fun KMutableProperty0<Int>.getAndAddField(delta: Int): Int
 
 /**
  * Atomically adds the given [delta] to the value of the field referenced by [this] and returns the old value of the field.
@@ -619,7 +605,7 @@ internal external fun KMutableProperty0<Int>.getAndAddField(newValue: Int): Int
  */
 @PublishedApi
 @TypedIntrinsic(IntrinsicType.GET_AND_ADD_FIELD)
-internal external fun KMutableProperty0<Long>.getAndAddField(newValue: Long): Long
+internal external fun KMutableProperty0<Long>.getAndAddField(delta: Long): Long
 
 /**
  * Atomically adds the given [delta] to the value of the field referenced by [this] and returns the old value of the field.
@@ -636,4 +622,4 @@ internal external fun KMutableProperty0<Long>.getAndAddField(newValue: Long): Lo
  */
 @PublishedApi
 @TypedIntrinsic(IntrinsicType.GET_AND_ADD_FIELD)
-internal external fun KMutableProperty0<Byte>.getAndAddField(newValue: Byte): Byte
+internal external fun KMutableProperty0<Byte>.getAndAddField(delta: Byte): Byte

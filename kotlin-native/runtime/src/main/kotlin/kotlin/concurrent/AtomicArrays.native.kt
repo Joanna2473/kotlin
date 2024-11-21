@@ -106,9 +106,6 @@ public actual class AtomicIntArray {
      * Atomically stores the [new value][newValue] into the element of this [AtomicIntArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
-     *
      * Comparison of values is done by value.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
@@ -406,9 +403,6 @@ public actual class AtomicLongArray {
      * Atomically stores the [new value][newValue] into the element of this [AtomicLongArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
      *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
-     *
      * Comparison of values is done by value.
      *
      * @throws IndexOutOfBoundsException if the [index] is out of bounds of this array.
@@ -696,9 +690,6 @@ public actual class AtomicArray<T> {
     /**
      * Atomically stores the [new value][newValue] into the element of this [AtomicArray] at the given [index]
      * if the current value equals the [expected value][expectedValue] and returns the old value of the element in any case.
-     *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
      *
      * Comparison of values is done by reference.
      *

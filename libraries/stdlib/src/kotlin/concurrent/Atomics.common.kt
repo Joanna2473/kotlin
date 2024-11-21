@@ -170,9 +170,6 @@ public expect class AtomicLong public constructor(value: Long) {
      * Atomically stores the given [new value][newValue] into this [AtomicLong] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
-     *
      * Comparison of values is done by value.
      */
     public fun compareAndExchange(expectedValue: Long, newValue: Long): Long
@@ -284,9 +281,6 @@ public expect class AtomicBoolean public constructor(value: Boolean) {
      * Atomically stores the given [new value][newValue] into this [AtomicBoolean] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
      *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
-     *
      * Comparison of values is done by value.
      */
     public fun compareAndExchange(expectedValue: Boolean, newValue: Boolean): Boolean
@@ -343,9 +337,6 @@ public expect class AtomicReference<T> public constructor(value: T) {
     /**
      * Atomically stores the given [new value][newValue] into this [AtomicReference] if the current value equals the [expected value][expectedValue]
      * and returns the old value in any case.
-     *
-     * This operation has so-called strong semantics,
-     * meaning that it returns false if and only if current and expected values are not equal.
      *
      * Comparison of values is done by reference.
      */
