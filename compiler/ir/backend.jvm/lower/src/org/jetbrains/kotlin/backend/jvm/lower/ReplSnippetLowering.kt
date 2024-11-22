@@ -23,7 +23,6 @@ import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
-import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrComposite
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
@@ -116,8 +115,6 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                 .transform(lambdaPatcher, ScriptFixLambdasTransformerContext())
         }
 
-        irSnippetClass.dump()
-
         irSnippetClass.addFunction {
             name = Name.identifier("eval")
             startOffset = SYNTHETIC_OFFSET
@@ -166,7 +163,8 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                             +irReturn(patchedStatement as IrExpression)
                         } else {
                             when (patchedStatement) {
-                                is IrSimpleFunction -> {
+                                is IrSimpleFunction,
+                                is IrClass -> {
                                     patchedStatement.visibility = DescriptorVisibilities.PUBLIC
                                     irSnippetClass.declarations.add(patchedStatement)
                                 }
