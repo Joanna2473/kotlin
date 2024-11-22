@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.implementing
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.utils.whenEvaluated
 
-class NpmResolverPluginApplier(
+internal class NpmResolverPluginApplier(
     private val nodeJsRootApply: (Project) -> AbstractNodeJsRootExtension,
     private val singleNodeJsApply: (Project) -> Unit,
 ) {
