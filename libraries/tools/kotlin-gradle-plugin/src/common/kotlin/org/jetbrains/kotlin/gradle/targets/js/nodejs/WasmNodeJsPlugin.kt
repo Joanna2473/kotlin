@@ -23,10 +23,10 @@ open class WasmNodeJsPlugin : Plugin<Project> {
     companion object : HasPlatformDisambiguate by WasmPlatformDisambiguate {
         fun apply(project: Project): WasmNodeJsEnvSpec {
             project.plugins.apply(WasmNodeJsPlugin::class.java)
-            return project.extensions.getByName(extensionName(NodeJsEnvSpec.EXTENSION_NAME)) as WasmNodeJsEnvSpec
+            return project.extensions.getByName(WasmNodeJsEnvSpec.EXTENSION_NAME) as WasmNodeJsEnvSpec
         }
 
         val Project.kotlinNodeJsEnvSpec: WasmNodeJsEnvSpec
-            get() = extensions.getByName(extensionName(NodeJsEnvSpec.EXTENSION_NAME)).castIsolatedKotlinPluginClassLoaderAware()
+            get() = extensions.getByName(WasmNodeJsEnvSpec.EXTENSION_NAME).castIsolatedKotlinPluginClassLoaderAware()
     }
 }
