@@ -7,20 +7,20 @@ package org.jetbrains.kotlin.gradle.targets.js.npm
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin
 
-class NpmResolverPlugin : Plugin<Project> {
+class WasmNpmResolverPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         NpmResolverPluginApplier(
-            { NodeJsRootPlugin.apply(project.rootProject) },
-            { NodeJsPlugin.apply(project) },
+            { WasmNodeJsRootPlugin.apply(project.rootProject) },
+            { WasmNodeJsPlugin.apply(project) },
         ).apply(project)
     }
 
     companion object {
         fun apply(project: Project) {
-            project.plugins.apply(NpmResolverPlugin::class.java)
+            project.plugins.apply(WasmNpmResolverPlugin::class.java)
         }
     }
 }
