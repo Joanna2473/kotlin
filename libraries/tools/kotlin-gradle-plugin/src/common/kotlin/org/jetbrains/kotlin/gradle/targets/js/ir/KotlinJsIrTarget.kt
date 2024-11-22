@@ -18,8 +18,8 @@ import org.jetbrains.kotlin.gradle.targets.js.*
 import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenExec
 import org.jetbrains.kotlin.gradle.targets.js.dsl.*
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTargetConfigurator.Companion.configureJsDefaultOptions
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmResolverForWasmPlugin
@@ -31,7 +31,7 @@ import org.jetbrains.kotlin.util.capitalizeDecapitalize.capitalizeAsciiOnly
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 import org.jetbrains.kotlin.utils.addIfNotNull
 import javax.inject.Inject
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsRootForWasmExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension as wasmKotlinNodeJsRootExtension
 
 abstract class KotlinJsIrTarget
 @Inject
@@ -201,7 +201,7 @@ constructor(
             it.versions.value(
                 compilation.targetVariant(
                     { project.rootProject.kotlinNodeJsRootExtension.versions },
-                    { project.rootProject.kotlinNodeJsRootForWasmExtension.versions },
+                    { project.rootProject.wasmKotlinNodeJsRootExtension.versions },
                 )
             ).disallowChanges()
             it.inputDir.set(linkTask.flatMap { it.destinationDirectory })
@@ -239,8 +239,8 @@ constructor(
         if (wasmTargetType != KotlinWasmTargetType.WASI) {
             commonLazy
         } else {
-            NodeJsForWasmPlugin.apply(project)
-            NodeJsRootForWasmPlugin.apply(project.rootProject)
+            WasmNodeJsPlugin.apply(project)
+            WasmNodeJsRootPlugin.apply(project.rootProject)
         }
 
         addSubTarget(KotlinNodeJsIr::class.java) {
@@ -261,7 +261,7 @@ constructor(
     private val d8LazyDelegate = lazy {
         targetVariant(
             { NodeJsRootPlugin.apply(project.rootProject) },
-            { NodeJsRootForWasmPlugin.apply(project.rootProject) },
+            { WasmNodeJsRootPlugin.apply(project.rootProject) },
         )
 
         addSubTarget(KotlinD8Ir::class.java) {

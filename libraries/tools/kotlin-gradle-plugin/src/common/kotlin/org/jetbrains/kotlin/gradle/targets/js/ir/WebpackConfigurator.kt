@@ -31,7 +31,7 @@ import org.jetbrains.kotlin.gradle.tasks.IncrementalSyncTask
 import org.jetbrains.kotlin.gradle.tasks.dependsOn
 import org.jetbrains.kotlin.gradle.utils.*
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsRootForWasmExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension as wasmKotlinNodeJsRootExtension
 
 class WebpackConfigurator(private val subTarget: KotlinJsIrSubTarget) : SubTargetConfigurator<KotlinWebpack, KotlinWebpack> {
 
@@ -39,7 +39,7 @@ class WebpackConfigurator(private val subTarget: KotlinJsIrSubTarget) : SubTarge
 
     private val nodeJsRoot = subTarget.target.targetVariant(
         { project.rootProject.kotlinNodeJsRootExtension },
-        { project.rootProject.kotlinNodeJsRootForWasmExtension },
+        { project.rootProject.wasmKotlinNodeJsRootExtension },
     )
 
     private val webpackTaskConfigurations = project.objects.domainObjectSet<Action<KotlinWebpack>>()

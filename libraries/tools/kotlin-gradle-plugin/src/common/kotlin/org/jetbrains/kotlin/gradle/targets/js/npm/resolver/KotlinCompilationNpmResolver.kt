@@ -35,8 +35,8 @@ import org.jetbrains.kotlin.gradle.targets.js.targetVariant
 import org.jetbrains.kotlin.gradle.tasks.registerTask
 import org.jetbrains.kotlin.gradle.utils.*
 import java.io.Serializable
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNpmResolutionManager as kotlinNpmResolutionManagerForWasm
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension as wasmKotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNpmResolutionManager as wasmKotlinNpmResolutionManager
 
 /**
  * See [KotlinNpmResolutionManager] for details about resolution process.
@@ -67,7 +67,7 @@ class KotlinCompilationNpmResolver(
     val publicPackageJsonTaskHolder: TaskProvider<PublicPackageJsonTask> = run {
         val npmResolutionManager = compilation.targetVariant(
             { project.kotlinNpmResolutionManager },
-            { project.kotlinNpmResolutionManagerForWasm },
+            { project.wasmKotlinNpmResolutionManager },
         )
 
         project.registerTask<PublicPackageJsonTask>(
@@ -92,7 +92,7 @@ class KotlinCompilationNpmResolver(
 
             val nodeJsRoot = compilation.targetVariant(
                 { project.rootProject.kotlinNodeJsRootExtension },
-                { project.rootProject.kotlinNodeJsForWasmRootExtension },
+                { project.rootProject.wasmKotlinNodeJsRootExtension },
             )
 
             nodeJsRoot.packageJsonUmbrellaTaskProvider.configure {

@@ -100,11 +100,11 @@ constructor(
             val project = target.project
             val nodeJsRoot = compilation.targetVariant(
                 { NodeJsRootPlugin.apply(project.rootProject) },
-                { NodeJsRootForWasmPlugin.apply(project.rootProject) },
+                { WasmNodeJsRootPlugin.apply(project.rootProject) },
             )
             val nodeJsEnvSpec = compilation.targetVariant(
                 { NodeJsPlugin.apply(project) },
-                { NodeJsForWasmPlugin.apply(project) },
+                { WasmNodeJsPlugin.apply(project) },
             )
 
             val npmProject = compilation.npmProject

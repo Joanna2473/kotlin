@@ -10,19 +10,19 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
-open class NodeJsForWasmPlugin : Plugin<Project> {
+open class WasmNodeJsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         NodeJsPluginApplier(
             platformDisambiguate = WasmPlatformDisambiguate,
             nodeJsEnvSpecKlass = WasmNodeJsEnvSpec::class,
             nodeJsEnvSpecName = WasmNodeJsEnvSpec.EXTENSION_NAME,
-            nodeJsRootApply = { NodeJsRootForWasmPlugin.apply(it) }
+            nodeJsRootApply = { WasmNodeJsRootPlugin.apply(it) }
         ).apply(target)
     }
 
     companion object : HasPlatformDisambiguate by WasmPlatformDisambiguate {
         fun apply(project: Project): WasmNodeJsEnvSpec {
-            project.plugins.apply(NodeJsForWasmPlugin::class.java)
+            project.plugins.apply(WasmNodeJsPlugin::class.java)
             return project.extensions.getByName(extensionName(NodeJsEnvSpec.EXTENSION_NAME)) as WasmNodeJsEnvSpec
         }
 
