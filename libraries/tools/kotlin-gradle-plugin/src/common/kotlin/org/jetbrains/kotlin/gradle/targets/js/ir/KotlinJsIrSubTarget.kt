@@ -28,8 +28,8 @@ import org.jetbrains.kotlin.gradle.testing.internal.configureConventions
 import org.jetbrains.kotlin.gradle.testing.internal.kotlinTestRegistry
 import org.jetbrains.kotlin.gradle.utils.domainObjectSet
 import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsWasmEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin.Companion.kotlinNodeJsEnvSpec as wasmKotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension as wasmKotlinNodeJsRootExtension
 
 interface KotlinJsIrSubTargetWithBinary : KotlinJsSubTargetDsl, Named {
     fun processBinary()
@@ -59,12 +59,12 @@ abstract class KotlinJsIrSubTarget(
 
     protected val nodeJsRoot = target.targetVariant(
         { project.rootProject.kotlinNodeJsRootExtension },
-        { project.rootProject.kotlinNodeJsForWasmRootExtension },
+        { project.rootProject.wasmKotlinNodeJsRootExtension },
     )
 
     protected val nodeJsEnvSpec = target.targetVariant(
         { project.kotlinNodeJsEnvSpec },
-        { project.kotlinNodeJsWasmEnvSpec },
+        { project.wasmKotlinNodeJsEnvSpec },
     )
 
     @ExperimentalDistributionDsl

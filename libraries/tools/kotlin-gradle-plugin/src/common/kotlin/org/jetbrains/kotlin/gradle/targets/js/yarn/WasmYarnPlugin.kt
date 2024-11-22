@@ -8,13 +8,13 @@ package org.jetbrains.kotlin.gradle.targets.js.yarn
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin.Companion.kotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 
-open class YarnForWasmPlugin : Plugin<Project> {
+open class WasmYarnPlugin : Plugin<Project> {
     override fun apply(target: Project) {
 
         YarnPluginApplier(
@@ -23,7 +23,7 @@ open class YarnForWasmPlugin : Plugin<Project> {
             yarnRootName = WasmYarnRootExtension.YARN,
             yarnEnvSpecKlass = WasmYarnRootEnvSpec::class,
             yarnEnvSpecName = WasmYarnRootEnvSpec.YARN,
-            nodeJsRootApply = { NodeJsRootForWasmPlugin.apply(it) },
+            nodeJsRootApply = { WasmNodeJsRootPlugin.apply(it) },
             nodeJsRootExtension = { it.kotlinNodeJsRootExtension },
             nodeJsEnvSpec = { it.kotlinNodeJsEnvSpec },
             lockFileDirectory = { it.resolve(LockCopyTask.KOTLIN_JS_STORE).resolve(WasmPlatformDisambiguate.platformDisambiguate) },
@@ -33,7 +33,7 @@ open class YarnForWasmPlugin : Plugin<Project> {
     companion object : HasPlatformDisambiguate by WasmPlatformDisambiguate {
         fun apply(project: Project): WasmYarnRootExtension {
             val rootProject = project.rootProject
-            rootProject.plugins.apply(YarnForWasmPlugin::class.java)
+            rootProject.plugins.apply(WasmYarnPlugin::class.java)
             return rootProject.extensions.getByName(extensionName(YarnRootExtension.YARN)) as WasmYarnRootExtension
         }
     }

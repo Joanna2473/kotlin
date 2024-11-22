@@ -16,7 +16,6 @@ import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
@@ -27,7 +26,7 @@ import org.jetbrains.kotlin.gradle.utils.CompositeProjectComponentArtifactMetada
 import org.jetbrains.kotlin.gradle.utils.`is`
 import org.jetbrains.kotlin.gradle.utils.mapToFile
 import java.io.File
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNpmResolutionManager as kotlinNpmResolutionManagerForWasm
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNpmResolutionManager as wasmKotlinNpmResolutionManager
 
 @DisableCachingByDefault
 abstract class KotlinPackageJsonTask :
@@ -85,7 +84,7 @@ abstract class KotlinPackageJsonTask :
 
             val npmResolutionManager = compilation.targetVariant(
                 { project.kotlinNpmResolutionManager },
-                { project.kotlinNpmResolutionManagerForWasm },
+                { project.wasmKotlinNpmResolutionManager },
             )
 
             val nodeJsRoot = npmProject.nodeJsRoot

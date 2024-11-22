@@ -22,8 +22,8 @@ import org.jetbrains.kotlin.gradle.targets.js.targetVariant
 import org.jetbrains.kotlin.gradle.utils.getFile
 import java.io.File
 import java.io.Serializable
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsForWasmEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin.Companion.kotlinNodeJsEnvSpec as wasmKotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension as wasmKotlinNodeJsRootExtension
 
 val KotlinJsIrCompilation.npmProject: NpmProject
     get() = NpmProject(this)
@@ -49,7 +49,7 @@ open class NpmProject(@Transient val compilation: KotlinJsIrCompilation) : Seria
     val nodeJsRoot by lazy {
         compilation.targetVariant(
             { project.rootProject.kotlinNodeJsRootExtension },
-            { project.rootProject.kotlinNodeJsForWasmRootExtension },
+            { project.rootProject.wasmKotlinNodeJsRootExtension },
         )
     }
 
@@ -57,7 +57,7 @@ open class NpmProject(@Transient val compilation: KotlinJsIrCompilation) : Seria
     val nodeJs by lazy {
         compilation.targetVariant(
             { project.kotlinNodeJsEnvSpec },
-            { project.kotlinNodeJsForWasmEnvSpec },
+            { project.wasmKotlinNodeJsEnvSpec },
         )
     }
 

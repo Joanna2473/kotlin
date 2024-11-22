@@ -7,17 +7,17 @@ package org.jetbrains.kotlin.gradle.targets.js.npm
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.implementing
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.utils.whenEvaluated
 
 class NpmResolverForWasmPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val nodeJsRoot = NodeJsRootForWasmPlugin.apply(project.rootProject)
-        NodeJsForWasmPlugin.apply(project)
+        val nodeJsRoot = WasmNodeJsRootPlugin.apply(project.rootProject)
+        WasmNodeJsPlugin.apply(project)
         project.rootProject.kotlinNodeJsRootExtension.resolver.addProject(project)
         val kotlinNodeJsTaskProvidersExtension = project.rootProject.kotlinNodeJsRootExtension
         project.whenEvaluated {

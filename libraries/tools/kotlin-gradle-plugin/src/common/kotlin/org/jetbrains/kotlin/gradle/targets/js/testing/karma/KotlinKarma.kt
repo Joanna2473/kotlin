@@ -40,8 +40,8 @@ import org.jetbrains.kotlin.gradle.utils.property
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 import org.slf4j.Logger
 import java.io.File
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec as kotlinNodeJsForWasmEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension as kotlinNodeJsForWasmRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin.Companion.kotlinNodeJsEnvSpec as wasmKotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension as wasmKotlinNodeJsRootExtension
 
 class KotlinKarma(
     @Transient override val compilation: KotlinJsIrCompilation,
@@ -57,7 +57,7 @@ class KotlinKarma(
     @Transient
     private val nodeJsRoot = compilation.targetVariant(
         { project.rootProject.kotlinNodeJsRootExtension },
-        { project.rootProject.kotlinNodeJsForWasmRootExtension },
+        { project.rootProject.wasmKotlinNodeJsRootExtension },
     )
 
     private val versions by lazy {
@@ -67,7 +67,7 @@ class KotlinKarma(
     @Transient
     private val nodeJsEnvSpec = compilation.targetVariant(
         { project.kotlinNodeJsEnvSpec },
-        { project.kotlinNodeJsForWasmEnvSpec },
+        { project.wasmKotlinNodeJsEnvSpec },
     )
 
     private val config: KarmaConfig = KarmaConfig()

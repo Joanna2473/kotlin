@@ -13,10 +13,10 @@ import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.npm.WasmNpmExtension
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnForWasmPlugin
+import org.jetbrains.kotlin.gradle.targets.js.yarn.WasmYarnPlugin
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
-open class NodeJsRootForWasmPlugin : Plugin<Project> {
+open class WasmNodeJsRootPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         val rootDirectoryName = WasmPlatformDisambiguate.platformDisambiguate
@@ -28,8 +28,8 @@ open class NodeJsRootForWasmPlugin : Plugin<Project> {
             npmName = WasmNpmExtension.EXTENSION_NAME,
             rootDirectoryName = rootDirectoryName,
             lockFileDirectory = { it.dir(LockCopyTask.KOTLIN_JS_STORE).dir(rootDirectoryName) },
-            singleNodeJsPluginApply = { NodeJsForWasmPlugin.apply(it) },
-            yarnPlugin = YarnForWasmPlugin::class,
+            singleNodeJsPluginApply = { WasmNodeJsPlugin.apply(it) },
+            yarnPlugin = WasmYarnPlugin::class,
             platformType = KotlinPlatformType.wasm,
         ).apply(target)
     }
@@ -37,7 +37,7 @@ open class NodeJsRootForWasmPlugin : Plugin<Project> {
     companion object : HasPlatformDisambiguate by WasmPlatformDisambiguate {
         fun apply(rootProject: Project): WasmNodeJsRootExtension {
             check(rootProject == rootProject.rootProject)
-            rootProject.plugins.apply(NodeJsRootForWasmPlugin::class.java)
+            rootProject.plugins.apply(WasmNodeJsRootPlugin::class.java)
             return rootProject.extensions.getByName(extensionName(NodeJsRootExtension.EXTENSION_NAME)) as WasmNodeJsRootExtension
         }
 
