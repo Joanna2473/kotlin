@@ -8,12 +8,27 @@ package org.jetbrains.kotlin.gradle.targets.js.ir
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
+import org.jetbrains.kotlin.gradle.targets.js.targetVariant
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin.Companion.kotlinNodeJsEnvSpec as wasmKotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension as wasmKotlinNodeJsRootExtension
 
 abstract class KotlinJsIrNpmBasedSubTarget(
     target: KotlinJsIrTarget,
     disambiguationClassifier: String,
 ) : KotlinJsIrSubTarget(target, disambiguationClassifier) {
+
+    protected val nodeJsRoot = target.targetVariant(
+        { project.rootProject.kotlinNodeJsRootExtension },
+        { project.rootProject.wasmKotlinNodeJsRootExtension },
+    )
+
+    protected val nodeJsEnvSpec = target.targetVariant(
+        { project.kotlinNodeJsEnvSpec },
+        { project.wasmKotlinNodeJsEnvSpec },
+    )
 
     override fun binaryInputFile(binary: JsIrBinary): Provider<RegularFile> {
         return binary.mainFileSyncPath

@@ -3905,6 +3905,8 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrNpmBas
 	public fun binaryInputFile (Lorg/jetbrains/kotlin/gradle/targets/js/ir/JsIrBinary;)Lorg/gradle/api/provider/Provider;
 	public fun binarySyncOutput (Lorg/jetbrains/kotlin/gradle/targets/js/ir/JsIrBinary;)Lorg/gradle/api/provider/Provider;
 	public fun binarySyncTaskName (Lorg/jetbrains/kotlin/gradle/targets/js/ir/JsIrBinary;)Ljava/lang/String;
+	protected final fun getNodeJsEnvSpec ()Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsEnvSpec;
+	protected final fun getNodeJsRoot ()Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsRootExtension;
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrOutputGranularity : java/lang/Enum {
@@ -3939,8 +3941,6 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrSubTar
 	public fun distribution (Lorg/gradle/api/Action;)V
 	public final fun getDisambiguationClassifier ()Ljava/lang/String;
 	public fun getName ()Ljava/lang/String;
-	protected final fun getNodeJsEnvSpec ()Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsEnvSpec;
-	protected final fun getNodeJsRoot ()Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/AbstractNodeJsRootExtension;
 	public final fun getProject ()Lorg/gradle/api/Project;
 	public final fun getTarget ()Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrTarget;
 	public final fun getTestRuns ()Lorg/gradle/api/NamedDomainObjectContainer;
