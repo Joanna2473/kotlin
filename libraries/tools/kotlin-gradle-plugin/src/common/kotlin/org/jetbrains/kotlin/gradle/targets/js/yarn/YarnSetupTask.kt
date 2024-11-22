@@ -14,8 +14,8 @@ import javax.inject.Inject
 
 @DisableCachingByDefault
 abstract class YarnSetupTask @Inject constructor(
-    settings: YarnRootEnvSpec
-) : AbstractSetupTask<YarnEnv, YarnRootEnvSpec>(settings) {
+    settings: AbstractYarnRootEnvSpec
+) : AbstractSetupTask<YarnEnv, AbstractYarnRootEnvSpec>(settings) {
 
     @get:Internal
     override val artifactPattern: String

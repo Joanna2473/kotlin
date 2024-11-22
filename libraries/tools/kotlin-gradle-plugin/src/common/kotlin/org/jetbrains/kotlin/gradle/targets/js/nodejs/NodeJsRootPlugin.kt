@@ -11,6 +11,7 @@ import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
+import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
@@ -18,8 +19,12 @@ open class NodeJsRootPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         NodeJsRootPluginApplier(
-            platformDisambiguate = null,
-            rootDirectoryName = jsPlatform,
+            platformDisambiguate = JsPlatformDisambiguate,
+            nodeJsRootKlass = NodeJsRootExtension::class,
+            nodeJsRootName = NodeJsRootExtension.EXTENSION_NAME,
+            npmKlass = NpmExtension::class,
+            npmName = NpmExtension.EXTENSION_NAME,
+            rootDirectoryName = JsPlatformDisambiguate.jsPlatform,
             lockFileDirectory = { it.dir(LockCopyTask.KOTLIN_JS_STORE) },
             singleNodeJsPluginApply = { NodeJsPlugin.apply(it) },
             yarnPlugin = YarnPlugin::class,
@@ -48,8 +53,5 @@ open class NodeJsRootPlugin : Plugin<Project> {
                     error("Must be already registered")
                 }
             }
-
-        internal val jsPlatform: String
-            get() = KotlinPlatformType.js.name
     }
 }

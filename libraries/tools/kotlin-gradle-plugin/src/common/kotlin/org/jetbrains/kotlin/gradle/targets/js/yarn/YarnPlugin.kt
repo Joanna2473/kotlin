@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.gradle.targets.js.yarn
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
@@ -16,12 +17,16 @@ open class YarnPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
         YarnPluginApplier(
-            platformDisambiguate = null,
+            platformDisambiguate = JsPlatformDisambiguate,
+            yarnRootKlass = YarnRootExtension::class,
+            yarnRootName = YarnRootExtension.YARN,
+            yarnEnvSpecKlass = YarnRootEnvSpec::class,
+            yarnEnvSpecName = YarnRootEnvSpec.YARN,
             nodeJsRootApply = { NodeJsRootPlugin.apply(it) },
             nodeJsRootExtension = { it.kotlinNodeJsRootExtension },
             nodeJsEnvSpec = { it.kotlinNodeJsEnvSpec },
             lockFileDirectory = { it.resolve(LockCopyTask.KOTLIN_JS_STORE) },
-        )
+        ).apply(target)
     }
 
     companion object {
