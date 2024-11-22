@@ -38,11 +38,11 @@ open class WasmNodeJsRootPlugin : Plugin<Project> {
         fun apply(rootProject: Project): WasmNodeJsRootExtension {
             check(rootProject == rootProject.rootProject)
             rootProject.plugins.apply(WasmNodeJsRootPlugin::class.java)
-            return rootProject.extensions.getByName(extensionName(NodeJsRootExtension.EXTENSION_NAME)) as WasmNodeJsRootExtension
+            return rootProject.extensions.getByName(WasmNodeJsRootExtension.EXTENSION_NAME) as WasmNodeJsRootExtension
         }
 
         val Project.kotlinNodeJsRootExtension: WasmNodeJsRootExtension
-            get() = extensions.getByName(extensionName(NodeJsRootExtension.EXTENSION_NAME)).castIsolatedKotlinPluginClassLoaderAware()
+            get() = extensions.getByName(WasmNodeJsRootExtension.EXTENSION_NAME).castIsolatedKotlinPluginClassLoaderAware()
 
         val Project.kotlinNpmResolutionManager: Provider<KotlinNpmResolutionManager>
             get() {

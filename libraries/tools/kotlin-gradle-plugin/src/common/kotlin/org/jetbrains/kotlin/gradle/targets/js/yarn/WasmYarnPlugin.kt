@@ -34,7 +34,7 @@ open class WasmYarnPlugin : Plugin<Project> {
         fun apply(project: Project): WasmYarnRootExtension {
             val rootProject = project.rootProject
             rootProject.plugins.apply(WasmYarnPlugin::class.java)
-            return rootProject.extensions.getByName(extensionName(YarnRootExtension.YARN)) as WasmYarnRootExtension
+            return rootProject.extensions.getByName(WasmYarnRootExtension.YARN) as WasmYarnRootExtension
         }
     }
 }
