@@ -82,28 +82,53 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
     private var scriptProcessed = false
     private val replState: MutableMap<String, Any?> = mutableMapOf()
     private var currentReplClassloader: GeneratedClassLoader? = null
+    private val classLoadersToDispose: MutableList<GeneratedClassLoader> = mutableListOf()
 
     override fun processModule(module: TestModule, info: BinaryArtifacts.Jvm) {
         val fileInfos = info.fileInfos.ifEmpty { return }
         currentReplClassloader = generatedReplSnippetTestClassLoader(testServices, module, info.classFileFactory, currentReplClassloader)
-        // TODO: restore disposal, but after all snippets
-//        try {
-            for (fileInfo in fileInfos) {
-                when (val sourceFile = fileInfo.sourceFile) {
-                    is KtPsiSourceFile -> (sourceFile.psiFile as? KtFile)?.let { ktFile ->
-                        ktFile.script?.fqName?.let { scriptFqName ->
-                            runAndCheckSnippet(ktFile, scriptFqName, currentReplClassloader!!)
-                            scriptProcessed = true
-                        }
-                    }
-                    else -> {
-                        assertions.fail { "Only PSI scripts are supported so far" }
+        for (fileInfo in fileInfos) {
+            when (val sourceFile = fileInfo.sourceFile) {
+                is KtPsiSourceFile -> (sourceFile.psiFile as? KtFile)?.let { ktFile ->
+                    ktFile.script?.fqName?.let { scriptFqName ->
+                        runAndCheckSnippet(ktFile, scriptFqName, currentReplClassloader!!)
+                        scriptProcessed = true
                     }
                 }
+                else -> {
+                    assertions.fail { "Only PSI scripts are supported so far" }
+                }
             }
-//        } finally {
-//            classLoader.dispose()
-//        }
+        }
+    }
+
+    private fun generatedReplSnippetTestClassLoader(
+        testServices: TestServices,
+        module: TestModule,
+        classFileFactory: ClassFileFactory,
+        previousSnippetClassLoader: GeneratedClassLoader?,
+    ): GeneratedClassLoader {
+        val configuration = testServices.compilerConfigurationProvider.getCompilerConfiguration(module)
+        val classpath = computeTestRuntimeClasspath(testServices, module)
+        var parentClassLoader: ClassLoader? = previousSnippetClassLoader
+        if (PREFER_IN_TEST_OVER_STDLIB in module.directives) {
+            val libPathProvider = testServices.standardLibrariesPathProvider
+            classpath += libPathProvider.runtimeJarForTests()
+            if (configuration[TEST_CONFIGURATION_KIND_KEY]?.withReflection == true) {
+                classpath += libPathProvider.reflectJarForTests()
+            }
+            classpath += libPathProvider.scriptRuntimeJarForTests()
+            classpath += libPathProvider.kotlinTestJarForTests()
+        } else if (parentClassLoader == null) {
+            parentClassLoader = if (configuration[TEST_CONFIGURATION_KIND_KEY]?.withReflection == true) {
+                testServices.standardLibrariesPathProvider.getRuntimeAndReflectJarClassLoader()
+            } else {
+                testServices.standardLibrariesPathProvider.getRuntimeJarClassLoader()
+            }
+        }
+        return GeneratedClassLoader(classFileFactory, parentClassLoader, *classpath.map { it.toURI().toURL() }.toTypedArray()).also {
+            classLoadersToDispose.add(it)
+        }
     }
 
     private fun runAndCheckSnippet(
@@ -126,37 +151,11 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
     }
 
     override fun processAfterAllModules(someAssertionWasFailed: Boolean) {
+        classLoadersToDispose.forEach { it.dispose() }
         if (!scriptProcessed) {
             assertions.fail { "Can't find script to test" }
         }
     }
-}
-
-fun generatedReplSnippetTestClassLoader(
-    testServices: TestServices,
-    module: TestModule,
-    classFileFactory: ClassFileFactory,
-    previousSnippetClassLoader: GeneratedClassLoader?,
-): GeneratedClassLoader {
-    val configuration = testServices.compilerConfigurationProvider.getCompilerConfiguration(module)
-    val classpath = computeTestRuntimeClasspath(testServices, module)
-    var parentClassLoader: ClassLoader? = previousSnippetClassLoader
-    if (PREFER_IN_TEST_OVER_STDLIB in module.directives) {
-        val libPathProvider = testServices.standardLibrariesPathProvider
-        classpath += libPathProvider.runtimeJarForTests()
-        if (configuration[TEST_CONFIGURATION_KIND_KEY]?.withReflection == true) {
-            classpath += libPathProvider.reflectJarForTests()
-        }
-        classpath += libPathProvider.scriptRuntimeJarForTests()
-        classpath += libPathProvider.kotlinTestJarForTests()
-    } else if (parentClassLoader == null) {
-        parentClassLoader = if (configuration[TEST_CONFIGURATION_KIND_KEY]?.withReflection == true) {
-            testServices.standardLibrariesPathProvider.getRuntimeAndReflectJarClassLoader()
-        } else {
-            testServices.standardLibrariesPathProvider.getRuntimeJarClassLoader()
-        }
-    }
-    return GeneratedClassLoader(classFileFactory, parentClassLoader, *classpath.map { it.toURI().toURL() }.toTypedArray())
 }
 
 private fun captureOut(body: () -> Unit): String {
