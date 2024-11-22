@@ -15,6 +15,7 @@ import org.gradle.api.tasks.*
 import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManager
@@ -203,7 +204,7 @@ abstract class KotlinPackageJsonTask :
             }
 
         private fun getCompilationResolver(
-            nodeJsRoot: NodeJsRootExtension,
+            nodeJsRoot: AbstractNodeJsRootExtension,
             projectPath: String,
             compilationDisambiguatedName: String,
         ): KotlinCompilationNpmResolver =

@@ -11,20 +11,23 @@ import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
 import org.jetbrains.kotlin.gradle.tasks.registerTask
 import org.jetbrains.kotlin.gradle.utils.providerWithLazyConvention
+import kotlin.reflect.KClass
 
 internal class NodeJsPluginApplier(
-    override val platformDisambiguate: String?,
-    private val nodeJsRootApply: (project: Project) -> NodeJsRootExtension,
-) : HasPlatformDisambiguate {
+    private val platformDisambiguate: HasPlatformDisambiguate,
+    private val nodeJsEnvSpecKlass: KClass<out AbstractNodeJsEnvSpec>,
+    private val nodeJsEnvSpecName: String,
+    private val nodeJsRootApply: (project: Project) -> AbstractNodeJsRootExtension,
+) {
 
     fun apply(project: Project) {
         MultiplePluginDeclarationDetector.detect(project)
 
-        val nodeJs = project.createNodeJsEnvSpec {
+        val nodeJs = project.createNodeJsEnvSpec(nodeJsEnvSpecKlass, nodeJsEnvSpecName) {
             nodeJsRootApply(project.rootProject)
         }
 
-        project.registerTask<NodeJsSetupTask>(extensionName(NodeJsSetupTask.NAME), listOf(nodeJs)) {
+        project.registerTask<NodeJsSetupTask>(platformDisambiguate.extensionName(NodeJsSetupTask.NAME), listOf(nodeJs)) {
             it.group = NodeJsRootPlugin.TASKS_GROUP_NAME
             it.description = "Download and install a local node/npm version"
             it.configuration = it.ivyDependencyProvider.map { ivyDependency ->
@@ -36,17 +39,17 @@ internal class NodeJsPluginApplier(
 
     @Suppress("DEPRECATION")
     private fun Project.createNodeJsEnvSpec(
-        nodeJsConstructor: () -> NodeJsRootExtension,
-    ): NodeJsEnvSpec {
+        nodeJsEnvSpecKlass: KClass<out AbstractNodeJsEnvSpec>,
+        nodeJsEnvSpecName: String,
+        nodeJsConstructor: () -> AbstractNodeJsRootExtension,
+    ): AbstractNodeJsEnvSpec {
         val extensions = extensions
         val objects = objects
 
         return extensions.create(
-            extensionName(NodeJsEnvSpec.EXTENSION_NAME),
-            NodeJsEnvSpec::class.java,
+            nodeJsEnvSpecName,
+            nodeJsEnvSpecKlass.java,
         ).apply {
-            platformDisambiguate.set(this@NodeJsPluginApplier.platformDisambiguate)
-
             installationDirectory.convention(
                 objects.directoryProperty().fileProvider(
                     objects.providerWithLazyConvention {
@@ -64,7 +67,7 @@ internal class NodeJsPluginApplier(
         }
     }
 
-    private fun addPlatform(project: Project, extension: NodeJsEnvSpec) {
+    private fun addPlatform(project: Project, extension: AbstractNodeJsEnvSpec) {
         val uname = project.providers
             .unameExecResult
 

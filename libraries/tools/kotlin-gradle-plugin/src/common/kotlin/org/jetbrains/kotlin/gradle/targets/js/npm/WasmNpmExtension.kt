@@ -9,21 +9,24 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmPlatformDisambiguate
 
-open class NpmExtension(
+open class WasmNpmExtension(
     project: Project,
-    nodeJsRoot: NodeJsRootExtension,
+    nodeJsRoot: WasmNodeJsRootExtension,
 ) : AbstractNpmExtension(
     project,
     nodeJsRoot
 ) {
-    companion object {
-        const val EXTENSION_NAME: String = "kotlinNpm"
+    companion object : HasPlatformDisambiguate by WasmPlatformDisambiguate {
+        val EXTENSION_NAME: String
+            get() = extensionName("kotlinNpm")
 
-        operator fun get(project: Project): NpmExtension {
+        operator fun get(project: Project): WasmNpmExtension {
             val rootProject = project.rootProject
             rootProject.plugins.apply(NodeJsRootPlugin::class.java)
-            return rootProject.extensions.getByName(EXTENSION_NAME) as NpmExtension
+            return rootProject.extensions.getByName(EXTENSION_NAME) as WasmNpmExtension
         }
     }
 }

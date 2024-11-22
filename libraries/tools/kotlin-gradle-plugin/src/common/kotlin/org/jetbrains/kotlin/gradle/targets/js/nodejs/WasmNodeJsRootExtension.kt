@@ -8,7 +8,7 @@ package org.jetbrains.kotlin.gradle.targets.js.nodejs
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 
-open class NodeJsRootExtension(
+open class WasmNodeJsRootExtension(
     project: Project,
     nodeJs: () -> NodeJsEnvSpec,
     rootDir: String,
@@ -16,8 +16,10 @@ open class NodeJsRootExtension(
     project,
     nodeJs,
     rootDir
-), HasPlatformDisambiguate by JsPlatformDisambiguate {
-    companion object {
-        const val EXTENSION_NAME: String = "kotlinNodeJs"
+), HasPlatformDisambiguate by WasmPlatformDisambiguate {
+
+    companion object : HasPlatformDisambiguate by WasmPlatformDisambiguate {
+        val EXTENSION_NAME: String
+            get() = extensionName("kotlinNodeJs")
     }
 }

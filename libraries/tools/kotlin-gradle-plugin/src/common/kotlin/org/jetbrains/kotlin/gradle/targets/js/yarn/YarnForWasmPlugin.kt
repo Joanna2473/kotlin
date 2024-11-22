@@ -11,29 +11,30 @@ import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.wasmPlatform
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 
 open class YarnForWasmPlugin : Plugin<Project> {
     override fun apply(target: Project) {
 
         YarnPluginApplier(
-            platformDisambiguate = wasmPlatform,
+            platformDisambiguate = WasmPlatformDisambiguate,
+            yarnRootKlass = WasmYarnRootExtension::class,
+            yarnRootName = WasmYarnRootExtension.YARN,
+            yarnEnvSpecKlass = WasmYarnRootEnvSpec::class,
+            yarnEnvSpecName = WasmYarnRootEnvSpec.YARN,
             nodeJsRootApply = { NodeJsRootForWasmPlugin.apply(it) },
             nodeJsRootExtension = { it.kotlinNodeJsRootExtension },
             nodeJsEnvSpec = { it.kotlinNodeJsEnvSpec },
-            lockFileDirectory = { it.resolve(LockCopyTask.KOTLIN_JS_STORE).resolve(platformDisambiguate) },
-        )
+            lockFileDirectory = { it.resolve(LockCopyTask.KOTLIN_JS_STORE).resolve(WasmPlatformDisambiguate.platformDisambiguate) },
+        ).apply(target)
     }
 
-    companion object : HasPlatformDisambiguate {
-        fun apply(project: Project): YarnRootExtension {
+    companion object : HasPlatformDisambiguate by WasmPlatformDisambiguate {
+        fun apply(project: Project): WasmYarnRootExtension {
             val rootProject = project.rootProject
             rootProject.plugins.apply(YarnForWasmPlugin::class.java)
-            return rootProject.extensions.getByName(extensionName(YarnRootExtension.YARN)) as YarnRootExtension
+            return rootProject.extensions.getByName(extensionName(YarnRootExtension.YARN)) as WasmYarnRootExtension
         }
-
-        override val platformDisambiguate: String
-            get() = wasmPlatform
     }
 }

@@ -10,8 +10,8 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionContainer
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
@@ -24,14 +24,19 @@ import org.jetbrains.kotlin.gradle.utils.detachedResolvable
 import org.jetbrains.kotlin.gradle.utils.listProperty
 import org.jetbrains.kotlin.gradle.utils.providerWithLazyConvention
 import java.io.File
+import kotlin.reflect.KClass
 
 internal class YarnPluginApplier(
-    override val platformDisambiguate: String?,
+    private val platformDisambiguate: HasPlatformDisambiguate,
+    private val yarnRootKlass: KClass<out AbstractYarnRootExtension>,
+    private val yarnRootName: String,
+    private val yarnEnvSpecKlass: KClass<out AbstractYarnRootEnvSpec>,
+    private val yarnEnvSpecName: String,
     private val nodeJsRootApply: (project: Project) -> Unit,
-    private val nodeJsRootExtension: (project: Project) -> NodeJsRootExtension,
-    private val nodeJsEnvSpec: (project: Project) -> NodeJsEnvSpec,
+    private val nodeJsRootExtension: (project: Project) -> AbstractNodeJsRootExtension,
+    private val nodeJsEnvSpec: (project: Project) -> AbstractNodeJsEnvSpec,
     private val lockFileDirectory: (projectDirectory: File) -> File,
-) : HasPlatformDisambiguate {
+) {
 
     fun apply(project: Project) {
         MultiplePluginDeclarationDetector.detect(project)
@@ -45,12 +50,15 @@ internal class YarnPluginApplier(
         val nodeJsRoot = nodeJsRootExtension(project)
         val nodeJs = nodeJsEnvSpec(project)
 
-        val yarnSpec = project.extensions.createYarnEnvSpec(extensionName(YarnRootEnvSpec.YARN))
+        val yarnSpec = project.extensions.createYarnEnvSpec(
+            yarnEnvSpecKlass,
+            yarnEnvSpecName
+        )
 
         val yarnRootExtension = project.extensions.create(
-            extensionName(YarnRootExtension.YARN),
-            YarnRootExtension::class.java,
-            this,
+            yarnRootName,
+            yarnRootKlass.java,
+            project,
             nodeJsRoot,
             yarnSpec,
         )
@@ -64,7 +72,7 @@ internal class YarnPluginApplier(
             yarnRootExtension
         )
 
-        val setupTask = project.registerTask<YarnSetupTask>(extensionName(YarnSetupTask.NAME), listOf(yarnSpec)) {
+        val setupTask = project.registerTask<YarnSetupTask>(platformDisambiguate.extensionName(YarnSetupTask.NAME), listOf(yarnSpec)) {
             with(nodeJs) {
                 it.dependsOn(project.nodeJsSetupTaskProvider)
             }
@@ -78,7 +86,7 @@ internal class YarnPluginApplier(
             }
         }
 
-        val kotlinNpmInstall = project.tasks.named(extensionName(KotlinNpmInstallTask.NAME))
+        val kotlinNpmInstall = project.tasks.named(platformDisambiguate.extensionName(KotlinNpmInstallTask.NAME))
         kotlinNpmInstall.configure {
             it.dependsOn(setupTask)
             it.inputs.property("yarnIgnoreScripts", { yarnRootExtension.ignoreScripts })
@@ -88,14 +96,14 @@ internal class YarnPluginApplier(
             nodeJs.env
         ).disallowChanges()
 
-        project.tasks.register(extensionName("yarn" + CleanDataTask.NAME_SUFFIX), CleanDataTask::class.java) {
+        project.tasks.register(platformDisambiguate.extensionName("yarn" + CleanDataTask.NAME_SUFFIX), CleanDataTask::class.java) {
             it.cleanableStoreProvider = project.provider { yarnRootExtension.requireConfigured().cleanableStore }
             it.description = "Clean unused local yarn version"
         }
 
         yarnRootExtension.lockFileDirectory = lockFileDirectory(project.rootDir)
 
-        project.tasks.register(extensionName(STORE_YARN_LOCK_NAME), YarnLockStoreTask::class.java) { task ->
+        project.tasks.register(platformDisambiguate.extensionName(STORE_YARN_LOCK_NAME), YarnLockStoreTask::class.java) { task ->
             task.dependsOn(kotlinNpmInstall)
             task.inputFile.set(nodeJsRoot.rootPackageDirectory.map { it.file(LockCopyTask.YARN_LOCK) })
             task.outputDirectory.set(yarnRootExtension.lockFileDirectory)
@@ -112,14 +120,14 @@ internal class YarnPluginApplier(
             ).disallowChanges()
         }
 
-        project.tasks.register(extensionName(UPGRADE_YARN_LOCK), YarnLockCopyTask::class.java) { task ->
+        project.tasks.register(platformDisambiguate.extensionName(UPGRADE_YARN_LOCK), YarnLockCopyTask::class.java) { task ->
             task.dependsOn(kotlinNpmInstall)
             task.inputFile.set(nodeJsRoot.rootPackageDirectory.map { it.file(LockCopyTask.YARN_LOCK) })
             task.outputDirectory.set(yarnRootExtension.lockFileDirectory)
             task.fileName.set(yarnRootExtension.lockFileName)
         }
 
-        project.tasks.register(extensionName(RESTORE_YARN_LOCK_NAME), YarnLockCopyTask::class.java) {
+        project.tasks.register(platformDisambiguate.extensionName(RESTORE_YARN_LOCK_NAME), YarnLockCopyTask::class.java) {
             val lockFile = yarnRootExtension.lockFileDirectory.resolve(yarnRootExtension.lockFileName)
             it.inputFile.set(yarnRootExtension.lockFileDirectory.resolve(yarnRootExtension.lockFileName))
             it.outputDirectory.set(nodeJsRoot.rootPackageDirectory)
@@ -138,16 +146,19 @@ internal class YarnPluginApplier(
         ).disallowChanges()
     }
 
-    private fun ExtensionContainer.createYarnEnvSpec(name: String): YarnRootEnvSpec {
+    private fun ExtensionContainer.createYarnEnvSpec(
+        yarnEnvSpecKlass: KClass<out AbstractYarnRootEnvSpec>,
+        yarnEnvSpecName: String,
+    ): AbstractYarnRootEnvSpec {
         return create(
-            name,
-            YarnRootEnvSpec::class.java
+            yarnEnvSpecName,
+            yarnEnvSpecKlass.java
         )
     }
 
-    private fun YarnRootEnvSpec.initializeYarnEnvSpec(
+    private fun AbstractYarnRootEnvSpec.initializeYarnEnvSpec(
         objectFactory: ObjectFactory,
-        yarnRootExtension: YarnRootExtension,
+        yarnRootExtension: AbstractYarnRootExtension,
     ) {
         download.convention(yarnRootExtension.downloadProperty)
         downloadBaseUrl.convention(yarnRootExtension.downloadBaseUrlProperty)

@@ -12,9 +12,11 @@ import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAwar
 open class NodeJsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         NodeJsPluginApplier(
-            platformDisambiguate = null,
+            platformDisambiguate = JsPlatformDisambiguate,
+            nodeJsEnvSpecKlass = NodeJsEnvSpec::class,
+            nodeJsEnvSpecName = NodeJsEnvSpec.EXTENSION_NAME,
             nodeJsRootApply = { NodeJsRootPlugin.apply(it) }
-        )
+        ).apply(target)
     }
 
     companion object {

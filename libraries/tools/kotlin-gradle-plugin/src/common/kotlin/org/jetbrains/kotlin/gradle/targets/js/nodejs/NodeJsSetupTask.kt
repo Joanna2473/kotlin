@@ -12,8 +12,8 @@ import javax.inject.Inject
 
 @DisableCachingByDefault
 abstract class NodeJsSetupTask @Inject constructor(
-    settings: NodeJsEnvSpec
-) : AbstractSetupTask<NodeJsEnv, NodeJsEnvSpec>(settings) {
+    settings: AbstractNodeJsEnvSpec
+) : AbstractSetupTask<NodeJsEnv, AbstractNodeJsEnvSpec>(settings) {
 
     @get:Internal
     override val artifactPattern: String
