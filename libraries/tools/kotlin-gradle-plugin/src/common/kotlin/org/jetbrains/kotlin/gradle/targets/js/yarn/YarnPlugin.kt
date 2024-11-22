@@ -5,31 +5,24 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
+import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
-import java.io.File
 
-open class YarnPlugin : AbstractYarnPlugin() {
-    override val platformDisambiguate: String?
-        get() = null
+open class YarnPlugin : Plugin<Project> {
 
-    override fun nodeJsRootApply(project: Project) {
-        NodeJsRootPlugin.apply(project)
+    override fun apply(target: Project) {
+        YarnPluginApplier(
+            platformDisambiguate = null,
+            nodeJsRootApply = { NodeJsRootPlugin.apply(it) },
+            nodeJsRootExtension = { it.kotlinNodeJsRootExtension },
+            nodeJsEnvSpec = { it.kotlinNodeJsEnvSpec },
+            lockFileDirectory = { it.resolve(LockCopyTask.KOTLIN_JS_STORE) },
+        )
     }
-
-    override fun nodeJsRootExtension(project: Project): NodeJsRootExtension =
-        project.kotlinNodeJsRootExtension
-
-    override fun nodeJsEnvSpec(project: Project): NodeJsEnvSpec =
-        project.kotlinNodeJsEnvSpec
-
-    override fun lockFileDirectory(projectDirectory: File): File =
-        projectDirectory.resolve(LockCopyTask.KOTLIN_JS_STORE)
 
     companion object {
         fun apply(project: Project): YarnRootExtension {

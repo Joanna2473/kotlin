@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.TASKS_GROUP_NAME
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.KotlinRootNpmResolver
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.PACKAGE_JSON_UMBRELLA_TASK_NAME
@@ -31,19 +32,16 @@ import org.jetbrains.kotlin.gradle.utils.onlyIfCompat
 import org.jetbrains.kotlin.gradle.utils.providerWithLazyConvention
 import kotlin.reflect.KClass
 
-abstract class AbstractNodeJsRootPlugin : Plugin<Project>, HasPlatformDisambiguate {
+internal class NodeJsRootPluginApplier(
+    override val platformDisambiguate: String?,
+    private val rootDirectoryName: String,
+    private val lockFileDirectory: (projectDirectory: Directory) -> Directory,
+    private val singleNodeJsPluginApply: (project: Project) -> NodeJsEnvSpec,
+    private val yarnPlugin: KClass<out Plugin<Project>>,
+    private val platformType: KotlinPlatformType,
+) : HasPlatformDisambiguate {
 
-    protected abstract val rootDirectoryName: String
-
-    protected abstract fun lockFileDirectory(projectDirectory: Directory): Directory
-
-    protected abstract fun singleNodeJsPluginApply(project: Project): NodeJsEnvSpec
-
-    protected abstract val yarnPlugin: KClass<out Plugin<Project>>
-
-    protected abstract val platformType: KotlinPlatformType
-
-    override fun apply(project: Project) {
+    fun apply(project: Project) {
         MultiplePluginDeclarationDetector.detect(project)
 
         check(project == project.rootProject) {
@@ -353,9 +351,5 @@ abstract class AbstractNodeJsRootPlugin : Plugin<Project>, HasPlatformDisambigua
                     }
                 }
             }
-    }
-
-    companion object {
-        const val TASKS_GROUP_NAME: String = "nodeJs"
     }
 }

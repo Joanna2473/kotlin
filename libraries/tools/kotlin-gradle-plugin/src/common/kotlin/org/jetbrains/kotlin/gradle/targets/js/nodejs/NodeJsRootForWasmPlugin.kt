@@ -7,7 +7,6 @@ package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
@@ -15,28 +14,20 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnForWasmPlugin
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
-import kotlin.reflect.KClass
 
-open class NodeJsRootForWasmPlugin : AbstractNodeJsRootPlugin() {
+open class NodeJsRootForWasmPlugin : Plugin<Project> {
 
-    override val rootDirectoryName: String
-        get() = wasmPlatform
-
-    override val platformDisambiguate: String?
-        get() = wasmPlatform
-
-    override fun lockFileDirectory(projectDirectory: Directory): Directory {
-        return projectDirectory.dir(LockCopyTask.KOTLIN_JS_STORE).dir(rootDirectoryName)
+    override fun apply(target: Project) {
+        val rootDirectoryName = wasmPlatform
+        NodeJsRootPluginApplier(
+            platformDisambiguate = wasmPlatform,
+            rootDirectoryName = rootDirectoryName,
+            lockFileDirectory = { it.dir(LockCopyTask.KOTLIN_JS_STORE).dir(rootDirectoryName) },
+            singleNodeJsPluginApply = { NodeJsForWasmPlugin.apply(it) },
+            yarnPlugin = YarnForWasmPlugin::class,
+            platformType = KotlinPlatformType.wasm,
+        ).apply(target)
     }
-
-    override fun singleNodeJsPluginApply(project: Project): NodeJsEnvSpec =
-        NodeJsForWasmPlugin.apply(project)
-
-    override val yarnPlugin: KClass<out Plugin<Project>> =
-        YarnForWasmPlugin::class
-
-    override val platformType: KotlinPlatformType
-        get() = KotlinPlatformType.wasm
 
     companion object : HasPlatformDisambiguate {
         fun apply(rootProject: Project): NodeJsRootExtension {
@@ -58,7 +49,7 @@ open class NodeJsRootForWasmPlugin : AbstractNodeJsRootPlugin() {
                 }
             }
 
-        val wasmPlatform: String
+        internal val wasmPlatform: String
             get() = KotlinPlatformType.wasm.name
 
         override val platformDisambiguate: String

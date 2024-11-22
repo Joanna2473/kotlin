@@ -7,37 +7,29 @@ package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
-import kotlin.reflect.KClass
 
-open class NodeJsRootPlugin : AbstractNodeJsRootPlugin() {
+open class NodeJsRootPlugin : Plugin<Project> {
 
-    override val rootDirectoryName: String
-        get() = jsPlatform
-
-    override val platformDisambiguate: String?
-        get() = null
-
-    override fun lockFileDirectory(projectDirectory: Directory): Directory {
-        return projectDirectory.dir(LockCopyTask.KOTLIN_JS_STORE)
+    override fun apply(target: Project) {
+        NodeJsRootPluginApplier(
+            platformDisambiguate = null,
+            rootDirectoryName = jsPlatform,
+            lockFileDirectory = { it.dir(LockCopyTask.KOTLIN_JS_STORE) },
+            singleNodeJsPluginApply = { NodeJsPlugin.apply(it) },
+            yarnPlugin = YarnPlugin::class,
+            platformType = KotlinPlatformType.js,
+        ).apply(target)
     }
 
-    override fun singleNodeJsPluginApply(project: Project): NodeJsEnvSpec =
-        NodeJsPlugin.apply(project)
-
-    override val yarnPlugin: KClass<out Plugin<Project>> =
-        YarnPlugin::class
-
-    override val platformType: KotlinPlatformType
-        get() = KotlinPlatformType.js
-
     companion object {
+        const val TASKS_GROUP_NAME: String = "nodeJs"
+
         fun apply(rootProject: Project): NodeJsRootExtension {
             check(rootProject == rootProject.rootProject)
             rootProject.plugins.apply(NodeJsRootPlugin::class.java)
@@ -57,7 +49,7 @@ open class NodeJsRootPlugin : AbstractNodeJsRootPlugin() {
                 }
             }
 
-        val jsPlatform: String
+        internal val jsPlatform: String
             get() = KotlinPlatformType.js.name
     }
 }

@@ -5,15 +5,17 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
+import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
-open class NodeJsPlugin : AbstractNodeJsPlugin() {
-    override val platformDisambiguate: String?
-        get() = null
-
-    override fun nodeJsRootApply(project: Project): NodeJsRootExtension =
-        NodeJsRootPlugin.apply(project)
+open class NodeJsPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        NodeJsPluginApplier(
+            platformDisambiguate = null,
+            nodeJsRootApply = { NodeJsRootPlugin.apply(it) }
+        )
+    }
 
     companion object {
         fun apply(project: Project): NodeJsEnvSpec {
