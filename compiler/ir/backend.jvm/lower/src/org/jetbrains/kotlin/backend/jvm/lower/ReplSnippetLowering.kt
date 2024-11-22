@@ -23,13 +23,16 @@ import org.jetbrains.kotlin.ir.builders.declarations.addFunction
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
+import org.jetbrains.kotlin.ir.declarations.impl.IrVariableImpl
 import org.jetbrains.kotlin.ir.expressions.IrComposite
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
+import org.jetbrains.kotlin.ir.symbols.IrVariableSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrConstructorSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrFieldSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
+import org.jetbrains.kotlin.ir.symbols.impl.IrVariableSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
@@ -142,46 +145,59 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
             var lastExpression: IrExpression? = null
             body =
                 context.createIrBuilder(symbol).irBlockBody {
+                    val variablesToSaveToState = mutableMapOf<String, IrVariableSymbol>()
                     irSnippet.propertiesFromOtherSnippets.forEach {
                         it.initializer = irCall(mapGet).apply {
                             dispatchReceiver = IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, replStateParameter.symbol)
                             putValueArgument(0, irString(it.name.asString()))
                         }
-                        +(it.patchStatementForClass() as IrStatement)
+                        val patchedVar = it.patchStatementForClass() as IrVariable
+                        if (patchedVar.isVar) {
+                            variablesToSaveToState[it.name.asString()] = patchedVar.symbol
+                        }
+                        +patchedVar
                     }
                     val flattenedStatements = irSnippet.body.statements.flatMap { snippetStatement ->
                         if (snippetStatement is IrComposite) {
-                            snippetStatement.statements
+                            snippetStatement.statements.map { it.patchStatementForClass() as IrStatement }
                         } else {
-                            listOf(snippetStatement)
+                            listOf(snippetStatement.patchStatementForClass() as IrStatement)
                         }
                     }
                     lastExpression = flattenedStatements.lastOrNull() as? IrExpression
+                    var lastExpressionVar: IrVariable? = null
                     flattenedStatements.forEach { statement ->
-                        val patchedStatement = statement.patchStatementForClass() as IrStatement
                         if (statement == lastExpression) {
-                            +irReturn(patchedStatement as IrExpression)
+                            // Could become a `$res..` one
+                            createTmpVariable(statement as IrExpression).patchStatementForClass() as IrVariable
                         } else {
-                            when (patchedStatement) {
+                            when (statement) {
                                 is IrSimpleFunction,
                                 is IrClass -> {
-                                    patchedStatement.visibility = DescriptorVisibilities.PUBLIC
-                                    irSnippetClass.declarations.add(patchedStatement)
+                                    statement.visibility = DescriptorVisibilities.PUBLIC
+                                    irSnippetClass.declarations.add(statement)
                                 }
                                 is IrVariable -> {
-                                    +patchedStatement
-                                    +irCall(mapPut).apply {
-                                        dispatchReceiver = IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, replStateParameter.symbol)
-                                        putValueArgument(0, irString(patchedStatement.name.asString()))
-                                        putValueArgument(1, IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, patchedStatement.symbol))
-                                    }
+                                    variablesToSaveToState[statement.name.asString()] = statement.symbol
+                                    +statement
                                 }
                                 else -> {
-                                    +patchedStatement
+                                    +statement
                                 }
                             }
                         }
                     }
+                    variablesToSaveToState.forEach { (name, symbol) ->
+                        +irCall(mapPut).apply {
+                            dispatchReceiver = IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, replStateParameter.symbol)
+                            putValueArgument(0, irString(name))
+                            putValueArgument(1, IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, symbol))
+                        }
+                    }
+                    // TODO: find why it fails now, and fix
+//                    lastExpression?.let {
+//                        +irReturn(IrGetValueImpl(it.startOffset, it.endOffset, lastExpressionVar!!.symbol))
+//                    }
                 }
             returnType = lastExpression?.type ?: context.irBuiltIns.unitType
         }
