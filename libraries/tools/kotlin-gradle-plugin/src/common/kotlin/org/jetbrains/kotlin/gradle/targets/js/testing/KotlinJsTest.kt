@@ -8,7 +8,6 @@ package org.jetbrains.kotlin.gradle.targets.js.testing
 import org.gradle.api.Action
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.process.internal.DefaultProcessForkOptions
 import org.gradle.work.DisableCachingByDefault
@@ -34,9 +33,6 @@ constructor(
     override var compilation: KotlinJsIrCompilation,
 ) : KotlinTest(),
     RequiresNpmDependencies {
-
-    @get:Internal
-    internal abstract val nodeExecutable: Property<String>
 
     @Input
     var environment = mutableMapOf<String, String>()
