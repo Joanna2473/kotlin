@@ -24,6 +24,6 @@ public class SirDeclarationChildrenProviderImpl(private val sirSession: SirSessi
                     }
                 }
             }
-            .map { with(sirSession) { it.sirDeclaration() } }
+            .flatMap { with(sirSession) { it.toSIR().allDeclarations } }
             .flatMap { with(sirSession) { listOf(it) + it.trampolineDeclarations() } }
 }

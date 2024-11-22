@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.analysis.api.types.*
 import org.jetbrains.kotlin.name.StandardClassIds
 import org.jetbrains.kotlin.sir.*
 import org.jetbrains.kotlin.sir.providers.SirSession
+import org.jetbrains.kotlin.sir.providers.SirTranslationResult
 import org.jetbrains.kotlin.sir.providers.SirTypeProvider
 import org.jetbrains.kotlin.sir.providers.SirTypeProvider.ErrorTypeStrategy
 import org.jetbrains.kotlin.sir.providers.source.KotlinRuntimeElement
@@ -95,7 +96,7 @@ public class SirTypeProviderImpl(
                         else -> {
                             val classSymbol = kaType.symbol
                             if (classSymbol.sirVisibility(ktAnalysisSession) == SirVisibility.PUBLIC) {
-                                SirNominalType(classSymbol.sirDeclaration() as SirNamedDeclaration)
+                                SirNominalType((classSymbol.toSIR() as SirTranslationResult.TypeDeclaration).declaration)
                             } else {
                                 null
                             }

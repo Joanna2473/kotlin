@@ -52,7 +52,7 @@ public interface SirSession :
 
     override fun KaDeclarationSymbol.sirDeclarationName(): String = with(declarationNamer) { this@sirDeclarationName.sirDeclarationName() }
 
-    override fun KaDeclarationSymbol.sirDeclaration(): SirDeclaration = with(declarationProvider) { this@sirDeclaration.sirDeclaration() }
+    override fun KaDeclarationSymbol.toSIR(): SirTranslationResult = with(declarationProvider) { this@toSIR.toSIR() }
 
     override fun KaDeclarationSymbol.getSirParent(ktAnalysisSession: KaSession): SirDeclarationParent =
         with(parentProvider) { this@getSirParent.getSirParent(ktAnalysisSession) }
@@ -93,12 +93,43 @@ public interface SirDeclarationNamer {
     public fun KaDeclarationSymbol.sirDeclarationName(): String
 }
 
+public sealed interface SirTranslationResult {
+    public val allDeclarations: List<SirDeclaration>
+
+    public sealed interface TypeDeclaration: SirTranslationResult {
+        public val declaration: SirNamedDeclaration
+    }
+
+    public data class Untranslatable(public val origin: SirOrigin) : SirTranslationResult {
+        override val allDeclarations: List<SirDeclaration> get() = emptyList()
+    }
+
+    public data class Class(public override val declaration: SirClass) : TypeDeclaration {
+        override val allDeclarations: List<SirDeclaration> = listOf(declaration)
+    }
+
+    public data class TypeAlias(public override val declaration: SirTypealias) : TypeDeclaration {
+        override val allDeclarations: List<SirDeclaration> = listOf(declaration)
+    }
+
+    public data class Init(public val declaration: SirInit) : SirTranslationResult {
+        override val allDeclarations: List<SirDeclaration> = listOf(declaration)
+    }
+
+    public data class Variable(public val declaration: SirVariable) : SirTranslationResult {
+        override val allDeclarations: List<SirDeclaration> = listOf(declaration)
+    }
+
+    public data class Function(public val declaration: SirFunction) : SirTranslationResult {
+        override val allDeclarations: List<SirDeclaration> = listOf(declaration)
+    }
+}
 
 /**
  * A single entry point to create a lazy wrapper around the given [KaDeclarationSymbol].
  */
 public interface SirDeclarationProvider {
-    public fun KaDeclarationSymbol.sirDeclaration(): SirDeclaration
+    public fun KaDeclarationSymbol.toSIR(): SirTranslationResult
 }
 
 /**

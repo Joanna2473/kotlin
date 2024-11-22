@@ -24,8 +24,9 @@ abstract class AbstractSymbolToSirTest : AbstractAnalysisApiBasedTest() {
             .expressionMarkerProvider.getElementOfTypeAtCaret<KtDeclaration>(mainFile).symbol
         val actual: String = withSirSession {
             kaDeclaration
-                .sirDeclaration()
-                .print(into = kaDeclaration.containingModule.sirModule())
+                .toSIR().allDeclarations
+                .map { it.print(into = kaDeclaration.containingModule.sirModule()) }
+                .joinToString(separator = "\n")
         }
         testServices.assertions.assertEqualsToTestDataFileSibling(actual)
     }
