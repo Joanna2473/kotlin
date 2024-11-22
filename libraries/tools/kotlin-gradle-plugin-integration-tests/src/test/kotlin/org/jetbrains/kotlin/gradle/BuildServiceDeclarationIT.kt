@@ -9,7 +9,6 @@ import org.gradle.api.logging.configuration.WarningMode
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.testbase.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 
 @DisplayName("Build services usages in tasks are declared with `usesService`")
@@ -35,11 +34,18 @@ class BuildServiceDeclarationIT : KGPBaseTest() {
         }
     }
 
+    // Before 8.10 there are false positive reports, which were fixed
+    // https://github.com/gradle/gradle/issues/22481
+    @GradleTestVersions(minVersion = TestVersions.Gradle.G_8_10)
     @DisplayName("Build services are registered for Kotlin/JS browser projects")
     @GradleTest
     @JsGradlePluginTests
     fun testJsBrowserProject(gradleVersion: GradleVersion) {
-        project("kotlin-js-browser-project", gradleVersion) {
+        project(
+            "kotlin-js-browser-project",
+            gradleVersion,
+            buildOptions = defaultBuildOptions.copy(warningMode = WarningMode.Fail)
+        ) {
             enableStableConfigurationCachePreview()
             build("build") {
                 assertOutputDoesNotContainBuildServiceDeclarationWarnings()
