@@ -79,8 +79,6 @@ class NameForAmbiguousParameter(
     val argument: FirNamedArgumentExpression
 ) : ResolutionDiagnostic(INAPPLICABLE_ARGUMENTS_MAPPING_ERROR)
 
-object InconsistentContextArguments : ResolutionDiagnostic(INAPPLICABLE)
-
 object InapplicableCandidate : ResolutionDiagnostic(INAPPLICABLE)
 
 class WrongNumberOfTypeArguments(

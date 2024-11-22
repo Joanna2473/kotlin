@@ -214,22 +214,28 @@ object CheckContextReceivers : ResolutionStage() {
             return
         }
 
-        candidate.contextReceiverArguments = candidate.mapContextArgumentsOrNull(
+        val (arguments, diagnostics) = candidate.tryMapContextArguments(
             contextReceiverExpectedTypes,
-            context.bodyResolveContext.towerDataContext,
-            sink
+            context.bodyResolveContext.towerDataContext
         )
+
+        candidate.contextReceiverArguments = arguments
+        diagnostics?.let { sink.reportDiagnostic(it) }
     }
 }
+
+data class ContextArgumentMapping(
+    val arguments: List<ConeResolutionAtom>?,
+    val diagnostic: ResolutionDiagnostic?
+)
 
 /**
  * If any diagnostics are reported to [sink], `null` is returned.
  */
-fun Candidate.mapContextArgumentsOrNull(
+fun Candidate.tryMapContextArguments(
     contextReceiverExpectedTypes: List<ConeKotlinType>,
     towerDataContext: FirTowerDataContext,
-    sink: CheckerSink,
-): List<ConeResolutionAtom>? {
+): ContextArgumentMapping {
     val receiverGroups: List<List<FirExpression>> =
         towerDataContext.towerDataElements.asReversed().mapNotNull { towerDataElement ->
             towerDataElement.implicitReceiver?.receiverExpression?.let(::listOf)
@@ -242,8 +248,7 @@ fun Candidate.mapContextArgumentsOrNull(
         val matchingReceivers = findClosestMatchingReceivers(expectedType, receiverGroups)
         when (matchingReceivers.size) {
             0 -> {
-                sink.reportDiagnostic(NoApplicableValueForContextReceiver(expectedType))
-                return null
+                return ContextArgumentMapping(null, NoApplicableValueForContextReceiver(expectedType))
             }
             1 -> {
                 val matchingReceiver = matchingReceivers.single()
@@ -251,13 +256,12 @@ fun Candidate.mapContextArgumentsOrNull(
                 system.addSubtypeConstraint(matchingReceiver.type, expectedType, SimpleConstraintSystemConstraintPosition)
             }
             else -> {
-                sink.reportDiagnostic(AmbiguousValuesForContextReceiverParameter(expectedType))
-                return null
+                return ContextArgumentMapping(null, AmbiguousValuesForContextReceiverParameter(expectedType))
             }
         }
     }
 
-    return resultingContextReceiverArguments
+    return ContextArgumentMapping(resultingContextReceiverArguments, null)
 }
 
 object TypeVariablesInExplicitReceivers : ResolutionStage() {
@@ -546,56 +550,56 @@ internal object MapArguments : ResolutionStage() {
             callSiteIsOperatorCall = (callInfo.callSite as? FirFunctionCall)?.origin == FirFunctionCallOrigin.Operator
         )
 
-        if (mapping.diagnostics.isNotEmpty() &&
-            candidate.tryMappingWithContextArguments(callInfo, arguments, function, context, sink)
+        if (candidate.tryMappingWithContextArgumentsForImplicitInvoke(
+                isRegularMappingSuccessful = mapping.diagnostics.isEmpty(),
+                arguments,
+                function,
+                context,
+                sink
+            )
         ) {
             return
-        }
-
-        if (mapping.diagnostics.isEmpty()) {
-            checkForInconsistentContextArguments(candidate, sink)
         }
 
         candidate.initializeMapping(arguments, mapping, function, sink)
     }
 
-    /**
-     * We enforce the following invariant:
-     * If the call-site is an implicit invoke-call with receiver,
-     * and the function type has both, context parameters and a receiver,
-     * then we MUST pass context arguments implicitly.
-     * Otherwise, we would allow calling `f: context(String, Int) Boolean.() -> Unit` with `"".f(1, true)`.
-     * See compiler/testData/diagnostics/tests/contextParameters/invoke.fir.kt
-     */
-    private fun checkForInconsistentContextArguments(
-        candidate: Candidate, sink: CheckerSink,
-    ) {
-        if (candidate.callInfo.implicitInvokeMode == ImplicitInvokeMode.ReceiverAsArgument &&
-            candidate.dispatchReceiver?.expression?.resolvedType?.hasContextReceivers == true
-        ) {
-            sink.reportDiagnostic(InconsistentContextArguments)
-        }
-    }
-
-    private suspend fun Candidate.tryMappingWithContextArguments(
-        callInfo: CallInfo,
+    private suspend fun Candidate.tryMappingWithContextArgumentsForImplicitInvoke(
+        isRegularMappingSuccessful: Boolean,
         arguments: List<ConeResolutionAtom>,
         function: FirFunction,
         context: ResolutionContext,
         sink: CheckerSink,
     ): Boolean {
         if (!callInfo.isImplicitInvoke) return false
-        if (arguments.size == function.valueParameters.size) return false
-        if (!context.session.languageVersionSettings.supportsFeature(LanguageFeature.ContextParameters)) return false
 
         val dispatchReceiverType = dispatchReceiver?.expression?.resolvedType?.fullyExpandedType(callInfo.session)
         val contextReceiverExpectedTypes = dispatchReceiverType?.contextReceiversTypes(context.session)
         if (contextReceiverExpectedTypes.isNullOrEmpty()) return false
 
-        val contextArguments = mapContextArgumentsOrNull(contextReceiverExpectedTypes, context.bodyResolveComponents.towerDataContext, sink)
-            ?: return false
+        // We enforce the following invariant:
+        // If the call-site is an implicit invoke-call with receiver,
+        // and the function type has both, context parameters and a receiver,
+        // then we MUST pass context arguments implicitly.
+        // Otherwise, we would allow calling `f: context(String, Int) Boolean.() -> Unit` with `"".f(1, true)`.
+        // See compiler/testData/diagnostics/tests/contextParameters/invoke.fir.kt
+        if (callInfo.implicitInvokeMode != ImplicitInvokeMode.ReceiverAsArgument) {
+            if (isRegularMappingSuccessful) return false
+            if (arguments.size == function.valueParameters.size) return false
+            if (!context.session.languageVersionSettings.supportsFeature(LanguageFeature.ContextParameters)) return false
+        } else if (!context.session.languageVersionSettings.supportsFeature(LanguageFeature.ContextParameters)) {
+            // Invoke with receiver against a contextual function type when context parameters are disabled is always an error.
+            sink.reportDiagnostic(UnsupportedContextualDeclarationCall)
+            return false
+        }
 
-        val combinedArguments = contextArguments + arguments
+        val (contextArguments, diagnostic) = tryMapContextArguments(
+            contextReceiverExpectedTypes,
+            context.bodyResolveComponents.towerDataContext
+        )
+        diagnostic?.let(sink::reportDiagnostic)
+
+        val combinedArguments = contextArguments?.plus(arguments) ?: arguments
         val mappingWithContextArguments = context.bodyResolveComponents.mapArguments(
             combinedArguments,
             function,
@@ -603,8 +607,7 @@ internal object MapArguments : ResolutionStage() {
             callSiteIsOperatorCall = (callInfo.callSite as? FirFunctionCall)?.origin == FirFunctionCallOrigin.Operator
         )
 
-        if (mappingWithContextArguments.diagnostics.isNotEmpty()) return false
-
+        mappingWithContextArguments.diagnostics.forEach(sink::reportDiagnostic)
         initializeMapping(combinedArguments, mappingWithContextArguments, function, sink)
         return true
     }

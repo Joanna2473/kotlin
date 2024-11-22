@@ -44,6 +44,15 @@ fun qux(
     f4("", 1, "")
     f5("", 1, "", true)
 
+    <!NO_CONTEXT_RECEIVER!>f1<!><!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>()<!>
+    <!NO_CONTEXT_RECEIVER!>f2<!>(<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!><!ARGUMENT_TYPE_MISMATCH!>true<!>)<!>
+    <!NO_CONTEXT_RECEIVER!>f3<!>(<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>true)<!>
+    true.<!NO_CONTEXT_RECEIVER!>f3<!><!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>()<!>
+    <!NO_CONTEXT_RECEIVER!>f4<!>(<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>"")<!>
+    "".<!NO_CONTEXT_RECEIVER!>f4<!><!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>()<!>
+    <!NO_CONTEXT_RECEIVER!>f5<!>("", <!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!><!ARGUMENT_TYPE_MISMATCH!>true<!>)<!>
+    "".<!NO_CONTEXT_RECEIVER!>f5<!>(<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!><!ARGUMENT_TYPE_MISMATCH!>true<!>)<!>
+
     with("") {
         with(1) {
             f1("", 1)
@@ -62,7 +71,7 @@ fun qux(
             f4()
             f4("")
             "".f4()
-            f5<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>()<!>
+            f5<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>()<!>
             f5(true)
             f5("", true)
             "".f5(true)
@@ -92,11 +101,11 @@ fun qux(
     with("") {
         <!NO_CONTEXT_RECEIVER!>f1<!>(<!NO_VALUE_FOR_PARAMETER!><!ARGUMENT_TYPE_MISMATCH!>1<!>)<!>
         <!NO_CONTEXT_RECEIVER!>f2<!>(<!ARGUMENT_TYPE_MISMATCH!>1<!>, <!NO_VALUE_FOR_PARAMETER!><!ARGUMENT_TYPE_MISMATCH!>true<!>)<!>
-        <!INCONSISTENT_CONTEXT_ARGUMENTS!>f3<!>(1, true)
-        <!INCONSISTENT_CONTEXT_ARGUMENTS!>f4<!>(1, "")
+        <!NO_CONTEXT_RECEIVER!>f3<!>(1, true)
+        <!NO_CONTEXT_RECEIVER!>f4<!>(1, "")
         <!NO_CONTEXT_RECEIVER!>f4<!>(<!NO_VALUE_FOR_PARAMETER, NO_VALUE_FOR_PARAMETER!>1)<!>
-        <!INCONSISTENT_CONTEXT_ARGUMENTS!>f5<!>(1, "", true)
+        <!NO_CONTEXT_RECEIVER!>f5<!>(1, "", true)
     }
 
-    "".<!INCONSISTENT_CONTEXT_ARGUMENTS!>f3<!>(1, true)
+    "".<!NO_CONTEXT_RECEIVER!>f3<!>(1, true)
 }
