@@ -1,19 +1,18 @@
 /*
- * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionContainer
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin.Companion.RESTORE_YARN_LOCK_NAME
@@ -26,17 +25,15 @@ import org.jetbrains.kotlin.gradle.utils.listProperty
 import org.jetbrains.kotlin.gradle.utils.providerWithLazyConvention
 import java.io.File
 
-abstract class AbstractYarnPlugin : Plugin<Project>, HasPlatformDisambiguate {
+internal class YarnPluginApplier(
+    override val platformDisambiguate: String?,
+    private val nodeJsRootApply: (project: Project) -> Unit,
+    private val nodeJsRootExtension: (project: Project) -> NodeJsRootExtension,
+    private val nodeJsEnvSpec: (project: Project) -> NodeJsEnvSpec,
+    private val lockFileDirectory: (projectDirectory: File) -> File,
+) : HasPlatformDisambiguate {
 
-    protected abstract fun nodeJsRootApply(project: Project)
-
-    protected abstract fun nodeJsRootExtension(project: Project): NodeJsRootExtension
-
-    protected abstract fun nodeJsEnvSpec(project: Project): NodeJsEnvSpec
-
-    protected abstract fun lockFileDirectory(projectDirectory: File): File
-
-    override fun apply(project: Project): Unit = project.run {
+    fun apply(project: Project) {
         MultiplePluginDeclarationDetector.detect(project)
 
         check(project == project.rootProject) {
@@ -45,12 +42,12 @@ abstract class AbstractYarnPlugin : Plugin<Project>, HasPlatformDisambiguate {
 
         nodeJsRootApply(project)
 
-        val nodeJsRoot = nodeJsRootExtension(this)
-        val nodeJs = nodeJsEnvSpec(this)
+        val nodeJsRoot = nodeJsRootExtension(project)
+        val nodeJs = nodeJsEnvSpec(project)
 
         val yarnSpec = project.extensions.createYarnEnvSpec(extensionName(YarnRootEnvSpec.YARN))
 
-        val yarnRootExtension = this.extensions.create(
+        val yarnRootExtension = project.extensions.create(
             extensionName(YarnRootExtension.YARN),
             YarnRootExtension::class.java,
             this,
@@ -58,7 +55,7 @@ abstract class AbstractYarnPlugin : Plugin<Project>, HasPlatformDisambiguate {
             yarnSpec,
         )
 
-        yarnSpec.initializeYarnEnvSpec(objects, yarnRootExtension)
+        yarnSpec.initializeYarnEnvSpec(project.objects, yarnRootExtension)
 
         yarnRootExtension.platform.value(nodeJs.platform)
             .disallowChanges()
@@ -67,21 +64,21 @@ abstract class AbstractYarnPlugin : Plugin<Project>, HasPlatformDisambiguate {
             yarnRootExtension
         )
 
-        val setupTask = registerTask<YarnSetupTask>(extensionName(YarnSetupTask.NAME), listOf(yarnSpec)) {
+        val setupTask = project.registerTask<YarnSetupTask>(extensionName(YarnSetupTask.NAME), listOf(yarnSpec)) {
             with(nodeJs) {
                 it.dependsOn(project.nodeJsSetupTaskProvider)
             }
 
-            it.group = AbstractNodeJsRootPlugin.TASKS_GROUP_NAME
+            it.group = NodeJsRootPlugin.TASKS_GROUP_NAME
             it.description = "Download and install a local yarn version"
 
             it.configuration = it.ivyDependencyProvider.map { ivyDependency ->
-                this.project.configurations.detachedResolvable(this.project.dependencies.create(ivyDependency))
+                project.configurations.detachedResolvable(project.dependencies.create(ivyDependency))
                     .also { conf -> conf.isTransitive = false }
             }
         }
 
-        val kotlinNpmInstall = tasks.named(extensionName(KotlinNpmInstallTask.NAME))
+        val kotlinNpmInstall = project.tasks.named(extensionName(KotlinNpmInstallTask.NAME))
         kotlinNpmInstall.configure {
             it.dependsOn(setupTask)
             it.inputs.property("yarnIgnoreScripts", { yarnRootExtension.ignoreScripts })
@@ -91,38 +88,38 @@ abstract class AbstractYarnPlugin : Plugin<Project>, HasPlatformDisambiguate {
             nodeJs.env
         ).disallowChanges()
 
-        tasks.register(extensionName("yarn" + CleanDataTask.NAME_SUFFIX), CleanDataTask::class.java) {
-            it.cleanableStoreProvider = provider { yarnRootExtension.requireConfigured().cleanableStore }
+        project.tasks.register(extensionName("yarn" + CleanDataTask.NAME_SUFFIX), CleanDataTask::class.java) {
+            it.cleanableStoreProvider = project.provider { yarnRootExtension.requireConfigured().cleanableStore }
             it.description = "Clean unused local yarn version"
         }
 
         yarnRootExtension.lockFileDirectory = lockFileDirectory(project.rootDir)
 
-        tasks.register(extensionName(STORE_YARN_LOCK_NAME), YarnLockStoreTask::class.java) { task ->
+        project.tasks.register(extensionName(STORE_YARN_LOCK_NAME), YarnLockStoreTask::class.java) { task ->
             task.dependsOn(kotlinNpmInstall)
             task.inputFile.set(nodeJsRoot.rootPackageDirectory.map { it.file(LockCopyTask.YARN_LOCK) })
             task.outputDirectory.set(yarnRootExtension.lockFileDirectory)
             task.fileName.set(yarnRootExtension.lockFileName)
 
             task.lockFileMismatchReport.value(
-                provider { yarnRootExtension.requireConfigured().yarnLockMismatchReport.toLockFileMismatchReport() }
+                project.provider { yarnRootExtension.requireConfigured().yarnLockMismatchReport.toLockFileMismatchReport() }
             ).disallowChanges()
             task.reportNewLockFile.value(
-                provider { yarnRootExtension.requireConfigured().reportNewYarnLock }
+                project.provider { yarnRootExtension.requireConfigured().reportNewYarnLock }
             ).disallowChanges()
             task.lockFileAutoReplace.value(
-                provider { yarnRootExtension.requireConfigured().yarnLockAutoReplace }
+                project.provider { yarnRootExtension.requireConfigured().yarnLockAutoReplace }
             ).disallowChanges()
         }
 
-        tasks.register(extensionName(UPGRADE_YARN_LOCK), YarnLockCopyTask::class.java) { task ->
+        project.tasks.register(extensionName(UPGRADE_YARN_LOCK), YarnLockCopyTask::class.java) { task ->
             task.dependsOn(kotlinNpmInstall)
             task.inputFile.set(nodeJsRoot.rootPackageDirectory.map { it.file(LockCopyTask.YARN_LOCK) })
             task.outputDirectory.set(yarnRootExtension.lockFileDirectory)
             task.fileName.set(yarnRootExtension.lockFileName)
         }
 
-        tasks.register(extensionName(RESTORE_YARN_LOCK_NAME), YarnLockCopyTask::class.java) {
+        project.tasks.register(extensionName(RESTORE_YARN_LOCK_NAME), YarnLockCopyTask::class.java) {
             val lockFile = yarnRootExtension.lockFileDirectory.resolve(yarnRootExtension.lockFileName)
             it.inputFile.set(yarnRootExtension.lockFileDirectory.resolve(yarnRootExtension.lockFileName))
             it.outputDirectory.set(nodeJsRoot.rootPackageDirectory)

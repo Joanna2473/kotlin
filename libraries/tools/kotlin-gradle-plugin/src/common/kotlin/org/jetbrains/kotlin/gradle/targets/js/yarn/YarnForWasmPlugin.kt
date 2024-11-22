@@ -5,33 +5,26 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
+import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsForWasmPlugin.Companion.kotlinNodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.kotlinNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootForWasmPlugin.Companion.wasmPlatform
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
-import java.io.File
 
-open class YarnForWasmPlugin : AbstractYarnPlugin() {
-    override val platformDisambiguate: String
-        get() = wasmPlatform
+open class YarnForWasmPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
 
-    override fun nodeJsRootApply(project: Project) {
-        NodeJsRootForWasmPlugin.apply(project)
+        YarnPluginApplier(
+            platformDisambiguate = wasmPlatform,
+            nodeJsRootApply = { NodeJsRootForWasmPlugin.apply(it) },
+            nodeJsRootExtension = { it.kotlinNodeJsRootExtension },
+            nodeJsEnvSpec = { it.kotlinNodeJsEnvSpec },
+            lockFileDirectory = { it.resolve(LockCopyTask.KOTLIN_JS_STORE).resolve(platformDisambiguate) },
+        )
     }
-
-    override fun nodeJsRootExtension(project: Project): NodeJsRootExtension =
-        project.kotlinNodeJsRootExtension
-
-    override fun nodeJsEnvSpec(project: Project): NodeJsEnvSpec =
-        project.kotlinNodeJsEnvSpec
-
-    override fun lockFileDirectory(projectDirectory: File): File =
-        projectDirectory.resolve(LockCopyTask.KOTLIN_JS_STORE).resolve(platformDisambiguate)
 
     companion object : HasPlatformDisambiguate {
         fun apply(project: Project): YarnRootExtension {

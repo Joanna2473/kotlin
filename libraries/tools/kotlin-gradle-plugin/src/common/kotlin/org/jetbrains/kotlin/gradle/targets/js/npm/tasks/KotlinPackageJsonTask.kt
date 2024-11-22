@@ -15,8 +15,8 @@ import org.gradle.api.tasks.*
 import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.*
@@ -93,7 +93,7 @@ abstract class KotlinPackageJsonTask :
                 task.compilationDisambiguatedName.set(compilation.disambiguatedName)
                 task.packageJsonHandlers.set(compilation.packageJsonHandlers)
                 task.description = "Create package.json file for $compilation"
-                task.group = AbstractNodeJsRootPlugin.TASKS_GROUP_NAME
+                task.group = NodeJsRootPlugin.TASKS_GROUP_NAME
 
                 task.npmResolutionManager.value(npmResolutionManager)
                     .disallowChanges()
