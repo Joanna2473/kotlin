@@ -11,9 +11,9 @@ import org.jetbrains.kotlin.ir.backend.js.lower.serialization.ir.JsManglerIr
 import org.jetbrains.kotlin.ir.inline.PreSerializationLoweringPhasesProvider
 import org.jetbrains.kotlin.ir.util.KotlinMangler
 
-object JsPreSerializationLoweringPhasesProvider : PreSerializationLoweringPhasesProvider<PreSerializationLoweringContext>() {
+object JsPreSerializationLoweringPhasesProvider : PreSerializationLoweringPhasesProvider<JsPreSerializationLoweringContext>() {
 
-    override val jsCodeOutliningLowering: ((PreSerializationLoweringContext) -> FileLoweringPass)?
+    override val jsCodeOutliningLowering: ((JsPreSerializationLoweringContext) -> FileLoweringPass)?
         get() = null // TODO(KT-71415): Return the actual lowering here
 
     override val allowExternalInlineFunctions: Boolean
