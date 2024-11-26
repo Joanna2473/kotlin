@@ -7,7 +7,12 @@ package org.jetbrains.kotlin.ir.inline
 
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.LoweringContext
+import org.jetbrains.kotlin.backend.common.lower.ArrayConstructorLowering
 import org.jetbrains.kotlin.backend.common.lower.LateinitLowering
+import org.jetbrains.kotlin.backend.common.lower.SharedVariablesLowering
+import org.jetbrains.kotlin.backend.common.lower.WrapInlineDeclarationsWithReifiedTypeParametersLowering
+import org.jetbrains.kotlin.backend.common.lower.inline.LocalClassesInInlineLambdasLowering
+import org.jetbrains.kotlin.backend.common.lower.inline.OuterThisInInlineFunctionsSpecialAccessorLowering
 import org.jetbrains.kotlin.backend.common.phaser.*
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.phaser.SameTypeNamedCompilerPhase
@@ -47,7 +52,9 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
     // TODO: The commented out lowerings must be copied here from the second compilation stage in scope of KT-71415
     fun lowerings(configuration: CompilerConfiguration): SameTypeNamedCompilerPhase<Context, IrModuleFragment> {
         fun lateinitPhase(context: Context) = LateinitLowering(context)
-
+        fun outerThisInInlineFunctionsSpecialAccessorLowering(context: Context) = OuterThisInInlineFunctionsSpecialAccessorLowering(context)
+        fun inlineCallableReferenceToLambdaPhase(context: Context) =
+            CommonInlineCallableReferenceToLambdaPhase(context, privateInlineFunctionResolver(context))
         return SameTypeNamedCompilerPhase(
             name = "PreSerializationLowerings",
             actions = DEFAULT_IR_ACTIONS,
@@ -60,16 +67,14 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
                     klibAssertionWrapperLowering, // Only on Native
                     jsCodeOutliningLowering, // Only on JS
                     ::lateinitPhase,
-//                  ::SharedVariablesLowering,
-//                  ::OuterThisInInlineFunctionsSpecialAccessorLowering,
-//                  ::LocalClassesInInlineLambdasLowering,
-//                  { CommonInlineCallableReferenceToLambdaPhase(it, inlineFunctionResolver(context, InlineMode.ALL_INLINE_FUNCTIONS)) },
-//                  ::ArrayConstructorLowering,
-//                  ::WrapInlineDeclarationsWithReifiedTypeParametersLowering,
-//                  { _ -> CacheInlineFunctionsBeforeInlining(cacheOnlyPrivateFunctions = true) },
+                    ::SharedVariablesLowering,
+                    ::outerThisInInlineFunctionsSpecialAccessorLowering,
+                    ::LocalClassesInInlineLambdasLowering,
+                    ::inlineCallableReferenceToLambdaPhase,
+                    ::ArrayConstructorLowering,
+                    ::WrapInlineDeclarationsWithReifiedTypeParametersLowering,
 //                  { FunctionInlining(it, inlineFunctionResolver(context, InlineMode.PRIVATE_INLINE_FUNCTIONS), produceOuterThisFields = false) },
 //                  ::SyntheticAccessorLowering,
-//                  { _ -> CacheInlineFunctionsBeforeInlining(cacheOnlyPrivateFunctions = false) },
                 ),
                 supportParallel = false,
             ) then buildModuleLoweringsPhase(

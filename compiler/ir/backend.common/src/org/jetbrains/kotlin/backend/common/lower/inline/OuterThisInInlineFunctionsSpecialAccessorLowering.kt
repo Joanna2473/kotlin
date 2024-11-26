@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.backend.common.lower.inline
 
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.LoweringContext
+import org.jetbrains.kotlin.backend.common.phaser.PhaseDescription
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities.*
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.*
@@ -25,6 +26,7 @@ import org.jetbrains.kotlin.utils.addToStdlib.getOrSetIfNull
 /**
  * Generates a special private member accessor for outer@this implicit value parameter in inline functions.
  */
+@PhaseDescription("OuterThisInInlineFunctionsSpecialAccessorLowering")
 class OuterThisInInlineFunctionsSpecialAccessorLowering(
     context: LoweringContext,
 
