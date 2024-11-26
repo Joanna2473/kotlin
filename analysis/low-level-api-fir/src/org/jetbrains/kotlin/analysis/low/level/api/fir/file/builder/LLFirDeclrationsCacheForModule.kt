@@ -12,6 +12,8 @@ import org.jetbrains.kotlin.fir.declarations.FirFile
 import org.jetbrains.kotlin.fir.psi
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.utils.ThreadSafe
+import org.jetbrains.kotlin.utils.exceptions.errorWithAttachment
+import org.jetbrains.kotlin.utils.exceptions.withVirtualFileEntry
 import java.util.concurrent.ConcurrentMap
 
 /**
@@ -27,9 +29,15 @@ internal abstract class ModuleFileCache {
      */
     abstract fun fileCached(file: KtFile, createValue: () -> FirFile): FirFile
 
+    /**
+     * @return [FirFile] for the [declaration]'s containing file, or `null` if declaration doesn't have a containing file.
+     */
     abstract fun getContainerFirFile(declaration: FirDeclaration): FirFile?
 
-    abstract fun getCachedFirFile(ktFile: KtFile): FirFile?
+    /**
+     * @return cached [FirFile] for the [ktFile].
+     */
+    abstract fun getCachedFirFile(ktFile: KtFile): FirFile
 }
 
 internal class ModuleFileCacheImpl(override val moduleComponents: LLFirModuleResolveComponents) : ModuleFileCache() {
@@ -37,7 +45,12 @@ internal class ModuleFileCacheImpl(override val moduleComponents: LLFirModuleRes
     override fun fileCached(file: KtFile, createValue: () -> FirFile): FirFile =
         ktFileToFirFile.computeIfAbsent(file) { createValue() }
 
-    override fun getCachedFirFile(ktFile: KtFile): FirFile? = ktFileToFirFile[ktFile]
+    override fun getCachedFirFile(ktFile: KtFile): FirFile {
+        return ktFileToFirFile[ktFile] ?: errorWithAttachment("FirFile was not found in cache for KtFile") {
+            withVirtualFileEntry("ktFileName", ktFile.virtualFile)
+            withEntry("session", moduleComponents.session.toString())
+        }
+    }
 
     override fun getContainerFirFile(declaration: FirDeclaration): FirFile? {
         val ktFile = declaration.psi?.containingFile as? KtFile ?: return null
