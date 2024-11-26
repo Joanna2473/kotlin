@@ -567,7 +567,10 @@ abstract class IncrementalCompilerRunner<
 
             val forceToRecompileFiles = mapClassesFqNamesToFiles(listOf(caches.platformCache), forceRecompile, reporter)
             with(dirtySources) {
-                clear()
+                when (icFeatures.compileScopeExpansionMode) {
+                    CompileScopeExpansionMode2.OPTIMISTIC -> clear()
+                    CompileScopeExpansionMode2.SAFE -> Unit
+                }
                 addAll(mapLookupSymbolsToFiles(caches.lookupCache, dirtyLookupSymbols, reporter, excludes = compiledInThisIterationSet))
                 addAll(
                     mapClassesFqNamesToFiles(

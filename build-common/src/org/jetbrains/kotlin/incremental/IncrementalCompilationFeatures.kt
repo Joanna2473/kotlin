@@ -1,11 +1,41 @@
 /*
- * Copyright 2010-2023 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package org.jetbrains.kotlin.incremental
 
 import java.io.Serializable
+
+//TODO: find proper name / resolve conflict with existing thing
+enum class CompileScopeExpansionMode2 {
+    /**
+     * Also can be described as monotonous scope expansion mode.
+     *
+     * If incremental compilation of a.kt detects that b.kt should be recompiled on the next compilation step,
+     * in [SAFE] mode next compilation step would include both a.kt and b.kt
+     *
+     * It guarantees that compiler doesn't go into an infinite loop - either the compilation would be successful,
+     * or an actionable error would be found.
+     */
+    SAFE,
+
+    /**
+     * The original scope expansion mode.
+     *
+     * If incremental compilation of a.kt detects that b.kt should be recompiled on the next compilation step,
+     * in [OPTIMISTIC] mode next compilation step would include b.kt.
+     *
+     * It ensures that not a single file is compiled twice, but it might trigger an infinite loop in rare cases.
+     */
+    OPTIMISTIC;
+
+    companion object {
+        val DEFAULT_EXPANSION_MODE = SAFE
+
+        const val serialVersionUID: Long = 1
+    }
+}
 
 /**
  * Lists configurable feature toggles for Incremental Compilation.
@@ -54,11 +84,23 @@ data class IncrementalCompilationFeatures(
      * You can enable "unsafeIC" to use pre-2.0 behavior with potentially incorrect incremental builds.
      */
     val enableUnsafeIncrementalCompilationForMultiplatform: Boolean = false,
+    /**
+     * Scope expansion mode governs the cases where incremental compilation uses multiple compilation steps.
+     *
+     * For example, suppose that we compile a.kt incrementally, and we find out that it has introduced
+     * an overload of fun fooBar in package org.example.
+     * Now we need to recompile usages of org.example.fooBar to ensure that they're linked against the most appropriate
+     * overload visible to them. Suppose that all these usages are in b.kt.
+     *
+     * Then, in SAFE mode the next compilation step would include both a.kt and b.kt.
+     * In OPTIMISTIC mode the next compilation step would include only the files that weren't compiled previously.
+     */
+    val compileScopeExpansionMode: CompileScopeExpansionMode2 = CompileScopeExpansionMode2.DEFAULT_EXPANSION_MODE,
 ) : Serializable {
 
     companion object {
         val DEFAULT_CONFIGURATION = IncrementalCompilationFeatures()
 
-        const val serialVersionUID: Long = 1
+        const val serialVersionUID: Long = 2
     }
 }

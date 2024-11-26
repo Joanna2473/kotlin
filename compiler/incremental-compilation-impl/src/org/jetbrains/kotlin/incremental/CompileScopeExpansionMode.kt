@@ -9,3 +9,4 @@ package org.jetbrains.kotlin.incremental
 enum class CompileScopeExpansionMode {
     ALWAYS, NEVER
 }
+//TODO what is this?
