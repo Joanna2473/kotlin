@@ -164,6 +164,7 @@ internal class K2WasmCompilerImpl(
             wasmModuleMetadataCache,
             irFactory,
             allowIncompleteImplementations = arguments.irDce,
+            skipCommentInstructions = !arguments.wasmGenerateWat
         )
         val wasmCompiledFileFragments = allModules.map { codeGenerator.generateModuleAsSingleFileFragment(it) }
 

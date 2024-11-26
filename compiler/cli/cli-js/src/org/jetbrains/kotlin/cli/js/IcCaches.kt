@@ -44,7 +44,8 @@ internal fun prepareIcCaches(
         WasmICContext(
             allowIncompleteImplementations = false,
             skipLocalNames = !arguments.wasmDebug,
-            safeFragmentTags = arguments.preserveIcOrder
+            safeFragmentTags = arguments.preserveIcOrder,
+            skipCommentInstructions = !arguments.wasmGenerateWat,
         )
     } else {
         JsICContext(
