@@ -39,7 +39,8 @@ import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 )
 open class LateinitLowering(
     private val loweringContext: LoweringContext,
-    private val uninitializedPropertyAccessExceptionThrower: UninitializedPropertyAccessExceptionThrower,
+    private val uninitializedPropertyAccessExceptionThrower: UninitializedPropertyAccessExceptionThrower =
+        UninitializedPropertyAccessExceptionThrower(loweringContext.ir.symbols),
 ) : FileLoweringPass, IrElementTransformerVoid() {
     constructor(backendContext: CommonBackendContext) :
             this(backendContext, UninitializedPropertyAccessExceptionThrower(backendContext.ir.symbols))

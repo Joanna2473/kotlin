@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.ir.inline
 
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.LoweringContext
+import org.jetbrains.kotlin.backend.common.lower.LateinitLowering
 import org.jetbrains.kotlin.backend.common.phaser.*
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.phaser.SameTypeNamedCompilerPhase
@@ -56,9 +57,7 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
                 createFilePhases(
                     klibAssertionWrapperLowering, // Only on Native
                     jsCodeOutliningLowering, // Only on JS
-//                  ::NullableFieldsForLateinitCreationLowering,
-//                  ::NullableFieldsDeclarationLowering,
-//                  ::LateinitUsageLowering,
+                    { LateinitLowering(it) },
 //                  ::SharedVariablesLowering,
 //                  ::OuterThisInInlineFunctionsSpecialAccessorLowering,
 //                  ::LocalClassesInInlineLambdasLowering,
