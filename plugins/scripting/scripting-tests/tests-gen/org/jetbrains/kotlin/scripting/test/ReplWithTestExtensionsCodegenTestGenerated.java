@@ -37,6 +37,12 @@ public class ReplWithTestExtensionsCodegenTestGenerated extends AbstractReplWith
   }
 
   @Test
+  @TestMetadata("function_uses_local_mutating_property.repl.kts")
+  public void testFunction_uses_local_mutating_property_repl() {
+    runTest("plugins/scripting/scripting-tests/testData/codegen/repl/function_uses_local_mutating_property.repl.kts");
+  }
+
+  @Test
   @TestMetadata("function_uses_mutating_property.repl.kts")
   public void testFunction_uses_mutating_property_repl() {
     runTest("plugins/scripting/scripting-tests/testData/codegen/repl/function_uses_mutating_property.repl.kts");
