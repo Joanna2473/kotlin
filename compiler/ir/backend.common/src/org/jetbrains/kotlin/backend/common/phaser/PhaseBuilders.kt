@@ -5,8 +5,8 @@
 
 package org.jetbrains.kotlin.backend.common.phaser
 
-import org.jetbrains.kotlin.backend.common.CommonBackendContext
 import org.jetbrains.kotlin.config.LoggingContext
+import org.jetbrains.kotlin.backend.common.LoweringContext
 import org.jetbrains.kotlin.backend.common.ModuleLoweringPass
 import org.jetbrains.kotlin.config.phaser.*
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
@@ -88,7 +88,7 @@ fun <Context : LoggingContext, Input> createSimpleNamedCompilerPhase(
         op(context, input)
 }
 
-fun <Context : CommonBackendContext> makeIrModulePhase(
+fun <Context : LoweringContext> makeIrModulePhase(
     lowering: (Context) -> ModuleLoweringPass,
     name: String,
     prerequisite: Set<NamedCompilerPhase<Context, *, *>> = emptySet(),
