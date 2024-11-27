@@ -45,8 +45,10 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
     }
 
     // TODO: The commented out lowerings must be copied here from the second compilation stage in scope of KT-71415
-    fun lowerings(configuration: CompilerConfiguration): SameTypeNamedCompilerPhase<Context, IrModuleFragment> =
-        SameTypeNamedCompilerPhase(
+    fun lowerings(configuration: CompilerConfiguration): SameTypeNamedCompilerPhase<Context, IrModuleFragment> {
+        fun lateinitPhase(context: Context) = LateinitLowering(context)
+
+        return SameTypeNamedCompilerPhase(
             name = "PreSerializationLowerings",
             actions = DEFAULT_IR_ACTIONS,
             nlevels = 1,
@@ -57,7 +59,7 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
                 createFilePhases(
                     klibAssertionWrapperLowering, // Only on Native
                     jsCodeOutliningLowering, // Only on JS
-                    { LateinitLowering(it) },
+                    ::lateinitPhase,
 //                  ::SharedVariablesLowering,
 //                  ::OuterThisInInlineFunctionsSpecialAccessorLowering,
 //                  ::LocalClassesInInlineLambdasLowering,
@@ -82,4 +84,5 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
 //              validateIrAfterInliningAllFunctions
             )
         )
+    }
 }
