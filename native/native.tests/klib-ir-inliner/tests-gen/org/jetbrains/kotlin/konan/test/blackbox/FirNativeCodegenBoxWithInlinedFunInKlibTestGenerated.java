@@ -27249,6 +27249,20 @@ public class FirNativeCodegenBoxWithInlinedFunInKlibTestGenerated extends Abstra
       }
 
       @Nested
+      @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed")
+      @TestDataPath("$PROJECT_ROOT")
+      @Tag("frontend-fir")
+      @FirPipeline()
+      @Tag("klibIrInliner")
+      @UseExtTestCaseGroupProvider()
+      public class JvmExposeBoxed {
+        @Test
+        public void testAllFilesPresentInJvmExposeBoxed() {
+          KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed"), Pattern.compile("^(.+)\\.kt$"), null, TargetBackend.NATIVE, true);
+        }
+      }
+
+      @Nested
       @TestMetadata("compiler/testData/codegen/box/inlineClasses/propertyDelegation")
       @TestDataPath("$PROJECT_ROOT")
       @Tag("frontend-fir")

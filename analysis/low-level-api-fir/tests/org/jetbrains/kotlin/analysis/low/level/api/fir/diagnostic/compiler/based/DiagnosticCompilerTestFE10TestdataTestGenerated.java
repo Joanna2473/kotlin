@@ -44571,6 +44571,28 @@ public class DiagnosticCompilerTestFE10TestdataTestGenerated extends AbstractDia
       public void testVarargsOnParametersOfValueClassType() {
         runTest("compiler/testData/diagnostics/tests/valueClasses/varargsOnParametersOfValueClassType.kt");
       }
+
+      @Nested
+      @TestMetadata("compiler/testData/diagnostics/tests/valueClasses/jvmExposeBoxed")
+      @TestDataPath("$PROJECT_ROOT")
+      public class JvmExposeBoxed {
+        @Test
+        public void testAllFilesPresentInJvmExposeBoxed() {
+          KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/diagnostics/tests/valueClasses/jvmExposeBoxed"), Pattern.compile("^(.+)\\.(kt|kts)$"), Pattern.compile("^(.+)\\.(reversed|fir|ll|latestLV)\\.kts?$"), true);
+        }
+
+        @Test
+        @TestMetadata("explicitApi.kt")
+        public void testExplicitApi() {
+          runTest("compiler/testData/diagnostics/tests/valueClasses/jvmExposeBoxed/explicitApi.kt");
+        }
+
+        @Test
+        @TestMetadata("simple.kt")
+        public void testSimple() {
+          runTest("compiler/testData/diagnostics/tests/valueClasses/jvmExposeBoxed/simple.kt");
+        }
+      }
     }
 
     @Nested

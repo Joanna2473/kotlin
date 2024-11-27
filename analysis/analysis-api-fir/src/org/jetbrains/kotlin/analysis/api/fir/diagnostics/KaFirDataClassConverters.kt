@@ -5634,6 +5634,60 @@ internal val KT_DIAGNOSTIC_CONVERTER = KaDiagnosticConverterBuilder.buildConvert
             token,
         )
     }
+    add(FirJvmErrors.INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME) { firDiagnostic ->
+        InapplicableJvmExposeBoxedWithNameImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
+    add(FirJvmErrors.USELESS_JVM_EXPOSE_BOXED) { firDiagnostic ->
+        UselessJvmExposeBoxedImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
+    add(FirJvmErrors.JVM_EXPOSE_BOXED_REQUIRES_NAME) { firDiagnostic ->
+        JvmExposeBoxedRequiresNameImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
+    add(FirJvmErrors.JVM_EXPOSE_BOXED_REQUIRES_NAMED_GETTER) { firDiagnostic ->
+        JvmExposeBoxedRequiresNamedGetterImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
+    add(FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME_AS_JVM_NAME) { firDiagnostic ->
+        JvmExposeBoxedCannotBeTheSameAsJvmNameImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
+    add(FirJvmErrors.JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT) { firDiagnostic ->
+        JvmExposeBoxedMustBeExplicitImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
+    add(FirJvmErrors.JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT_WARNING) { firDiagnostic ->
+        JvmExposeBoxedMustBeExplicitWarningImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
+    add(FirJvmErrors.JVM_EXPOSE_BOXED_METHOD_MUST_BE_EXPLICIT) { firDiagnostic ->
+        JvmExposeBoxedMethodMustBeExplicitImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
+    add(FirJvmErrors.JVM_EXPOSE_BOXED_METHOD_MUST_BE_EXPLICIT_WARNING) { firDiagnostic ->
+        JvmExposeBoxedMethodMustBeExplicitWarningImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
     add(FirJvmErrors.WRONG_NULLABILITY_FOR_JAVA_OVERRIDE) { firDiagnostic ->
         WrongNullabilityForJavaOverrideImpl(
             firSymbolBuilder.callableBuilder.buildCallableSymbol(firDiagnostic.a),

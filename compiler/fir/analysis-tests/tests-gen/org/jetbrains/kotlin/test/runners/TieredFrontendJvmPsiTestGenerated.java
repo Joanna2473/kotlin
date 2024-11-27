@@ -24124,6 +24124,23 @@ public class TieredFrontendJvmPsiTestGenerated extends AbstractTieredFrontendJvm
       public void testVarargsOnParametersOfValueClassType() {
         runTest("compiler/testData/diagnostics/tests/valueClasses/varargsOnParametersOfValueClassType.kt");
       }
+
+      @Nested
+      @TestMetadata("compiler/testData/diagnostics/tests/valueClasses/jvmExposeBoxed")
+      @TestDataPath("$PROJECT_ROOT")
+      public class JvmExposeBoxed {
+        @Test
+        @TestMetadata("explicitApi.kt")
+        public void testExplicitApi() {
+          runTest("compiler/testData/diagnostics/tests/valueClasses/jvmExposeBoxed/explicitApi.kt");
+        }
+
+        @Test
+        @TestMetadata("simple.kt")
+        public void testSimple() {
+          runTest("compiler/testData/diagnostics/tests/valueClasses/jvmExposeBoxed/simple.kt");
+        }
+      }
     }
 
     @Nested
