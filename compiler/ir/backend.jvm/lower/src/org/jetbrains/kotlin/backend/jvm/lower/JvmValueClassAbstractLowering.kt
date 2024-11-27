@@ -7,13 +7,22 @@ package org.jetbrains.kotlin.backend.jvm.lower
 
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
+import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
+import org.jetbrains.kotlin.backend.common.lower.irBlockBody
 import org.jetbrains.kotlin.backend.common.pop
 import org.jetbrains.kotlin.backend.common.push
 import org.jetbrains.kotlin.backend.jvm.*
+import org.jetbrains.kotlin.backend.jvm.ir.isInlineClassType
+import org.jetbrains.kotlin.backend.jvm.ir.shouldBeExposedByAnnotation
 import org.jetbrains.kotlin.ir.IrStatement
+import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
+import org.jetbrains.kotlin.ir.builders.declarations.buildConstructor
+import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
+import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.transformStatement
+import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.load.java.JvmAbi
 import org.jetbrains.kotlin.name.Name
@@ -44,6 +53,19 @@ internal abstract class JvmValueClassAbstractLowering(
                 if (constructorReplacement != null) {
                     addBindingsFor(function, constructorReplacement)
                     return transformFlattenedConstructor(function, constructorReplacement)
+                } else if (function.shouldBeExposedByAnnotation() && function.parameters.any { it.type.isInlineClassType() } &&
+                    !function.constructedClass.isSpecificLoweringLogicApplicable()
+                ) {
+                    val inlineClassParams = function.parameters.filter { it.type.isInlineClassType() }
+                    if (inlineClassParams.isNotEmpty() && inlineClassParams.all { param ->
+                            param.type.isNullable() && param.type.unboxInlineClass().let { it.isNullable() || it.isPrimitiveType() }
+                        }
+                    ) {
+                        val replacement = createNonExposedConstructorWithMarker(function) ?: return null
+                        replacement.parent = function.parent
+                        return listOfNotNull(replacement, createExposedConstructor(replacement))
+                    }
+                    return listOfNotNull(function, createExposedConstructor(function))
                 }
             }
             function.transformChildrenVoid()
@@ -75,6 +97,10 @@ internal abstract class JvmValueClassAbstractLowering(
             is IrConstructor -> transformSecondaryConstructorFlat(function, replacement)
         }
     }
+
+    abstract fun createNonExposedConstructorWithMarker(constructor: IrConstructor): IrConstructor?
+
+    abstract fun createExposedConstructor(constructor: IrConstructor): IrConstructor?
 
     private fun transformFlattenedConstructor(function: IrConstructor, replacement: IrConstructor): List<IrDeclaration> {
         replacement.valueParameters.forEach {
@@ -115,8 +141,9 @@ internal abstract class JvmValueClassAbstractLowering(
         replacement.copyAttributes(function)
 
         // Don't create a wrapper for functions which are only used in an unboxed context
-        if (function.overriddenSymbols.isEmpty() || replacement.dispatchReceiverParameter != null)
-            return listOf(replacement)
+        if (!function.shouldBeExposedByAnnotation() &&
+            (function.overriddenSymbols.isEmpty() || replacement.dispatchReceiverParameter != null)
+        ) return listOf(replacement)
 
         val bridgeFunction = createBridgeFunction(function, replacement)
 
@@ -176,7 +203,7 @@ internal abstract class JvmValueClassAbstractLowering(
     protected abstract val specificMangle: SpecificMangle
     private fun createBridgeFunction(
         function: IrSimpleFunction,
-        replacement: IrSimpleFunction
+        replacement: IrSimpleFunction,
     ): IrSimpleFunction {
         val bridgeFunction = createBridgeDeclaration(
             function,
@@ -220,9 +247,10 @@ internal abstract class JvmValueClassAbstractLowering(
     }
 
     private fun IrSimpleFunction.signatureRequiresMangling(includeInline: Boolean = true, includeMFVC: Boolean = true) =
-        fullValueParameterList.any { it.type.getRequiresMangling(includeInline, includeMFVC) } ||
-                context.config.functionsWithInlineClassReturnTypesMangled &&
-                returnType.getRequiresMangling(includeInline = includeInline, includeMFVC = false)
+        !shouldBeExposedByAnnotation() &&
+                (fullValueParameterList.any { it.type.getRequiresMangling(includeInline, includeMFVC) } ||
+                        context.config.functionsWithInlineClassReturnTypesMangled &&
+                        returnType.getRequiresMangling(includeInline = includeInline, includeMFVC = false))
 
     protected fun typedArgumentList(function: IrFunction, expression: IrMemberAccessExpression<*>) = listOfNotNull(
         function.dispatchReceiverParameter?.let { it to expression.dispatchReceiver },

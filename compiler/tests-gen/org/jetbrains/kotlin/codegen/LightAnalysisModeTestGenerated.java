@@ -26443,6 +26443,84 @@ public class LightAnalysisModeTestGenerated extends AbstractLightAnalysisModeTes
       }
     }
 
+    @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class JvmExposeBoxed extends AbstractLightAnalysisModeTest {
+      private void runTest(String testDataFilePath) {
+        KotlinTestUtils.runTest(this::doTest, TargetBackend.JVM_IR, testDataFilePath);
+      }
+
+      public void testAllFilesPresentInJvmExposeBoxed() {
+        KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed"), Pattern.compile("^(.+)\\.kt$"), null, TargetBackend.JVM_IR, true);
+      }
+
+      @TestMetadata("constructor.kt")
+      public void testConstructor() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/constructor.kt");
+      }
+
+      @TestMetadata("constructorBoxed.kt")
+      public void testConstructorBoxed() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/constructorBoxed.kt");
+      }
+
+      @TestMetadata("file.kt")
+      public void testFile() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/file.kt");
+      }
+
+      @TestMetadata("getter.kt")
+      public void testGetter() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/getter.kt");
+      }
+
+      @TestMetadata("globalReturn.kt")
+      public void testGlobalReturn() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/globalReturn.kt");
+      }
+
+      @TestMetadata("initBlock.kt")
+      public void testInitBlock() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/initBlock.kt");
+      }
+
+      @TestMetadata("method.kt")
+      public void testMethod() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/method.kt");
+      }
+
+      @TestMetadata("methodReturn.kt")
+      public void testMethodReturn() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/methodReturn.kt");
+      }
+
+      @TestMetadata("methodReturnWithJvmName.kt")
+      public void testMethodReturnWithJvmName() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/methodReturnWithJvmName.kt");
+      }
+
+      @TestMetadata("methodWithAnnotation.kt")
+      public void testMethodWithAnnotation() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/methodWithAnnotation.kt");
+      }
+
+      @TestMetadata("nested.kt")
+      public void testNested() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/nested.kt");
+      }
+
+      @TestMetadata("noArg.kt")
+      public void testNoArg() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/noArg.kt");
+      }
+
+      @TestMetadata("simple.kt")
+      public void testSimple() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/simple.kt");
+      }
+    }
+
     @TestMetadata("compiler/testData/codegen/box/inlineClasses/propertyDelegation")
     @TestDataPath("$PROJECT_ROOT")
     @RunWith(JUnit3RunnerWithInners.class)
