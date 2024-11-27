@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.backend.common.lower.WrapInlineDeclarationsWithReifi
 import org.jetbrains.kotlin.backend.common.lower.inline.LocalClassesInInlineLambdasLowering
 import org.jetbrains.kotlin.backend.common.lower.inline.OuterThisInInlineFunctionsSpecialAccessorLowering
 import org.jetbrains.kotlin.backend.common.phaser.*
-import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.phaser.SameTypeNamedCompilerPhase
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.util.KotlinMangler.IrMangler
@@ -50,7 +49,7 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
     }
 
     // TODO: The commented out lowerings must be copied here from the second compilation stage in scope of KT-71415
-    fun lowerings(configuration: CompilerConfiguration): SameTypeNamedCompilerPhase<Context, IrModuleFragment> {
+    fun lowerings(): SameTypeNamedCompilerPhase<Context, IrModuleFragment> {
         fun lateinitPhase(context: Context) = LateinitLowering(context)
         fun outerThisInInlineFunctionsSpecialAccessorLowering(context: Context) = OuterThisInInlineFunctionsSpecialAccessorLowering(context)
         fun inlineCallableReferenceToLambdaPhase(context: Context) =

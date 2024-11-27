@@ -126,7 +126,7 @@ abstract class FirAbstractInvalidationTest(
             PhaseConfig(),
             PhaserState(),
             JsPreSerializationLoweringContext(fir2IrActualizedResult.irBuiltIns, configuration),
-        ).runPreSerializationLoweringPhases(fir2IrActualizedResult, JsPreSerializationLoweringPhasesProvider, configuration)
+        ).runPreSerializationLoweringPhases(fir2IrActualizedResult, JsPreSerializationLoweringPhasesProvider)
 
         serializeFirKlib(
             moduleStructure = moduleStructure,

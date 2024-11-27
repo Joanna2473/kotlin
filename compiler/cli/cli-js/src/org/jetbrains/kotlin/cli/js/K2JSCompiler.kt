@@ -419,7 +419,7 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
         if (arguments.irProduceKlibDir || arguments.irProduceKlibFile) {
             val transformedResult = if (!arguments.wasm) {
                 val phaseConfig = createPhaseConfig(
-                    JsPreSerializationLoweringPhasesProvider.lowerings(configuration),
+                    JsPreSerializationLoweringPhasesProvider.lowerings(),
                     arguments,
                     messageCollector,
                 )
@@ -428,7 +428,7 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
                     phaseConfig,
                     PhaserState(),
                     JsPreSerializationLoweringContext(fir2IrActualizedResult.irBuiltIns, configuration),
-                ).runPreSerializationLoweringPhases(fir2IrActualizedResult, JsPreSerializationLoweringPhasesProvider, configuration)
+                ).runPreSerializationLoweringPhases(fir2IrActualizedResult, JsPreSerializationLoweringPhasesProvider)
             } else {
                 fir2IrActualizedResult
             }
