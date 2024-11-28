@@ -645,7 +645,9 @@ internal class FunctionDFGBuilder(private val generationState: NativeGenerationS
                                     ), size = expressionToEdge(value.getValueArgument(0)!!), value)
 
                                 createEmptyStringSymbol ->
-                                    DataFlowIR.Node.AllocString(symbolTable.mapType(createEmptyStringSymbol.owner.returnType), value)
+                                    // Technically, this allocates an array. However, this is an empty string, so let's treat it
+                                    // like a fixed-size object.
+                                    DataFlowIR.Node.AllocInstance(symbolTable.mapType(createEmptyStringSymbol.owner.returnType), value)
 
                                 reinterpret -> getNode(value.extensionReceiver!!).value
 
