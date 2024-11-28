@@ -68,6 +68,7 @@ object FirJvmErrors {
     val USELESS_JVM_EXPOSE_BOXED: KtDiagnosticFactory0 = KtDiagnosticFactory0("USELESS_JVM_EXPOSE_BOXED", WARNING, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
     val JVM_EXPOSE_BOXED_REQUIRES_NAME: KtDiagnosticFactory0 = KtDiagnosticFactory0("JVM_EXPOSE_BOXED_REQUIRES_NAME", ERROR, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
     val JVM_EXPOSE_BOXED_REQUIRES_NAMED_GETTER: KtDiagnosticFactory0 = KtDiagnosticFactory0("JVM_EXPOSE_BOXED_REQUIRES_NAMED_GETTER", ERROR, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
+    val JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME: KtDiagnosticFactory0 = KtDiagnosticFactory0("JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME", ERROR, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
     val JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME_AS_JVM_NAME: KtDiagnosticFactory0 = KtDiagnosticFactory0("JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME_AS_JVM_NAME", ERROR, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
     val JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT: KtDiagnosticFactory0 = KtDiagnosticFactory0("JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT", ERROR, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)
     val JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT_WARNING: KtDiagnosticFactory0 = KtDiagnosticFactory0("JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT_WARNING", WARNING, SourceElementPositioningStrategies.DEFAULT, PsiElement::class)

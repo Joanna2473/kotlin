@@ -1,3 +1,4 @@
+// RUN_PIPELINE_TILL: FRONTEND
 // SKIP_JAVAC
 // WITH_STDLIB
 
@@ -31,6 +32,9 @@ val icic: IC = TODO()
 fun foo(): IC = TODO()
 
 @JvmExposeBoxed
+fun bar(ic: IC) {}
+
+@JvmExposeBoxed
 fun foo(result: Result<Any>) {}
 
 @JvmExposeBoxed
@@ -58,7 +62,7 @@ fun Int.foo(i: Int) {}
 
 @JvmExposeBoxed("foo")
 @JvmName("foo")
-fun bar(ic: IC) {}
+fun bar1(ic: IC) {}
 
 @JvmExposeBoxed("foo")
 @JvmName("foo")
@@ -66,3 +70,9 @@ fun barIC(): IC = TODO()
 
 @JvmExposeBoxed("...")
 fun todo(ic: IC) {}
+
+@JvmExposeBoxed
+inline fun <reified T> inlineMe(ic: IC) {}
+
+@JvmExposeBoxed("same")
+fun same(): IC = TODO()

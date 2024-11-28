@@ -63,6 +63,10 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Plat
                 if (!declaration.canBeOverloadedByExposed(context.session)) {
                     checkJvmNameHasDifferentName(name, declaration, reporter, jvmExposeBoxedAnnotation, context)
                 }
+
+                if (declaration is FirFunction && declaration.typeParameters.any { it.symbol.isReified }) {
+                    reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.USELESS_JVM_EXPOSE_BOXED, context)
+                }
             }
         } else if (context.languageVersionSettings.apiVersion >= ApiVersion.KOTLIN_2_2 &&
             context.languageVersionSettings.getFlag(AnalysisFlags.explicitApiMode) != ExplicitApiMode.DISABLED
@@ -149,6 +153,10 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Plat
                     FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME_AS_JVM_NAME,
                     context
                 )
+            }
+
+            if (declaration is FirFunction && declaration.nameOrSpecialName.asString() == value) {
+                reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME, context)
             }
         }
     }

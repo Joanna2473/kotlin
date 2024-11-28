@@ -1,3 +1,4 @@
+// RUN_PIPELINE_TILL: FRONTEND
 // SKIP_JAVAC
 // WITH_STDLIB
 
@@ -61,7 +62,7 @@ fun Int.foo(i: Int) {}
 
 @JvmExposeBoxed("foo")
 @JvmName("foo")
-fun bar(ic: IC) {}
+fun bar1(ic: IC) {}
 
 <!JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME_AS_JVM_NAME!>@JvmExposeBoxed("foo")<!>
 @JvmName("foo")
@@ -73,5 +74,5 @@ fun todo(ic: IC) {}
 <!USELESS_JVM_EXPOSE_BOXED!>@JvmExposeBoxed<!>
 inline fun <reified T> inlineMe(ic: IC) {}
 
-@JvmExposeBoxed("same")
+<!JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME!>@JvmExposeBoxed("same")<!>
 fun same(): IC = TODO()
