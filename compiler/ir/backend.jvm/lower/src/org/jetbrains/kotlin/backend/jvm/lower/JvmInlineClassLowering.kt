@@ -12,8 +12,6 @@ import org.jetbrains.kotlin.backend.common.phaser.PhaseDescription
 import org.jetbrains.kotlin.backend.jvm.*
 import org.jetbrains.kotlin.backend.jvm.JvmLoweredDeclarationOrigin.INLINE_CLASS_CONSTRUCTOR_SYNTHETIC_PARAMETER
 import org.jetbrains.kotlin.backend.jvm.ir.erasedUpperBound
-import org.jetbrains.kotlin.backend.jvm.ir.findJvmExposeBoxedAnnotation
-import org.jetbrains.kotlin.backend.jvm.ir.isInlineClassType
 import org.jetbrains.kotlin.backend.jvm.ir.shouldBeExposedByAnnotation
 import org.jetbrains.kotlin.builtins.StandardNames
 import org.jetbrains.kotlin.config.ApiVersion
@@ -32,7 +30,6 @@ import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.ir.util.isNullable
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.resolve.JVM_EXPOSE_BOXED_ANNOTATION_FQ_NAME
 import org.jetbrains.kotlin.resolve.JVM_INLINE_ANNOTATION_FQ_NAME
 import org.jetbrains.kotlin.resolve.JVM_NAME_ANNOTATION_FQ_NAME
 
@@ -294,7 +291,7 @@ internal class JvmInlineClassLowering(context: JvmBackendContext) : JvmValueClas
         }
     }
 
-    override fun createNonExposedConstructorWithMarker(constructor: IrConstructor): IrConstructor {
+    override fun addMarkerParameterToNonExposedConstructor(constructor: IrConstructor): IrConstructor {
         constructor.addValueParameter {
             name = Name.identifier("\$null")
             origin = JvmLoweredDeclarationOrigin.NON_EXPOSED_CONSTRUCTOR_SYNTHETIC_PARAMETER
@@ -323,11 +320,7 @@ internal class JvmInlineClassLowering(context: JvmBackendContext) : JvmValueClas
             body = context.createIrBuilder(this.symbol).irBlockBody(this) {
                 +irDelegatingConstructorCall(constructor).apply {
                     for ((index, param) in valueParameters.withIndex()) {
-                        if (param.type.isInlineClassType()) {
-                            putValueArgument(index, irGet(param).coerceToUnboxed())
-                        } else {
-                            putValueArgument(index, irGet(param))
-                        }
+                        putValueArgument(index, irGet(param))
                     }
                     if (addedSyntheticParameter) {
                         putValueArgument(valueParameters.size, irNull())

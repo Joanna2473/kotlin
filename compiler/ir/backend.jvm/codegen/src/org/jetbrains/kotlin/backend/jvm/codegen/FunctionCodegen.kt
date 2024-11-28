@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.ir.expressions.IrGetValue
 import org.jetbrains.kotlin.ir.expressions.IrVararg
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.load.java.JavaDescriptorVisibilities
+import org.jetbrains.kotlin.load.kotlin.TypeMappingMode
 import org.jetbrains.kotlin.name.JvmStandardClassIds.JVM_SYNTHETIC_ANNOTATION_FQ_NAME
 import org.jetbrains.kotlin.name.JvmStandardClassIds.STRICTFP_ANNOTATION_FQ_NAME
 import org.jetbrains.kotlin.name.JvmStandardClassIds.SYNCHRONIZED_ANNOTATION_FQ_NAME
@@ -266,7 +267,13 @@ class FunctionCodegen(private val irFunction: IrFunction, private val classCodeg
         }
         val regularParameters = valueParameters.subList(contextReceiverParametersCount, valueParameters.size)
         for (parameter in regularParameters) {
-            frameMap.enter(parameter, classCodegen.typeMapper.mapType(parameter.type))
+            val type =
+                if (origin == JvmLoweredDeclarationOrigin.FUNCTION_WITH_EXPOSED_INLINE_CLASS && parameter.type.isInlineClassType()) {
+                    classCodegen.typeMapper.mapType(parameter.type, TypeMappingMode.DEFAULT.wrapInlineClassesMode())
+                } else {
+                    classCodegen.typeMapper.mapType(parameter.type)
+                }
+            frameMap.enter(parameter, type)
         }
         return frameMap
     }
