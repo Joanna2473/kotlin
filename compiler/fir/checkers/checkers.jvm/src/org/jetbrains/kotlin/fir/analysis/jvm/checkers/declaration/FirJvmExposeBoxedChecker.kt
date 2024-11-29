@@ -16,10 +16,9 @@ import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.analysis.checkers.MppCheckerKind
 import org.jetbrains.kotlin.fir.analysis.checkers.context.CheckerContext
 import org.jetbrains.kotlin.fir.analysis.checkers.declaration.FirBasicDeclarationChecker
+import org.jetbrains.kotlin.fir.analysis.checkers.declaration.primaryConstructorSymbol
 import org.jetbrains.kotlin.fir.analysis.checkers.toRegularClassSymbol
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors
-import org.jetbrains.kotlin.fir.analysis.jvm.checkers.declaration.FirJvmExposeBoxedChecker.getContainingClass
-import org.jetbrains.kotlin.fir.analysis.jvm.checkers.declaration.FirJvmExposeBoxedChecker.isInline
 import org.jetbrains.kotlin.fir.containingClassLookupTag
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.declarations.impl.FirDefaultPropertyGetter
@@ -30,75 +29,91 @@ import org.jetbrains.kotlin.fir.expressions.FirExpression
 import org.jetbrains.kotlin.fir.expressions.FirLiteralExpression
 import org.jetbrains.kotlin.fir.java.findJvmNameValue
 import org.jetbrains.kotlin.fir.resolve.toRegularClassSymbol
-import org.jetbrains.kotlin.fir.symbols.impl.FirConstructorSymbol
+import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.types.FirTypeRef
+import org.jetbrains.kotlin.name.JvmStandardClassIds
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.resolve.JVM_EXPOSE_BOXED_ANNOTATION_CLASS_ID
 
 object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Platform) {
     override fun check(declaration: FirDeclaration, context: CheckerContext, reporter: DiagnosticReporter) {
-        val jvmExposeBoxedAnnotation = declaration.getAnnotationByClassId(JVM_EXPOSE_BOXED_ANNOTATION_CLASS_ID, context.session)
+        val jvmExposeBoxedAnnotation =
+            declaration.getAnnotationByClassId(JvmStandardClassIds.JVM_EXPOSE_BOXED_ANNOTATION_CLASS_ID, context.session)
 
         if (jvmExposeBoxedAnnotation != null) {
-            val name = jvmExposeBoxedAnnotation.findArgumentByName(Name.identifier("jvmName"))
-
-            if (name != null) {
-                if (declaration.isContainer()) {
-                    reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME, context)
-                }
-
-                val value = (name as? FirLiteralExpression)?.value as? String
-                if (value != null && !Name.isValidIdentifier(value)) {
-                    reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.ILLEGAL_JVM_NAME, context)
-                }
-            }
-
-            if (declaration is FirCallableDeclaration) {
-                if (!declaration.isWithInlineClass(context.session)) {
-                    reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.USELESS_JVM_EXPOSE_BOXED, context)
-                } else if (name == null && !declaration.isMangledOrWithResult(context.session)) {
-                    reportMissingName(declaration, jvmExposeBoxedAnnotation, reporter, context)
-                }
-
-                if (!declaration.canBeOverloadedByExposed(context.session)) {
-                    checkJvmNameHasDifferentName(name, declaration, reporter, jvmExposeBoxedAnnotation, context)
-                }
-
-                if (declaration is FirFunction && declaration.typeParameters.any { it.symbol.isReified }) {
-                    reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.USELESS_JVM_EXPOSE_BOXED, context)
-                }
-            }
+            checkJvmExposeBoxedAnnotation(jvmExposeBoxedAnnotation, declaration, reporter, context)
         } else if (context.languageVersionSettings.apiVersion >= ApiVersion.KOTLIN_2_2 &&
             context.languageVersionSettings.getFlag(AnalysisFlags.explicitApiMode) != ExplicitApiMode.DISABLED
         ) {
-            if (declaration is FirCallableDeclaration) {
-                if (declaration.isMangled(context.session)) {
-                    // Do not duplicate diagnostic on a property
-                    if (declaration is FirDefaultPropertyGetter ||
-                        (declaration is FirDefaultPropertySetter && declaration.getContainingClass(context.session) != null)
-                    ) return
+            checkExplicitApiMode(declaration, context, reporter)
+        }
+    }
 
-                    if (context.languageVersionSettings.getFlag(AnalysisFlags.explicitApiMode) == ExplicitApiMode.STRICT) {
-                        reporter.reportOn(declaration.source, FirJvmErrors.JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT, context)
-                    } else {
-                        reporter.reportOn(declaration.source, FirJvmErrors.JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT_WARNING, context)
-                    }
-                    return
-                }
+    private fun checkJvmExposeBoxedAnnotation(
+        jvmExposeBoxedAnnotation: FirAnnotation,
+        declaration: FirDeclaration,
+        reporter: DiagnosticReporter,
+        context: CheckerContext,
+    ) {
+        val name = jvmExposeBoxedAnnotation.findArgumentByName(JvmStandardClassIds.Annotations.ParameterNames.jvmExposeBoxedName)
 
-                val inlineClass = declaration.getContainingClass(context.session)
-                if (inlineClass?.isInline == true) {
-                    // Do not duplicate diagnostic on a property
-                    if (declaration is FirDefaultPropertyGetter || declaration is FirDefaultPropertySetter) return
+        if (name != null) {
+            if (declaration.isContainer()) {
+                reporter.reportOn(name.source, FirJvmErrors.INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME, context)
+            }
 
-                    if (declaration.isUnderlyingPropertyOfInlineClass(context.session)) return
+            val value = (name as? FirLiteralExpression)?.value as? String
+            if (value != null && !Name.isValidIdentifier(value)) {
+                reporter.reportOn(name.source, FirJvmErrors.ILLEGAL_JVM_NAME, context)
+            }
+        }
 
-                    if (context.languageVersionSettings.getFlag(AnalysisFlags.explicitApiMode) == ExplicitApiMode.STRICT) {
-                        reporter.reportOn(declaration.source, FirJvmErrors.JVM_EXPOSE_BOXED_METHOD_MUST_BE_EXPLICIT, context)
-                    } else {
-                        reporter.reportOn(declaration.source, FirJvmErrors.JVM_EXPOSE_BOXED_METHOD_MUST_BE_EXPLICIT_WARNING, context)
-                    }
-                }
+        if (declaration is FirCallableDeclaration) {
+            if (!declaration.isWithInlineClass(context.session)) {
+                reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.USELESS_JVM_EXPOSE_BOXED, context)
+            } else if (name == null && !declaration.isMangledOrWithResult(context.session)) {
+                reportMissingName(declaration, jvmExposeBoxedAnnotation, reporter, context)
+            }
+
+            if (!declaration.canBeOverloadedByExposed(context.session)) {
+                checkJvmNameHasDifferentName(name, declaration, reporter, jvmExposeBoxedAnnotation, context)
+            }
+
+            if (declaration is FirFunction && declaration.typeParameters.any { it.symbol.isReified }) {
+                reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.USELESS_JVM_EXPOSE_BOXED, context)
+            }
+        }
+    }
+
+    private fun checkExplicitApiMode(
+        declaration: FirDeclaration,
+        context: CheckerContext,
+        reporter: DiagnosticReporter,
+    ) {
+        if (declaration !is FirCallableDeclaration) return
+
+        if (declaration.isMangled(context.session)) {
+            // Do not duplicate diagnostic on a property
+            if (declaration is FirDefaultPropertyGetter || declaration is FirDefaultPropertySetter) return
+
+            if (context.languageVersionSettings.getFlag(AnalysisFlags.explicitApiMode) == ExplicitApiMode.STRICT) {
+                reporter.reportOn(declaration.source, FirJvmErrors.JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT, context)
+            } else {
+                reporter.reportOn(declaration.source, FirJvmErrors.JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT_WARNING, context)
+            }
+            return
+        }
+
+        val inlineClass = declaration.getContainingClass(context.session)
+        if (inlineClass?.isInline == true) {
+            // Do not duplicate diagnostic on a property
+            if (declaration is FirDefaultPropertyGetter || declaration is FirDefaultPropertySetter) return
+
+            if (declaration.isUnderlyingPropertyOfInlineClass(context.session)) return
+
+            if (context.languageVersionSettings.getFlag(AnalysisFlags.explicitApiMode) == ExplicitApiMode.STRICT) {
+                reporter.reportOn(declaration.source, FirJvmErrors.JVM_EXPOSE_BOXED_METHOD_MUST_BE_EXPLICIT, context)
+            } else {
+                reporter.reportOn(declaration.source, FirJvmErrors.JVM_EXPOSE_BOXED_METHOD_MUST_BE_EXPLICIT_WARNING, context)
             }
         }
     }
@@ -110,10 +125,9 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Plat
 
         val inlineClass = getContainingClass(session) ?: return false
         if (!inlineClass.isInline) return false
-        val primaryConstructor = inlineClass.declarationSymbols
-            .firstOrNull { it is FirConstructorSymbol && it.isPrimary } as FirConstructorSymbol?
-        val valueParameterSymbol = primaryConstructor?.valueParameterSymbols?.firstOrNull()
-        return valueParameterSymbol?.name == name
+        val primaryConstructor = inlineClass.primaryConstructorSymbol(session) ?: return false
+        val valueParameterSymbol = primaryConstructor.valueParameterSymbols.firstOrNull() ?: return false
+        return valueParameterSymbol == correspondingValueParameterFromPrimaryConstructor
     }
 
     private fun reportMissingName(
@@ -196,7 +210,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Plat
         return false
     }
 
-    private fun FirCallableDeclaration.getContainingClass(session: FirSession) =
+    private fun FirCallableDeclaration.getContainingClass(session: FirSession): FirRegularClassSymbol? =
         containingClassLookupTag()?.toRegularClassSymbol(session)
 
     private fun FirTypeRef.isInline(session: FirSession): Boolean =
