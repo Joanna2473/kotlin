@@ -1460,12 +1460,14 @@ open class PsiRawFirBuilder(
                                         }
                                         is KtProperty -> {
                                             val firProperty = convertProperty(declaration, null, forceLocal = true)
+                                            firProperty.containingReplSnippetSymbol = snippetSymbol
                                             statements.add(firProperty)
                                         }
                                         else -> {
                                             val firStatement = declaration.toFirStatement()
                                             if (firStatement is FirDeclaration) {
                                                 statements.add(firStatement)
+                                                firStatement.containingReplSnippetSymbol = snippetSymbol
                                             } else {
                                                 error("unexpected declaration type in script")
                                             }

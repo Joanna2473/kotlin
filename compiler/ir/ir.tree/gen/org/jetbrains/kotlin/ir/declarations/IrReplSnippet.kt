@@ -30,7 +30,7 @@ abstract class IrReplSnippet : IrDeclarationBase(), IrDeclarationWithName, IrDec
 
     abstract var receiversParameters: List<IrValueParameter>
 
-    abstract val propertiesFromOtherSnippets: MutableList<IrVariable>
+    abstract val propertiesFromOtherSnippets: MutableList<IrProperty>
 
     abstract var body: IrBody
 

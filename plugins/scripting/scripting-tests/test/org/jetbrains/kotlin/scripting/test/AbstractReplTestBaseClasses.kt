@@ -141,10 +141,12 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
         }.joinToString("\n")
 
         val scriptClass = classLoader.loadClass(scriptFqName.asString())
+        val ctor = scriptClass.constructors.single()
         val eval = scriptClass.methods.find { it.name.contains("eval") }!!
 
         val res = captureOut {
-            eval.invoke(null, replState)
+            val snippet = ctor.newInstance(replState)
+            eval.invoke(snippet)
         }
 
         assertions.assertEquals(expected, res)

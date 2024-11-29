@@ -57,7 +57,7 @@ internal object ValueScopeUpdater : ContextUpdater {
 
         override fun visitReplSnippet(declaration: IrReplSnippet, data: Nothing?) {
             context.withScopeOwner(declaration, block) {
-                declaration.propertiesFromOtherSnippets.forEach { addIfNotNull(it.symbol) }
+//                addIfNotNull(declaration.thisReceiver?.symbol)
             }
         }
 
