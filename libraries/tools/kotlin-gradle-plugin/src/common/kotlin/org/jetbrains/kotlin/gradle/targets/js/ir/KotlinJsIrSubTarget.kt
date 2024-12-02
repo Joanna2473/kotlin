@@ -52,7 +52,7 @@ abstract class KotlinJsIrSubTarget(
 
     internal val taskGroupName = "Kotlin $disambiguationClassifier"
 
-    internal val subTargetConfigurators: DomainObjectSet<SubTargetConfigurator<*, *>> =
+    val subTargetConfigurators: DomainObjectSet<SubTargetConfigurator<*, *>> =
         project.objects.domainObjectSet<SubTargetConfigurator<*, *>>()
 
     @ExperimentalDistributionDsl
@@ -63,7 +63,7 @@ abstract class KotlinJsIrSubTarget(
             }
     }
 
-    internal fun configure() {
+    fun configure() {
         target.compilations.configureEach { compilation ->
             compilation.compileTaskProvider.configure { task ->
                 task.compilerOptions {
@@ -87,7 +87,7 @@ abstract class KotlinJsIrSubTarget(
         testRuns.getByName(KotlinTargetWithTests.DEFAULT_TEST_RUN_NAME).executionTask.configure(body)
     }
 
-    internal fun disambiguateCamelCased(vararg names: String?): String =
+    fun disambiguateCamelCased(vararg names: String?): String =
         lowerCamelCaseName(target.disambiguationClassifier, disambiguationClassifier, *names)
 
     private fun configureTests() {

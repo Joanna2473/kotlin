@@ -51,7 +51,7 @@ abstract class AbstractSetupTask<Env : AbstractEnv, Spec : EnvSpec<Env>>(
     internal abstract val fs: FileSystemOperations
 
     @get:Input
-    internal val ivyDependencyProvider: Provider<String> = env.map { it.ivyDependency }
+    val ivyDependencyProvider: Provider<String> = env.map { it.ivyDependency }
 
     @Deprecated("Use ivyDependencyProvider instead. It uses Gradle Provider API.")
     val ivyDependency: String
@@ -91,7 +91,7 @@ abstract class AbstractSetupTask<Env : AbstractEnv, Spec : EnvSpec<Env>>(
 
     @Transient
     @get:Internal
-    internal var configuration: Provider<Configuration>? = null
+    var configuration: Provider<Configuration>? = null
 
     @get:Classpath
     @get:Optional

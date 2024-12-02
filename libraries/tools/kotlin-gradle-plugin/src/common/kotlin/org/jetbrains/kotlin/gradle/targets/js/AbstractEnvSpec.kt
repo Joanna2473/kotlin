@@ -44,7 +44,7 @@ abstract class EnvSpec<T : AbstractEnv> {
     /**
      * Full serializable cache-friendly entity without Gradle Provider API
      */
-    internal abstract val env: Provider<T>
+    abstract val env: Provider<T>
 
     /**
      * Provider with full executable path
