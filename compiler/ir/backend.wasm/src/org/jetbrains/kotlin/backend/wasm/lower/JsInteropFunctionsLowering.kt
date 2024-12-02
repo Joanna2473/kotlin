@@ -37,6 +37,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
+val JS_EXPORT_ADAPTER by IrDeclarationOriginImpl
 val KOTLIN_TO_JS_CLOSURE_ORIGIN by IrDeclarationOriginImpl
 
 /**
@@ -171,6 +172,7 @@ class JsInteropFunctionsLowering(val context: WasmBackendContext) : DeclarationT
             function.parent,
             name = Name.identifier(function.name.asStringStripSpecialMarkers() + "__JsExportAdapter"),
             function,
+            origin = JS_EXPORT_ADAPTER,
             remapMultiFieldValueClassStructure = context::remapMultiFieldValueClassStructure
         )
 

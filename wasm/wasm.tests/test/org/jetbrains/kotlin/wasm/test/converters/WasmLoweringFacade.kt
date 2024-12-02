@@ -32,6 +32,7 @@ import java.io.File
 
 class WasmLoweringFacade(
     testServices: TestServices,
+    private val isIncremental: Boolean = false,
 ) : BackendFacade<IrBackendInput, BinaryArtifacts.Wasm>(testServices, BackendKinds.IrBackend, ArtifactKinds.Wasm) {
     private val supportedOptimizer: WasmOptimizer = WasmOptimizer.Binaryen
 
@@ -46,7 +47,7 @@ class WasmLoweringFacade(
 
         val moduleInfo = inputArtifact.moduleInfo
         val debugMode = DebugMode.fromSystemProperty("kotlin.wasm.debugMode")
-        val wasmPhases = getWasmPhases(isIncremental = false)
+        val wasmPhases = getWasmPhases(isIncremental = isIncremental)
         val phaseConfig = if (debugMode >= DebugMode.SUPER_DEBUG) {
             val outputDirBase = testServices.getWasmTestOutputDirectory()
             val dumpOutputDir = File(outputDirBase, "irdump")
@@ -74,7 +75,8 @@ class WasmLoweringFacade(
             phaseConfig = phaseConfig,
             exportedDeclarations = setOf(FqName.fromSegments(listOfNotNull(testPackage, "box"))),
             propertyLazyInitialization = true,
-            generateTypeScriptFragment = generateDts
+            generateTypeScriptFragment = generateDts,
+            isIncremental = isIncremental,
         )
         val generateWat = debugMode >= DebugMode.DEBUG || configuration.getBoolean(WasmConfigurationKeys.WASM_GENERATE_WAT)
         val baseFileName = "index"
