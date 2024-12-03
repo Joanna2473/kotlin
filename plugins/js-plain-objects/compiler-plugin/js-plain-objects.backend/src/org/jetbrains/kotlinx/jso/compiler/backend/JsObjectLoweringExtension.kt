@@ -5,6 +5,7 @@
 package org.jetbrains.kotlinx.jspo.compiler.backend
 
 import org.jetbrains.kotlin.backend.common.DeclarationTransformer
+import org.jetbrains.kotlin.backend.common.compilationException
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.builtins.StandardNames
@@ -15,6 +16,7 @@ import org.jetbrains.kotlin.ir.declarations.impl.IrVariableImpl
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.impl.*
 import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
+import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.symbols.impl.IrVariableSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.defaultType
@@ -30,9 +32,11 @@ import org.jetbrains.kotlinx.jspo.compiler.resolve.StandardIds
 import kotlin.math.abs
 
 private class MoveExternalInlineFunctionsWithBodiesOutsideLowering(private val context: IrPluginContext) : DeclarationTransformer {
-    private val jsFunction = context.referenceFunctions(StandardIds.JS_FUNCTION_ID).single()
     private val EXPECTED_ORIGIN = IrDeclarationOrigin.GeneratedByPlugin(JsPlainObjectsPluginKey)
 
+    private val jsFunction = context.referenceFunctions(StandardIds.JS_FUNCTION_ID).single()
+
+    @OptIn(UnsafeDuringIrConstructionAPI::class)
     override fun transformFlat(declaration: IrDeclaration): List<IrDeclaration>? {
         val file = declaration.file
         val parent = declaration.parentClassOrNull
@@ -68,7 +72,7 @@ private class MoveExternalInlineFunctionsWithBodiesOutsideLowering(private val c
 
             copyValueParametersFrom(declaration, substitutionMap)
 
-            extensionReceiverParameter = dispatchReceiverParameter
+            extensionReceiverParameter = dispatchReceiverParameter.takeIf { !parent.isCompanion }
             dispatchReceiverParameter = null
             returnType = returnType.substitute(substitutionMap)
 
@@ -95,7 +99,7 @@ private class MoveExternalInlineFunctionsWithBodiesOutsideLowering(private val c
                     proxyFunction.symbol,
                     proxyFunction.typeParameters.size,
                 ).apply {
-                    declaration.dispatchReceiverParameter?.let {
+                    declaration.dispatchReceiverParameter.takeIf { declaration.parentClassOrNull?.isCompanion != true }?.let {
                         extensionReceiver = IrGetValueImpl(UNDEFINED_OFFSET, UNDEFINED_OFFSET, it.symbol)
                     }
 

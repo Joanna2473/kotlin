@@ -162,6 +162,11 @@ private val stripTypeAliasDeclarationsPhase = makeIrModulePhase<JsIrBackendConte
     name = "StripTypeAliasDeclarations",
 )
 
+private val jsNoDispatchReceiverApplyingPhase = makeIrModulePhase(
+    { _: JsIrBackendContext -> JsNoDispatchReceiverAnnotationApplyingLowering },
+    name = "JsNoDispatchReceiverAnnotationApplyingLowering",
+)
+
 private val jsCodeOutliningPhase = makeIrModulePhase(
     { context: JsIrBackendContext -> JsCodeOutliningLowering(context, context.intrinsics, context.dynamicType) },
     name = "JsCodeOutliningLowering",
@@ -743,6 +748,7 @@ fun getJsLowerings(
 ): List<SimpleNamedCompilerPhase<JsIrBackendContext, IrModuleFragment, IrModuleFragment>> = listOfNotNull(
     // BEGIN: Common Native/JS prefix.
     validateIrBeforeLowering,
+    jsNoDispatchReceiverApplyingPhase,
     jsCodeOutliningPhase,
     lateinitPhase,
     sharedVariablesLoweringPhase,
