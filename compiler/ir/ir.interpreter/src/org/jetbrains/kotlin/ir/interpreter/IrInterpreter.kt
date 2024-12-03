@@ -485,7 +485,7 @@ class IrInterpreter(internal val environment: IrInterpreterEnvironment, internal
                         val samFunction = samClass.getSingleAbstractMethod()
 
                         val invokeFunction = state.irClass.declarations.filterIsInstance<IrFunction>()
-                            .first { it.name == OperatorNameConventions.INVOKE && it.valueParameters.size == samFunction.valueParameters.size }
+                            .first { it.name == OperatorNameConventions.INVOKE && it.parameters.size == samFunction.parameters.size }
                         val functionClass = invokeFunction.getLastOverridden().parentAsClass
 
                         // receiver will be stored as up value
