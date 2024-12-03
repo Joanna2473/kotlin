@@ -123,14 +123,15 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                             listOf(snippetStatement)
                         }
                     }
-                    val lastExpression = (flattenedStatements.lastOrNull() as? IrExpression)?.takeIf {
-                        it.type != context.irBuiltIns.unitType && it.type != context.irBuiltIns.nothingType
+                    // relies on that Fir2IrVisitor.convertToIrBlockBody insert implicit coercion calls for "unused" statements
+                    val lastExpression = (flattenedStatements.lastOrNull() as? IrTypeOperatorCall)?.takeIf {
+                        it.operator == IrTypeOperator.IMPLICIT_COERCION_TO_UNIT
                     }
                     var lastExpressionVar: IrVariable? = null
                     flattenedStatements.forEach { statement ->
                         if (statement == lastExpression) {
                             // Could become a `$res..` one
-                            lastExpressionVar = createTmpVariable(statement as IrExpression, nameHint = "result")
+                            lastExpressionVar = createTmpVariable(lastExpression.argument, nameHint = "result")
                         } else {
                             when (statement) {
                                 is IrVariable -> {
@@ -177,7 +178,7 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                     lastExpression?.let {
                         +irReturn(IrGetValueImpl(it.startOffset, it.endOffset, lastExpressionVar!!.symbol))
                     }
-                    evalFun.returnType = lastExpression?.type ?: context.irBuiltIns.unitType
+                    evalFun.returnType = lastExpressionVar?.type ?: context.irBuiltIns.unitType
                 }
         }
 

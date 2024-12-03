@@ -148,12 +148,12 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
         val eval = scriptClass.methods.find { it.name.contains("eval") }!!
 
         val snippet = ctor.newInstance(replState)
-        val res = captureOut {
+        val (out, _, res) = captureOutErrRet {
             eval.invoke(snippet)
         }
 
         for ((fieldName, expectedValue) in expected) {
-            if (expectedValue == "<nofield>") {
+            if (expectedValue == "<missing>") {
                 try {
                     scriptClass.getDeclaredField(fieldName)
                     assertions.fail { "must have no field $fieldName" }
@@ -161,15 +161,18 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
                     continue
                 }
             }
-
-            val field = scriptClass.getDeclaredField(fieldName)
-            field.isAccessible = true
-            val result = field[snippet]
+            val result = if (fieldName == "<res>") {
+                res
+            } else {
+                val field = scriptClass.getDeclaredField(fieldName)
+                field.isAccessible = true
+                field[snippet]
+            }
             val resultString = result?.toString() ?: "null"
             assertions.assertEquals(expectedValue.trim(), resultString) { "comparing variable $fieldName" }
         }
 
-        assertions.assertEquals(expectedOut, res)
+        assertions.assertEquals(expectedOut, out)
     }
 
     override fun processAfterAllModules(someAssertionWasFailed: Boolean) {
@@ -180,15 +183,20 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
     }
 }
 
-private fun captureOut(body: () -> Unit): String {
+internal fun <T> captureOutErrRet(body: () -> T): Triple<String, String, T> {
     val outStream = ByteArrayOutputStream()
+    val errStream = ByteArrayOutputStream()
     val prevOut = System.out
+    val prevErr = System.err
     System.setOut(PrintStream(outStream))
-    try {
+    System.setErr(PrintStream(errStream))
+    val ret = try {
         body()
     } finally {
         System.out.flush()
+        System.err.flush()
         System.setOut(prevOut)
+        System.setErr(prevErr)
     }
-    return outStream.toString()
+    return Triple(outStream.toString().trim(), errStream.toString().trim(), ret)
 }

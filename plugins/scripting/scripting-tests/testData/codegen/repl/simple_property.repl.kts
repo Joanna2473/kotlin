@@ -11,6 +11,6 @@ val y = x
 
 // SNIPPET
 
-val res = x
+x
 
-// EXPECTED: res == "OK"
+// EXPECTED: <res> == "OK"
