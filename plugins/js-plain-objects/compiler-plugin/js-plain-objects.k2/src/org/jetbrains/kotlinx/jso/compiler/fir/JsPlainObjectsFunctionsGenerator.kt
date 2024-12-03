@@ -45,6 +45,7 @@ import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 import org.jetbrains.kotlin.util.OperatorNameConventions
 import org.jetbrains.kotlin.utils.addToStdlib.runIf
+import org.jetbrains.kotlinx.jspo.compiler.fir.services.ClassProperty
 import org.jetbrains.kotlinx.jspo.compiler.fir.services.jsPlainObjectPropertiesProvider
 import org.jetbrains.kotlinx.jspo.compiler.resolve.JsPlainObjectsPluginKey
 import org.jetbrains.kotlinx.jspo.compiler.resolve.StandardIds
@@ -176,7 +177,7 @@ class JsPlainObjectsFunctionsGenerator(session: FirSession) : FirDeclarationGene
         jsPlainObjectInterface: FirRegularClassSymbol,
     ): FirSimpleFunction {
         return createJsPlainObjectsFunction(callableId, parent, jsPlainObjectInterface) {
-            runIf(resolvedReturnTypeRef.coneType.isMarkedOrFlexiblyNullable) {
+            runIf(resolvedTypeRef.coneType.isMarkedOrFlexiblyNullable) {
                 buildPropertyAccessExpression {
                     calleeReference = buildResolvedNamedReference {
                         name = StandardIds.VOID_PROPERTY_NAME
@@ -209,7 +210,7 @@ class JsPlainObjectsFunctionsGenerator(session: FirSession) : FirDeclarationGene
         callableId: CallableId,
         parent: FirClassSymbol<*>,
         jsPlainObjectInterface: FirRegularClassSymbol,
-        getParameterDefaultValueFromProperty: FirPropertySymbol.() -> FirExpression?
+        getParameterDefaultValueFromProperty: ClassProperty.() -> FirExpression?
     ): FirSimpleFunction {
         var typeParameterSubstitutor: ConeSubstitutor? = null
         val jsPlainObjectProperties = session.jsPlainObjectPropertiesProvider.getJsPlainObjectsPropertiesForClass(jsPlainObjectInterface)
@@ -234,8 +235,8 @@ class JsPlainObjectsFunctionsGenerator(session: FirSession) : FirDeclarationGene
             ).apply {
                 isInline = true
                 isOperator = true
+                isOverride = false
             }
-
 
             if (parent.isCompanion && jsPlainObjectInterface.typeParameterSymbols.isNotEmpty()) {
                 jsPlainObjectInterface.typeParameterSymbols.mapTo(typeParameters) {
@@ -285,7 +286,7 @@ class JsPlainObjectsFunctionsGenerator(session: FirSession) : FirDeclarationGene
             }
 
             jsPlainObjectProperties.mapTo(valueParameters) {
-                val typeRef = it.resolvedReturnTypeRef
+                val typeRef = it.resolvedTypeRef
                 buildValueParameter {
                     moduleData = session.moduleData
                     origin = JsPlainObjectsPluginKey.origin
