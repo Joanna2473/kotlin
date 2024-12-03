@@ -586,6 +586,7 @@ object IrTree : AbstractTreeBuilder() {
     val variable: Element by element(Declaration) {
         parent(declarationBase)
         parent(valueDeclaration)
+        parent(attributeContainer)
 
         +descriptor("VariableDescriptor")
         +declaredSymbol(variableSymbol)

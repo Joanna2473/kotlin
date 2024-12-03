@@ -355,6 +355,7 @@ open class DeepCopyIrTreeWithSymbols(
         ).apply {
             annotations = declaration.annotations.memoryOptimizedMap { it.transform() }
             initializer = declaration.initializer?.transform()
+            processAttributes(declaration)
         }
 
     override fun visitExternalPackageFragment(declaration: IrExternalPackageFragment): IrExternalPackageFragment =
