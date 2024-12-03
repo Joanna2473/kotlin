@@ -48,6 +48,7 @@ import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JAVA_MODUL
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JAVA_MODULE_DOES_NOT_READ_UNNAMED_MODULE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JAVA_SAM_INTERFACE_CONSTRUCTOR_REFERENCE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JAVA_TYPE_MISMATCH
+import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JMV_EXPOSE_BOXED_REDUNDANT_NAME
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_DEFAULT_IN_DECLARATION
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_DEFAULT_WITH_COMPATIBILITY_IN_DECLARATION
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_DEFAULT_WITH_COMPATIBILITY_NOT_ON_INTERFACE
@@ -285,6 +286,10 @@ object FirJvmErrorsDefaultMessages : BaseDiagnosticRendererFactory() {
         map.put(
             USELESS_JVM_EXPOSE_BOXED,
             "'@JvmExposeBoxed' does nothing on this declaration - it is a callable declarations without inline class in its signature."
+        )
+        map.put(
+            JMV_EXPOSE_BOXED_REDUNDANT_NAME,
+            "Non-exposed declarations cannot be called from Java - redundant name."
         )
         map.put(
             JVM_EXPOSE_BOXED_REQUIRES_NAME,

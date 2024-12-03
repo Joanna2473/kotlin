@@ -55,8 +55,14 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
         context: CheckerContext,
     ) {
         val name = jvmExposeBoxedAnnotation.findArgumentByName(JvmStandardClassIds.Annotations.ParameterNames.jvmExposeBoxedName)
+        val exposedParam = jvmExposeBoxedAnnotation.findArgumentByName(JvmStandardClassIds.Annotations.ParameterNames.jvmExposeBoxedExpose)
+        val exposed = (exposedParam as? FirLiteralExpression)?.value as? Boolean != false
 
         if (name != null) {
+            if (!exposed) {
+                reporter.reportOn(name.source, FirJvmErrors.JMV_EXPOSE_BOXED_REDUNDANT_NAME, context)
+            }
+
             if (declaration.isContainer()) {
                 reporter.reportOn(name.source, FirJvmErrors.INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME, context)
             }
@@ -70,7 +76,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
         if (declaration is FirCallableDeclaration) {
             if (!declaration.isWithInlineClass(context.session)) {
                 reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.USELESS_JVM_EXPOSE_BOXED, context)
-            } else if (name == null && !declaration.isMangledOrWithResult(context.session)) {
+            } else if (exposed && name == null && !declaration.isMangledOrWithResult(context.session)) {
                 reportMissingName(declaration, jvmExposeBoxedAnnotation, reporter, context)
             }
 
@@ -160,7 +166,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
 
             if (value != null && value == declaration.findJvmNameValue()) {
                 reporter.reportOn(
-                    jvmExposeBoxedAnnotation.source,
+                    name.source,
                     FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME_AS_JVM_NAME,
                     context
                 )

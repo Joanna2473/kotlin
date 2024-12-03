@@ -3932,6 +3932,10 @@ sealed interface KaFirDiagnostic<PSI : PsiElement> : KaDiagnosticWithPsi<PSI> {
         override val diagnosticClass get() = UselessJvmExposeBoxed::class
     }
 
+    interface JmvExposeBoxedRedundantName : KaFirDiagnostic<PsiElement> {
+        override val diagnosticClass get() = JmvExposeBoxedRedundantName::class
+    }
+
     interface JvmExposeBoxedRequiresName : KaFirDiagnostic<PsiElement> {
         override val diagnosticClass get() = JvmExposeBoxedRequiresName::class
     }

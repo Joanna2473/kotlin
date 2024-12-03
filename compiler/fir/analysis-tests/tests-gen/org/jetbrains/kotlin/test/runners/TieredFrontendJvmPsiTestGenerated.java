@@ -24136,6 +24136,12 @@ public class TieredFrontendJvmPsiTestGenerated extends AbstractTieredFrontendJvm
         }
 
         @Test
+        @TestMetadata("nonExposed.kt")
+        public void testNonExposed() {
+          runTest("compiler/testData/diagnostics/tests/valueClasses/jvmExposeBoxed/nonExposed.kt");
+        }
+
+        @Test
         @TestMetadata("simple.kt")
         public void testSimple() {
           runTest("compiler/testData/diagnostics/tests/valueClasses/jvmExposeBoxed/simple.kt");

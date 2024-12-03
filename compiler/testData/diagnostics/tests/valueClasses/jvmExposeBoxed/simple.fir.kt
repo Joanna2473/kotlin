@@ -64,7 +64,7 @@ fun Int.foo(i: Int) {}
 @JvmName("foo")
 fun bar1(ic: IC) {}
 
-<!JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME_AS_JVM_NAME!>@JvmExposeBoxed("foo")<!>
+@JvmExposeBoxed(<!JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME_AS_JVM_NAME!>"foo"<!>)
 @JvmName("foo")
 fun barIC(): IC = TODO()
 
