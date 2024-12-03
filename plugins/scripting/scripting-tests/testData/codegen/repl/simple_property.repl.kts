@@ -7,8 +7,10 @@ val x = "OK"
 
 val y = x
 
+// EXPECTED: y == "OK"
+
 // SNIPPET
 
-print("$x")
+val res = x
 
-// expected out: OK
+// EXPECTED: res == "OK"

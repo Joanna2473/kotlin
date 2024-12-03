@@ -136,20 +136,40 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
         scriptFqName: FqName,
         classLoader: GeneratedClassLoader,
     ) {
-        val expected = Regex("// expected out: (.*)").findAll(ktFile.text).map {
+        val expectedOut = Regex("// EXPECTED_OUT: (.*)").findAll(ktFile.text).map {
             it.groups[1]!!.value
         }.joinToString("\n")
+        val expected = Regex("// EXPECTED: (\\S+) *== *\"?([^\"]*)\"?").findAll(ktFile.text).map {
+            it.groups[1]!!.value to it.groups[2]!!.value
+        }
 
         val scriptClass = classLoader.loadClass(scriptFqName.asString())
         val ctor = scriptClass.constructors.single()
         val eval = scriptClass.methods.find { it.name.contains("eval") }!!
 
+        val snippet = ctor.newInstance(replState)
         val res = captureOut {
-            val snippet = ctor.newInstance(replState)
             eval.invoke(snippet)
         }
 
-        assertions.assertEquals(expected, res)
+        for ((fieldName, expectedValue) in expected) {
+            if (expectedValue == "<nofield>") {
+                try {
+                    scriptClass.getDeclaredField(fieldName)
+                    assertions.fail { "must have no field $fieldName" }
+                } catch (e: NoSuchFieldException) {
+                    continue
+                }
+            }
+
+            val field = scriptClass.getDeclaredField(fieldName)
+            field.isAccessible = true
+            val result = field[snippet]
+            val resultString = result?.toString() ?: "null"
+            assertions.assertEquals(expectedValue.trim(), resultString) { "comparing variable $fieldName" }
+        }
+
+        assertions.assertEquals(expectedOut, res)
     }
 
     override fun processAfterAllModules(someAssertionWasFailed: Boolean) {

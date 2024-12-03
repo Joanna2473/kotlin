@@ -17,6 +17,6 @@ v = "K"
 
 // SNIPPET
 
-print("$o${f()}")
+val res = "$o${f()}"
 
-// expected out: OK
+// EXPECTED: res == "OK"
