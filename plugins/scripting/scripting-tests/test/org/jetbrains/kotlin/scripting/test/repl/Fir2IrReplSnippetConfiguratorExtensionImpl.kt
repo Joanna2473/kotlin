@@ -24,9 +24,7 @@ import org.jetbrains.kotlin.fir.visitors.FirDefaultVisitorVoid
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrReplSnippet
 import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
-import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.name.NameUtils
+import org.jetbrains.kotlin.name.SpecialNames
 import kotlin.script.experimental.host.ScriptingHostConfiguration
 
 class Fir2IrReplSnippetConfiguratorExtensionImpl(
@@ -122,13 +120,6 @@ class Fir2IrReplSnippetConfiguratorExtensionImpl(
             return Factory { session -> Fir2IrReplSnippetConfiguratorExtensionImpl(session, hostConfiguration) }
         }
     }
-}
-
-private fun FirReplSnippetSymbol.getTargetClassId(): ClassId {
-    // TODO: either make this transformation here but configure/retain target script name somewhere, or abstract it away, or make it on lowering
-    val snippetTargetName = NameUtils.getScriptNameForFile(name.asStringStripSpecialMarkers().removePrefix("script-"))
-    // TODO: take base package from snippet symbol (see todo elsewhere for adding it to the symbol)
-    return ClassId(FqName.ROOT, snippetTargetName)
 }
 
 private class CollectAccessToOtherState(
