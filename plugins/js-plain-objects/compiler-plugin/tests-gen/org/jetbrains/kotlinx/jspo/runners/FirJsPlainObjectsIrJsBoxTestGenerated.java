@@ -43,6 +43,12 @@ public class FirJsPlainObjectsIrJsBoxTestGenerated extends AbstractFirJsPlainObj
   }
 
   @Test
+  @TestMetadata("nested.kt")
+  public void testNested() {
+    runTest("plugins/js-plain-objects/compiler-plugin/testData/box/nested.kt");
+  }
+
+  @Test
   @TestMetadata("optional.kt")
   public void testOptional() {
     runTest("plugins/js-plain-objects/compiler-plugin/testData/box/optional.kt");
