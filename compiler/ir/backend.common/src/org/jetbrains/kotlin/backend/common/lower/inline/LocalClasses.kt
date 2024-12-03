@@ -87,6 +87,7 @@ class LocalClassesInInlineLambdasLowering(val context: LoweringContext) : BodyLo
                         override fun visitFunction(declaration: IrFunction) {
                             declaration.transformChildren(transformer, declaration)
 
+                            if (declaration.origin == IrDeclarationOrigin.INLINE_LAMBDA) return
                             localFunctions.add(declaration)
                         }
 
