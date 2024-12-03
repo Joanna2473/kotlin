@@ -4,25 +4,25 @@
 
 @file:OptIn(ExperimentalStdlibApi::class)
 
-<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>@file:JvmExposeBoxed("foo")<!>
+@file:JvmExposeBoxed(<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>"foo"<!>)
 
-<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>@JvmExposeBoxed("foo")<!>
+@JvmExposeBoxed(<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>"foo"<!>)
 class Foo
-<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME, USELESS_JVM_EXPOSE_BOXED!>@JvmExposeBoxed("foo")<!> constructor()
+<!USELESS_JVM_EXPOSE_BOXED!>@JvmExposeBoxed(<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>"foo"<!>)<!> constructor()
 {
-    <!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>@JvmExposeBoxed("foo")<!>
+    @JvmExposeBoxed(<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>"foo"<!>)
     companion object {
 
     }
 }
 
-<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>@JvmExposeBoxed("foo")<!>
+@JvmExposeBoxed(<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>"foo"<!>)
 class Obj
 
 @JvmInline
 value class IC(val s: String)
 
-<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>@JvmExposeBoxed("foo")<!>
+@JvmExposeBoxed(<!INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME!>"foo"<!>)
 val ic: IC = TODO()
 
 @get:JvmExposeBoxed("foo")
@@ -68,7 +68,7 @@ fun bar1(ic: IC) {}
 @JvmName("foo")
 fun barIC(): IC = TODO()
 
-<!ILLEGAL_JVM_NAME!>@JvmExposeBoxed("...")<!>
+@JvmExposeBoxed(<!ILLEGAL_JVM_NAME!>"..."<!>)
 fun todo(ic: IC) {}
 
 <!USELESS_JVM_EXPOSE_BOXED!>@JvmExposeBoxed<!>

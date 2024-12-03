@@ -34,7 +34,7 @@ import org.jetbrains.kotlin.fir.types.FirTypeRef
 import org.jetbrains.kotlin.name.JvmStandardClassIds
 import org.jetbrains.kotlin.name.Name
 
-object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Platform) {
+object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Common) {
     override fun check(declaration: FirDeclaration, context: CheckerContext, reporter: DiagnosticReporter) {
         val jvmExposeBoxedAnnotation =
             declaration.getAnnotationByClassId(JvmStandardClassIds.JVM_EXPOSE_BOXED_ANNOTATION_CLASS_ID, context.session)
@@ -92,9 +92,6 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Plat
         if (declaration !is FirCallableDeclaration) return
 
         if (declaration.isMangled(context.session)) {
-            // Do not duplicate diagnostic on a property
-            if (declaration is FirDefaultPropertyGetter || declaration is FirDefaultPropertySetter) return
-
             if (context.languageVersionSettings.getFlag(AnalysisFlags.explicitApiMode) == ExplicitApiMode.STRICT) {
                 reporter.reportOn(declaration.source, FirJvmErrors.JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT, context)
             } else {
@@ -201,6 +198,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Plat
     }
 
     private fun FirCallableDeclaration.isMangled(session: FirSession): Boolean {
+        if (this is FirProperty) return false
         if (receiverParameter?.typeRef?.isInlineClassThatRequiresMangling(session) == true) return true
         if (contextReceivers.any { it.returnTypeRef.isInlineClassThatRequiresMangling(session) }) return true
         if (this is FirFunction && valueParameters.any { it.returnTypeRef.isInlineClassThatRequiresMangling(session) })

@@ -1,3 +1,4 @@
+// RUN_PIPELINE_TILL: FRONTEND
 // SKIP_JAVAC
 // WITH_STDLIB
 // API_VERSION: 2.2
@@ -52,7 +53,7 @@ public class Foo
 
     <!JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT!>public val withGetter: IC = TODO()<!> // Error
 
-    <!JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT!>public var withSetter: IC = TODO()<!> // Error
+    <!JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT, JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT!>public var withSetter: IC = TODO()<!> // Error
 }
 
 @JvmExposeBoxed
