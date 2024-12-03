@@ -39,7 +39,9 @@ class IrReplSnippetImpl(
 
     override lateinit var receiversParameters: List<IrValueParameter>
 
-    override val propertiesFromOtherSnippets: MutableList<IrProperty> = ArrayList()
+    override val variablesFromOtherSnippets: MutableList<IrVariable> = ArrayList()
+
+    override val capturingDeclarationsFromOtherSnippets: MutableList<IrDeclaration> = ArrayList()
 
     override lateinit var body: IrBody
 

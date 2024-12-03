@@ -285,7 +285,8 @@ open class DeepCopyIrTreeWithSymbols(
             with(factory) { declarationCreated() }
             annotations = declaration.annotations.memoryOptimizedMap { it.transform() }
             receiversParameters = declaration.receiversParameters.memoryOptimizedMap { it.transform() }
-            declaration.propertiesFromOtherSnippets.mapTo(propertiesFromOtherSnippets) { it.transform() }
+            declaration.variablesFromOtherSnippets.mapTo(variablesFromOtherSnippets) { it.transform() }
+            declaration.capturingDeclarationsFromOtherSnippets.mapTo(capturingDeclarationsFromOtherSnippets) { it.transform() }
             body = declaration.body.transform()
             returnType = declaration.returnType?.remapType()
             targetClass = declaration.targetClass?.let(symbolRemapper::getReferencedClass)
@@ -354,6 +355,7 @@ open class DeepCopyIrTreeWithSymbols(
         ).apply {
             annotations = declaration.annotations.memoryOptimizedMap { it.transform() }
             initializer = declaration.initializer?.transform()
+            processAttributes(declaration)
         }
 
     override fun visitExternalPackageFragment(declaration: IrExternalPackageFragment): IrExternalPackageFragment =

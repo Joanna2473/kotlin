@@ -30,7 +30,9 @@ abstract class IrReplSnippet : IrDeclarationBase(), IrDeclarationWithName, IrDec
 
     abstract var receiversParameters: List<IrValueParameter>
 
-    abstract val propertiesFromOtherSnippets: MutableList<IrProperty>
+    abstract val variablesFromOtherSnippets: MutableList<IrVariable>
+
+    abstract val capturingDeclarationsFromOtherSnippets: MutableList<IrDeclaration>
 
     abstract var body: IrBody
 
@@ -43,13 +45,13 @@ abstract class IrReplSnippet : IrDeclarationBase(), IrDeclarationWithName, IrDec
 
     override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
         receiversParameters.forEach { it.accept(visitor, data) }
-        propertiesFromOtherSnippets.forEach { it.accept(visitor, data) }
+        variablesFromOtherSnippets.forEach { it.accept(visitor, data) }
         body.accept(visitor, data)
     }
 
     override fun <D> transformChildren(transformer: IrElementTransformer<D>, data: D) {
         receiversParameters = receiversParameters.transformIfNeeded(transformer, data)
-        propertiesFromOtherSnippets.transformInPlace(transformer, data)
+        variablesFromOtherSnippets.transformInPlace(transformer, data)
         body = body.transform(transformer, data)
     }
 }

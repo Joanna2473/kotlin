@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.scripting.test.repl
 
+import org.jetbrains.kotlin.backend.jvm.originalSnippetValueSymbol
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.fir.FirElement
 import org.jetbrains.kotlin.fir.FirSession
@@ -21,8 +22,11 @@ import org.jetbrains.kotlin.fir.symbols.SymbolInternals
 import org.jetbrains.kotlin.fir.symbols.impl.*
 import org.jetbrains.kotlin.fir.types.FirResolvedTypeRef
 import org.jetbrains.kotlin.fir.visitors.FirDefaultVisitorVoid
+import org.jetbrains.kotlin.ir.builders.declarations.addField
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrReplSnippet
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
+import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.name.SpecialNames
 import kotlin.script.experimental.host.ScriptingHostConfiguration
@@ -58,17 +62,18 @@ class Fir2IrReplSnippetConfiguratorExtensionImpl(
 
         propertiesFromState.forEach { (snippetSymbol, propertySymbol) ->
             classifierStorage.getCachedEarlierSnippetClass(snippetSymbol)?.let { originalSnippet ->
-                irSnippet.propertiesFromOtherSnippets.add(
-                    declarationStorage.createAndCacheIrProperty(
-                        propertySymbol.fir,
-                        originalSnippet,
-                        predefinedOrigin = IrDeclarationOrigin.REPL_FROM_OTHER_SNIPPET,
-                        allowLazyDeclarationsCreation = false
-                    ).also {
-                        it.parent = originalSnippet
-                        it.visibility = DescriptorVisibilities.PUBLIC
+                declarationStorage.createAndCacheIrVariable(
+                    propertySymbol.fir, irSnippet, IrDeclarationOrigin.REPL_FROM_OTHER_SNIPPET
+                ).also { varFromOtherSnippet ->
+                    irSnippet.variablesFromOtherSnippets.add(varFromOtherSnippet)
+                    val field = originalSnippet.addField {
+                        name = varFromOtherSnippet.name
+                        type = varFromOtherSnippet.type
+                        visibility = DescriptorVisibilities.PUBLIC
+                        origin = IrDeclarationOrigin.REPL_FROM_OTHER_SNIPPET
                     }
-                )
+                    varFromOtherSnippet.originalSnippetValueSymbol = field.symbol
+                }
             }
         }
 
@@ -79,10 +84,27 @@ class Fir2IrReplSnippetConfiguratorExtensionImpl(
                     originalSnippet,
                     predefinedOrigin = IrDeclarationOrigin.REPL_FROM_OTHER_SNIPPET,
                     fakeOverrideOwnerLookupTag = null,
-                    allowLazyDeclarationsCreation = false
+                    allowLazyDeclarationsCreation = true
                 ).run {
                     parent = originalSnippet
                     visibility = DescriptorVisibilities.PUBLIC
+                    dispatchReceiverParameter = IrFactoryImpl.createValueParameter(
+                        startOffset = startOffset,
+                        endOffset = endOffset,
+                        origin = origin,
+                        kind = null,
+                        name = SpecialNames.THIS,
+                        type = originalSnippet.thisReceiver!!.type,
+                        isAssignable = false,
+                        symbol = IrValueParameterSymbolImpl(),
+                        varargElementType = null,
+                        isCrossinline = false,
+                        isNoinline = false,
+                        isHidden = false,
+                    ).apply {
+                        parent = this@run
+                    }
+                    irSnippet.capturingDeclarationsFromOtherSnippets.add(this)
                 }
             }
         }
