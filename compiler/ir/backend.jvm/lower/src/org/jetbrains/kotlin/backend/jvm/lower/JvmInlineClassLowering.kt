@@ -16,6 +16,7 @@ import org.jetbrains.kotlin.backend.jvm.ir.shouldBeExposedByAnnotation
 import org.jetbrains.kotlin.builtins.StandardNames
 import org.jetbrains.kotlin.config.ApiVersion
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.*
@@ -69,16 +70,20 @@ internal class JvmInlineClassLowering(context: JvmBackendContext) : JvmValueClas
             name = mangledName
             if (source.shouldBeExposedByAnnotation()) {
                 origin = JvmLoweredDeclarationOrigin.FUNCTION_WITH_EXPOSED_INLINE_CLASS
+                if (modality == Modality.ABSTRACT) {
+                    modality = Modality.OPEN
+                }
             }
             returnType = source.returnType
         }.apply {
             copyParameterDeclarationsFrom(source)
             // Exposed functions should have no @JvmName annotation, since it does not affect them,
             // but always @JvmExposeBoxed, so users can use reflection to get all exposed functions, if they so desire.
-            annotations =
-                if (source.shouldBeExposedByAnnotation() && source.origin != IrDeclarationOrigin.GENERATED_SINGLE_FIELD_VALUE_CLASS_MEMBER)
-                    source.annotations.withoutJvmNameAnnotation().withJvmExposeBoxedAnnotation(source)
-                else source.annotations
+            if (source.shouldBeExposedByAnnotation() && source.origin != IrDeclarationOrigin.GENERATED_SINGLE_FIELD_VALUE_CLASS_MEMBER) {
+                annotations = source.annotations.withoutJvmNameAnnotation().withJvmExposeBoxedAnnotation(source)
+            } else {
+                annotations = source.annotations
+            }
             // Non-exposed counterparts should lack @JvmExposeBoxed.
             source.annotations = source.annotations.withoutJvmExposeBoxedAnnotation()
 

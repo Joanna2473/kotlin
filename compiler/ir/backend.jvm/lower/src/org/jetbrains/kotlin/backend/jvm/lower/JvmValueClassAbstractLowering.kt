@@ -133,7 +133,7 @@ internal abstract class JvmValueClassAbstractLowering(
         replacement.copyAttributes(function)
 
         // Don't create a wrapper for functions which are only used in an unboxed context
-        if (!function.shouldBeExposedByAnnotation() &&
+        if (!(function.shouldBeExposedByAnnotation() && !function.isFakeOverride) &&
             (function.overriddenSymbols.isEmpty() || replacement.dispatchReceiverParameter != null)
         ) return listOf(replacement)
 

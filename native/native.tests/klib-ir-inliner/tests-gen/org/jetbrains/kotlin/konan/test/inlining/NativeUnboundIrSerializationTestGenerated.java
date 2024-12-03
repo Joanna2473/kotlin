@@ -25866,6 +25866,31 @@ public class NativeUnboundIrSerializationTestGenerated extends AbstractNativeUnb
       @FirPipeline()
       @Tag("klib")
       public class JvmExposeBoxed {
+        @Nested
+        @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/inherit")
+        @TestDataPath("$PROJECT_ROOT")
+        @Tag("frontend-fir")
+        @FirPipeline()
+        @Tag("klib")
+        public class Inherit {
+          @Nested
+          @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/inherit/child")
+          @TestDataPath("$PROJECT_ROOT")
+          @Tag("frontend-fir")
+          @FirPipeline()
+          @Tag("klib")
+          public class Child {
+          }
+
+          @Nested
+          @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/inherit/parent")
+          @TestDataPath("$PROJECT_ROOT")
+          @Tag("frontend-fir")
+          @FirPipeline()
+          @Tag("klib")
+          public class Parent {
+          }
+        }
       }
 
       @Nested

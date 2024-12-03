@@ -269,20 +269,23 @@ val IrDeclaration.isStaticMultiFieldValueClassReplacement: Boolean
             || origin == JvmLoweredDeclarationOrigin.STATIC_MULTI_FIELD_VALUE_CLASS_CONSTRUCTOR
 
 fun IrDeclaration.shouldBeExposedByAnnotation(): Boolean {
-    // Do not duplicate function without inline classes in parameters, since it lead to CONFLICTING_JVM_DECLARATIONS
-    if (this is IrFunction && !(this is IrConstructor && parentAsClass.isSingleFieldValueClass)) {
-        if (explicitParameters.none { it.type.isInlineClassType() }) {
-            if (!returnType.isInlineClassType()) return false
-            // It is not explicitly annotated, global and returns inline class, do not expose it, since otherwise
-            // it would lead to ambiguous call on Java side
-            if (parentAsClass.isFileClass && !annotations.hasAnnotation(JVM_EXPOSE_BOXED_ANNOTATION_FQ_NAME)) return false
-        }
-    }
+    if (!isFunctionWithInlineClassesInSignature()) return false
 
     val annotation = findJvmExposeBoxedAnnotation() ?: return false
     // Second argument tells us, whether to expose the declaration
     // val expose: Boolean = true
     return annotation.arguments.size < 2 || (annotation.arguments[1]?.isTrueConst() ?: true)
+}
+
+// Do not duplicate function without inline classes in parameters, since it would lead to CONFLICTING_JVM_DECLARATIONS
+fun IrDeclaration.isFunctionWithInlineClassesInSignature(): Boolean {
+    if (this !is IrFunction || origin == IrDeclarationOrigin.GENERATED_SINGLE_FIELD_VALUE_CLASS_MEMBER) return false
+
+    if (explicitParameters.any { it.type.isInlineClassType() }) return true
+    if (!returnType.isInlineClassType()) return false
+    // It is not explicitly annotated, global and returns inline class, do not expose it, since otherwise
+    // it would lead to ambiguous call on Java side
+    return !parentAsClass.isFileClass || annotations.hasAnnotation(JVM_EXPOSE_BOXED_ANNOTATION_FQ_NAME)
 }
 
 fun IrDeclaration.findJvmExposeBoxedAnnotation(): IrConstructorCall? {
