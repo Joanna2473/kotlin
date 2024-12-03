@@ -9,6 +9,6 @@ val y = C().v
 
 // SNIPPET
 
-print("${C().v}")
+val res = C().v
 
-// expected out: OK
+// EXPECTED: res == "OK"

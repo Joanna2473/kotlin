@@ -9,6 +9,6 @@ fun f() = C().v
 
 // SNIPPET
 
-print("${f()}")
+val res = f()
 
-// expected out: OK
+// EXPECTED: res == "OK"

@@ -10,6 +10,6 @@ x = "K"
 
 // SNIPPET
 
-print("$o$x")
+val res = "$o$x"
 
-// expected out: OK
+// EXPECTED: res == "OK"

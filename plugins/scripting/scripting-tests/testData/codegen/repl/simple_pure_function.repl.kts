@@ -9,6 +9,6 @@ val y = f()
 
 // SNIPPET
 
-print("${f()}")
+val res = f()
 
-// expected out: OK
+// EXPECTED: res == "OK"

@@ -136,20 +136,43 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
         scriptFqName: FqName,
         classLoader: GeneratedClassLoader,
     ) {
-        val expected = Regex("// expected out: (.*)").findAll(ktFile.text).map {
+        val expectedOut = Regex("// EXPECTED_OUT: (.*)").findAll(ktFile.text).map {
             it.groups[1]!!.value
         }.joinToString("\n")
+        val expected = Regex("// EXPECTED: (\\S+) *== *\"?([^\"]*)\"?").findAll(ktFile.text).map {
+            it.groups[1]!!.value to it.groups[2]!!.value
+        }
 
         val scriptClass = classLoader.loadClass(scriptFqName.asString())
         val ctor = scriptClass.constructors.single()
         val eval = scriptClass.methods.find { it.name.contains("eval") }!!
 
-        val res = captureOut {
-            val snippet = ctor.newInstance(replState)
+        val snippet = ctor.newInstance(replState)
+        val (out, _, res) = captureOutErrRet {
             eval.invoke(snippet)
         }
 
-        assertions.assertEquals(expected, res)
+        for ((fieldName, expectedValue) in expected) {
+            if (expectedValue == "<missing>") {
+                try {
+                    scriptClass.getDeclaredField(fieldName)
+                    assertions.fail { "must have no field $fieldName" }
+                } catch (e: NoSuchFieldException) {
+                    continue
+                }
+            }
+            val result = if (fieldName == "<res>") {
+                res
+            } else {
+                val field = scriptClass.getDeclaredField(fieldName)
+                field.isAccessible = true
+                field[snippet]
+            }
+            val resultString = result?.toString() ?: "null"
+            assertions.assertEquals(expectedValue.trim(), resultString) { "comparing variable $fieldName" }
+        }
+
+        assertions.assertEquals(expectedOut, out)
     }
 
     override fun processAfterAllModules(someAssertionWasFailed: Boolean) {
@@ -160,15 +183,20 @@ private class ReplRunChecker(testServices: TestServices) : JvmBinaryArtifactHand
     }
 }
 
-private fun captureOut(body: () -> Unit): String {
+internal fun <T> captureOutErrRet(body: () -> T): Triple<String, String, T> {
     val outStream = ByteArrayOutputStream()
+    val errStream = ByteArrayOutputStream()
     val prevOut = System.out
+    val prevErr = System.err
     System.setOut(PrintStream(outStream))
-    try {
+    System.setErr(PrintStream(errStream))
+    val ret = try {
         body()
     } finally {
         System.out.flush()
+        System.err.flush()
         System.setOut(prevOut)
+        System.setErr(prevErr)
     }
-    return outStream.toString()
+    return Triple(outStream.toString().trim(), errStream.toString().trim(), ret)
 }

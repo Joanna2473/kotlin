@@ -13,6 +13,6 @@ class C {
 
 // SNIPPET
 
-print("${C().v1}_${C().v2}")
+val res = "${C().v1}_${C().v2}"
 
-// expected out: OK_OK
+// EXPECTED: res == "OK_OK"
