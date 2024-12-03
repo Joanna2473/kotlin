@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.fir.backend.utils.ConversionTypeOrigin
 import org.jetbrains.kotlin.fir.declarations.*
 import org.jetbrains.kotlin.fir.declarations.utils.visibility
 import org.jetbrains.kotlin.fir.expressions.FirAnonymousObjectExpression
+import org.jetbrains.kotlin.fir.lazy.Fir2IrLazyClass
 import org.jetbrains.kotlin.fir.resolve.providers.symbolProvider
 import org.jetbrains.kotlin.fir.resolve.toClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
@@ -434,6 +435,9 @@ class Fir2IrClassifierStorage(
         val symbol = createClassSymbol()
         return classifiersGenerator.createEarlierSnippetClass(snippetSymbol.fir, containingPackageFragment, symbol).also {
             earlierSnippetsCache[snippetSymbol] = it
+            (it as? Fir2IrLazyClass)?.let { lazyClass ->
+                classCache[lazyClass.fir] = symbol
+            }
         }
     }
 
