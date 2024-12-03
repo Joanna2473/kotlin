@@ -114,7 +114,6 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
             evalFun.parent = irSnippetClass
             evalFun.dispatchReceiverParameter =
                 buildReceiverParameter(evalFun, irSnippetClass.origin, irSnippetClass.defaultType, UNDEFINED_OFFSET, UNDEFINED_OFFSET)
-            var lastExpression: IrExpression? = null
             evalFun.body =
                 context.createIrBuilder(evalFun.symbol).irBlockBody {
                     val flattenedStatements = irSnippet.body.statements.flatMap { snippetStatement ->
@@ -124,12 +123,14 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                             listOf(snippetStatement)
                         }
                     }
-                    lastExpression = flattenedStatements.lastOrNull() as? IrExpression
+                    val lastExpression = (flattenedStatements.lastOrNull() as? IrExpression)?.takeIf {
+                        it.type != context.irBuiltIns.unitType && it.type != context.irBuiltIns.nothingType
+                    }
                     var lastExpressionVar: IrVariable? = null
                     flattenedStatements.forEach { statement ->
                         if (statement == lastExpression) {
                             // Could become a `$res..` one
-                            lastExpressionVar = createTmpVariable(statement as IrExpression)
+                            lastExpressionVar = createTmpVariable(statement as IrExpression, nameHint = "result")
                         } else {
                             when (statement) {
                                 is IrVariable -> {
@@ -173,8 +174,11 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                             topLevelDeclaration = evalFun
                         )
                     )
+                    lastExpression?.let {
+                        +irReturn(IrGetValueImpl(it.startOffset, it.endOffset, lastExpressionVar!!.symbol))
+                    }
+                    evalFun.returnType = lastExpression?.type ?: context.irBuiltIns.unitType
                 }
-            evalFun.returnType = lastExpression?.type ?: context.irBuiltIns.unitType
         }
 
         val scriptTransformer = ReplSnippetToClassTransformer(
@@ -198,11 +202,6 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
             it.transform(scriptTransformer, rootContext)
                 .transform(lambdaPatcher, ScriptFixLambdasTransformerContext())
         }
-
-        // TODO: find why it fails now, and fix
-//                    lastExpression?.let {
-//                        +irReturn(IrGetValueImpl(it.startOffset, it.endOffset, lastExpressionVar!!.symbol))
-//                    }
 
         irSnippetClass.annotations += (irSnippetClass.parent as IrFile).annotations
     }
