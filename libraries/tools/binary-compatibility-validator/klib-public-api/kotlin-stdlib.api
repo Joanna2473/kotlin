@@ -13539,6 +13539,16 @@ open annotation class kotlin.concurrent/Volatile : kotlin/Annotation { // kotlin
 }
 
 // Targets: [js, wasmJs, wasmWasi]
+open annotation class kotlin.jvm/JvmExposeBoxed : kotlin/Annotation { // kotlin.jvm/JvmExposeBoxed|null[1]
+    constructor <init>(kotlin/String = ..., kotlin/Boolean = ...) // kotlin.jvm/JvmExposeBoxed.<init>|<init>(kotlin.String;kotlin.Boolean){}[1]
+
+    final val expose // kotlin.jvm/JvmExposeBoxed.expose|{}expose[1]
+        final fun <get-expose>(): kotlin/Boolean // kotlin.jvm/JvmExposeBoxed.expose.<get-expose>|<get-expose>(){}[1]
+    final val jvmName // kotlin.jvm/JvmExposeBoxed.jvmName|{}jvmName[1]
+        final fun <get-jvmName>(): kotlin/String // kotlin.jvm/JvmExposeBoxed.jvmName.<get-jvmName>|<get-jvmName>(){}[1]
+}
+
+// Targets: [js, wasmJs, wasmWasi]
 open annotation class kotlin.native.concurrent/SharedImmutable : kotlin/Annotation { // kotlin.native.concurrent/SharedImmutable|null[1]
     constructor <init>() // kotlin.native.concurrent/SharedImmutable.<init>|<init>(){}[1]
 }
