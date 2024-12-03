@@ -72,3 +72,10 @@ internal annotation class JsGenerator
  */
 @Target(AnnotationTarget.CLASS)
 internal annotation class JsImplicitExport(val couldBeConvertedToExplicitExport: Boolean)
+
+/**
+ * The annotation is needed for annotating function declarations that should not accept any dispatch receiver
+ * It's used only internally (for now, only in js-plain-object plugin)
+ */
+@Target(AnnotationTarget.FUNCTION)
+internal annotation class JsNoDispatchReceiver
