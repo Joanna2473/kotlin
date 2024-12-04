@@ -72,6 +72,8 @@ abstract class FirModuleData : FirSessionComponent {
     override fun toString(): String {
         return "Module $name"
     }
+
+    abstract val stableModuleName: String?
 }
 
 class FirModuleDataImpl(
@@ -86,6 +88,9 @@ class FirModuleDataImpl(
     override val session: FirSession
         get() = boundSession
             ?: error("module data ${this::class.simpleName}:${name} not bound to session")
+
+    override val stableModuleName: String?
+        get() = null
 
     override val allDependsOnDependencies: List<FirModuleData> = topologicalSort(dependsOnDependencies) { it.dependsOnDependencies }
 }
