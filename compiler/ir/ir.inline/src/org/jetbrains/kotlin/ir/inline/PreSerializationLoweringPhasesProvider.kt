@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.ir.inline
 
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.LoweringContext
+import org.jetbrains.kotlin.backend.common.ir.isReifiable
 import org.jetbrains.kotlin.backend.common.lower.ArrayConstructorLowering
 import org.jetbrains.kotlin.backend.common.lower.LateinitLowering
 import org.jetbrains.kotlin.backend.common.lower.SharedVariablesLowering
@@ -16,6 +17,7 @@ import org.jetbrains.kotlin.backend.common.lower.inline.OuterThisInInlineFunctio
 import org.jetbrains.kotlin.backend.common.phaser.*
 import org.jetbrains.kotlin.config.phaser.SameTypeNamedCompilerPhase
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.expressions.IrFunctionReference
 import org.jetbrains.kotlin.ir.util.KotlinMangler.IrMangler
 
 abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext> {
@@ -56,6 +58,20 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
             CommonInlineCallableReferenceToLambdaPhase(context, privateInlineFunctionResolver(context))
         fun privateInline(context: Context) =
             FunctionInlining(context, privateInlineFunctionResolver(context), produceOuterThisFields = false)
+        fun validateIrAfterInliningOnlyPrivateFunctions(context: Context) = IrValidationAfterInliningOnlyPrivateFunctionsPhase(
+            context = context,
+            checkInlineFunctionCallSites = { inlineFunctionUseSite ->
+                val inlineFunction = inlineFunctionUseSite.symbol.owner
+                when {
+                    // TODO: remove this condition after the fix of KT-69457:
+                    inlineFunctionUseSite is IrFunctionReference && !inlineFunction.isReifiable() -> true // temporarily permitted
+
+                    // Call sites of non-private functions are allowed at this stage.
+                    else -> !inlineFunction.isConsideredAsPrivateForInlining()
+                }
+            }
+        )
+
         return SameTypeNamedCompilerPhase(
             name = "PreSerializationLowerings",
             actions = DEFAULT_IR_ACTIONS,
@@ -79,7 +95,7 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
                 ),
                 supportParallel = false,
             ) then buildModuleLoweringsPhase(
-//              validateIrAfterInliningOnlyPrivateFunctions,
+                ::validateIrAfterInliningOnlyPrivateFunctions,
             ) then performByIrFile(
                 name = "FunctionInlining",
                 createFilePhases(
