@@ -133,8 +133,7 @@ class CinteropIT : KGPBaseTest() {
                 assertOutputContains(
                     """
                     |For the Cinterop task, either the `definitionFile` or `packageName` parameter must be specified, however, neither has been provided.
-                    |
-                    |More info here: https://kotlinlang.org/docs/multiplatform-dsl-reference.html#cinterops 
+                    |More info here: https://kotlinlang.org/docs/multiplatform-dsl-reference.html#cinterops
                     """.trimMargin()
                 )
             }

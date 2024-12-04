@@ -12,11 +12,9 @@ e: [CommonMainOrTestWithDependsOnDiagnostic | ERROR] commonMain can't declare de
 w: [KotlinDefaultHierarchyFallbackDependsOnUsageDetected | WARNING] The Default Kotlin Hierarchy Template was not applied to 'project ':subprojectA'':
 Explicit .dependsOn() edges were configured for the following source sets:
 [commonMain]
-
 Consider removing dependsOn-calls or disabling the default template by adding
     'kotlin.mpp.applyDefaultHierarchyTemplate=false'
 to your gradle.properties
-
 Learn more about hierarchy templates: https://kotl.in/hierarchy-template
 #diagnostic-end
 
@@ -28,11 +26,9 @@ e: [CommonMainOrTestWithDependsOnDiagnostic | ERROR] commonMain can't declare de
 w: [KotlinDefaultHierarchyFallbackDependsOnUsageDetected | WARNING] The Default Kotlin Hierarchy Template was not applied to 'project ':subprojectB'':
 Explicit .dependsOn() edges were configured for the following source sets:
 [commonMain]
-
 Consider removing dependsOn-calls or disabling the default template by adding
     'kotlin.mpp.applyDefaultHierarchyTemplate=false'
 to your gradle.properties
-
 Learn more about hierarchy templates: https://kotl.in/hierarchy-template
 #diagnostic-end
 

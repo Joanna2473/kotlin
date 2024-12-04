@@ -1,6 +1,5 @@
 > Configure project :
 w: [PlatformSourceSetConventionUsedWithCustomTargetName | WARNING] Accessed 'source set jvmMain', but jvm target used a custom name 'customName' (expected 'jvm'):
-
 Replace:
     kotlin {
         jvm("customName") /* <- custom name used */
