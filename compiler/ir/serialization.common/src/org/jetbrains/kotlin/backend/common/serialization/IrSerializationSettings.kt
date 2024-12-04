@@ -42,7 +42,7 @@ class IrSerializationSettings(
      * already in 2.1.20. This property should be used with care, and should be switched on in 2.1.20 only when
      * [LanguageFeature.IrInlinerBeforeKlibSerialization] experimental language feature is also turned on.
      * In 2.2.0, this setting should be removed leaving `true` value effectively everywhere it was checked before.
-     * TODO: ticket number
+     * TODO: KT-73676, drop this flag
      */
     val allow220Nodes: Boolean = languageVersionSettings.supportsFeature(LanguageFeature.IrInlinerBeforeKlibSerialization)
 }
