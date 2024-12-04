@@ -1,5 +1,4 @@
 [PlatformSourceSetConventionUsedWithCustomTargetName | WARNING] Accessed 'source set jvmMain', but jvm target used a custom name 'desktop' (expected 'jvm'):
-
 Replace:
     kotlin {
         jvm("desktop") /* <- custom name used */
@@ -11,7 +10,6 @@ With:
    }
 ----
 [PlatformSourceSetConventionUsedWithCustomTargetName | WARNING] Accessed 'source set jvmTest', but jvm target used a custom name 'desktop' (expected 'jvm'):
-
 Replace:
     kotlin {
         jvm("desktop") /* <- custom name used */

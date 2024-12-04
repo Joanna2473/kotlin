@@ -1,5 +1,4 @@
 [AndroidGradlePluginIsMissing | FATAL] The Android target requires a 'Android Gradle Plugin' to be applied to the project.
-
 plugins {
     kotlin("multiplatform")
 
