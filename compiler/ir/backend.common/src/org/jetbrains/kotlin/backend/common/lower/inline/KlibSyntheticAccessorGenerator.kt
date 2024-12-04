@@ -56,9 +56,14 @@ class KlibSyntheticAccessorGenerator(
             accessor.copyValueParametersToStatic(source, IrDeclarationOrigin.SYNTHETIC_ACCESSOR)
             accessor.returnType = source.returnType.remapTypeParameters(klass, accessor)
 
-            accessor.body = context.irFactory.createExpressionBody(
+            accessor.body = context.irFactory.createBlockBody(
                 UNDEFINED_OFFSET, UNDEFINED_OFFSET,
-                createConstructorCall(accessor, source.symbol)
+                listOf(
+                    IrReturnImpl(
+                        UNDEFINED_OFFSET, UNDEFINED_OFFSET,
+                        context.irBuiltIns.nothingType, accessor.symbol, createConstructorCall(accessor, source.symbol)
+                    )
+                )
             )
         }
     }
