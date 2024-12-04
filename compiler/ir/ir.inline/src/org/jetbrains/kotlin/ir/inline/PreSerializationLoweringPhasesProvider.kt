@@ -54,6 +54,8 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
         fun outerThisInInlineFunctionsSpecialAccessorLowering(context: Context) = OuterThisInInlineFunctionsSpecialAccessorLowering(context)
         fun inlineCallableReferenceToLambdaPhase(context: Context) =
             CommonInlineCallableReferenceToLambdaPhase(context, privateInlineFunctionResolver(context))
+        fun privateInline(context: Context) =
+            FunctionInlining(context, privateInlineFunctionResolver(context), produceOuterThisFields = false)
         return SameTypeNamedCompilerPhase(
             name = "PreSerializationLowerings",
             actions = DEFAULT_IR_ACTIONS,
@@ -72,8 +74,8 @@ abstract class PreSerializationLoweringPhasesProvider<Context : LoweringContext>
                     ::inlineCallableReferenceToLambdaPhase,
                     ::ArrayConstructorLowering,
                     ::WrapInlineDeclarationsWithReifiedTypeParametersLowering,
-//                  { FunctionInlining(it, inlineFunctionResolver(context, InlineMode.PRIVATE_INLINE_FUNCTIONS), produceOuterThisFields = false) },
-//                  ::SyntheticAccessorLowering,
+                    ::privateInline,
+                    ::SyntheticAccessorLowering,
                 ),
                 supportParallel = false,
             ) then buildModuleLoweringsPhase(
