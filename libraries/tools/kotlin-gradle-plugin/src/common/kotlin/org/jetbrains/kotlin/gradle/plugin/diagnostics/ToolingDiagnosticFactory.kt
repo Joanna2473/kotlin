@@ -8,13 +8,20 @@ package org.jetbrains.kotlin.gradle.plugin.diagnostics
 import org.jetbrains.kotlin.gradle.InternalKotlinGradlePluginApi
 
 @InternalKotlinGradlePluginApi // used in integration tests
-abstract class ToolingDiagnosticFactory(private val predefinedSeverity: ToolingDiagnostic.Severity?, customId: String?) {
-    constructor(customId: String) : this(null, customId)
-    constructor(predefinedSeverity: ToolingDiagnostic.Severity?) : this(predefinedSeverity, null)
-
+abstract class ToolingDiagnosticFactory(
+    private val predefinedSeverity: ToolingDiagnostic.Severity? = null,
+    customId: String? = null,
+) {
     open val id: String = customId ?: this::class.simpleName!!
 
-    protected fun build(message: String, severity: ToolingDiagnostic.Severity? = null, throwable: Throwable? = null): ToolingDiagnostic {
+    protected fun build(
+        name: String,
+        message: String,
+        solution: String? = null,
+        documentation: ToolingDiagnostic.Documentation? = null,
+        severity: ToolingDiagnostic.Severity? = null,
+        throwable: Throwable? = null,
+    ): ToolingDiagnostic {
         if (severity == null && predefinedSeverity == null) {
             error(
                 "Can't determine severity. " +
@@ -27,14 +34,53 @@ abstract class ToolingDiagnosticFactory(private val predefinedSeverity: ToolingD
                         " but not both at once"
             )
         }
-        return ToolingDiagnostic(id, message, severity ?: predefinedSeverity!!, throwable)
+
+        return ToolingDiagnostic(
+            identifier = ToolingDiagnostic.ID(id, name),
+            message = message,
+            severity = severity ?: predefinedSeverity!!,
+            solution = solution,
+            documentation = documentation,
+            throwable = throwable
+        )
     }
 
     internal fun build(
         severity: ToolingDiagnostic.Severity? = null,
         throwable: Throwable? = null,
-        builder: StringBuilder.() -> Unit,
-    ) = build(buildString(builder), severity, throwable)
+        builder: ToolingDiagnosticBuilder.() -> Unit,
+    ) = ToolingDiagnosticBuilder().apply(builder).let {
+        build(it.name, it.message, it.solution, it.documentation, severity, throwable)
+    }
 
     protected fun String.onlyIf(condition: Boolean) = if (condition) this else ""
+}
+
+internal class ToolingDiagnosticBuilder {
+
+    val name: String get() = _name ?: error("Name is not provided")
+    val message: String get() = _message ?: error("Message is not provided")
+    val solution: String? get() = _solution
+    val documentation: ToolingDiagnostic.Documentation? get() = _documentation
+
+    private var _name: String? = null
+    private var _message: String? = null
+    private var _solution: String? = null
+    private var _documentation: ToolingDiagnostic.Documentation? = null
+
+    fun name(string: () -> String) {
+        _name = string()
+    }
+
+    fun message(string: () -> String) {
+        _message = string()
+    }
+
+    fun solution(string: () -> String) {
+        _solution = string()
+    }
+
+    fun documentation(url: String, urlBuilder: (String) -> String = { "See $url for more details." }) {
+        _documentation = ToolingDiagnostic.Documentation(url, urlBuilder(url))
+    }
 }

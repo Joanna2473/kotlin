@@ -1123,7 +1123,6 @@ public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingD
 }
 
 public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingDiagnostics$CreateTarget : org/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnosticFactory {
-	public static final field DEPRECATION_MESSAGE Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingDiagnostics$CreateTarget;
 	public final fun invoke ()Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic;
 }
@@ -1264,11 +1263,6 @@ public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingD
 public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingDiagnostics$KonanHomeConflictDeclaration : org/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnosticFactory {
 	public static final field INSTANCE Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingDiagnostics$KonanHomeConflictDeclaration;
 	public final fun invoke (Ljava/io/File;Ljava/lang/String;)Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic;
-}
-
-public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingDiagnostics$Kotlin12XMppDeprecation : org/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnosticFactory {
-	public static final field INSTANCE Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingDiagnostics$Kotlin12XMppDeprecation;
-	public final fun invoke ()Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic;
 }
 
 public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingDiagnostics$KotlinCompilationSourceDeprecation : org/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnosticFactory {
@@ -1487,6 +1481,32 @@ public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingD
 public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingDiagnostics$XcodeVersionTooHighWarning : org/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnosticFactory {
 	public static final field INSTANCE Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/KotlinToolingDiagnostics$XcodeVersionTooHighWarning;
 	public final fun invoke (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic;
+}
+
+public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic$Documentation {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic$Documentation;
+	public static synthetic fun copy$default (Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic$Documentation;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic$Documentation;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun getUrlWithHint ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic$ID {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic$ID;
+	public static synthetic fun copy$default (Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic$ID;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic$ID;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDisplayName ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/kotlin/gradle/plugin/diagnostics/ToolingDiagnostic$Severity : java/lang/Enum {

@@ -15,6 +15,7 @@ object CocoapodsPluginDiagnostics {
 
     object DeprecatedPropertiesUsed : ToolingDiagnosticFactory(WARNING) {
         operator fun invoke(usedDeprecatedProperties: List<String>) = build(
+            "Deprecated Properties Used",
             """
             |Properties 
             |    ${usedDeprecatedProperties.joinToString(separator = "\n|    ")}
@@ -25,6 +26,7 @@ object CocoapodsPluginDiagnostics {
 
     object LinkOnlyUsedWithStaticFramework : ToolingDiagnosticFactory(WARNING) {
         operator fun invoke(podName: String) = build(
+            "Link-Only Option Ignored",
             """
                  Dependency on '$podName' with option 'linkOnly=true' is unused for building static frameworks.
                  When using static linkage you will need to provide all dependencies for linking the framework into a final application.
@@ -34,6 +36,7 @@ object CocoapodsPluginDiagnostics {
 
     object UnsupportedOs : ToolingDiagnosticFactory(WARNING) {
         operator fun invoke() = build(
+            "Unsupported Operating System",
             """
                 Kotlin CocoaPods Plugin is fully supported on MacOS machines only. Gradle tasks that can not run on non-mac hosts will be skipped.
             """.trimIndent()
@@ -41,15 +44,22 @@ object CocoapodsPluginDiagnostics {
     }
 
     object InteropBindingSelfDependency : ToolingDiagnosticFactory(ERROR) {
-        operator fun invoke(podName: String) = build("Pod '$podName' has an interop-binding dependency on itself")
+        operator fun invoke(podName: String) = build(
+            "Self-Referential Interop-Binding Dependency",
+            "Pod '$podName' has an interop-binding dependency on itself"
+        )
     }
 
     object InteropBindingUnknownDependency : ToolingDiagnosticFactory(ERROR) {
-        operator fun invoke(podName: String, dependencyName: String) = build("Couldn't find declaration of pod '$dependencyName' (interop-binding dependency of pod '${podName}')")
+        operator fun invoke(podName: String, dependencyName: String) = build(
+            "Unknown Interop-Binding Dependency",
+            "Couldn't find declaration of pod '$dependencyName' (interop-binding dependency of pod '${podName}')"
+        )
     }
 
     object EmbedAndSignUsedWithPodDependencies : ToolingDiagnosticFactory(FATAL) {
         operator fun invoke() = build(
+            "Incompatible 'embedAndSign' Task with Pod Dependencies",
             """
                 'embedAndSign' task can't be used in a project with dependencies to pods.
                 Please migrate to CocoaPods for integration into Xcode: https://kotl.in/vc2iq3
@@ -62,5 +72,4 @@ object CocoapodsPluginDiagnostics {
             """.trimIndent()
         )
     }
-
 }
