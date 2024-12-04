@@ -5,7 +5,6 @@ Explicit .dependsOn() edges were configured for the following source sets:
 Consider removing dependsOn-calls or disabling the default template by adding
     'kotlin.mpp.applyDefaultHierarchyTemplate=false'
 to your gradle.properties
-
 Learn more about hierarchy templates: https://kotl.in/hierarchy-template
 ----
 [MultipleSourceSetRootsInCompilation | WARNING] Kotlin Source Set 'commonMain2' is included in compilations of Kotlin Targets: 'jvm', 'js', 'linuxX64'
@@ -19,5 +18,4 @@ For example:
 Or add explicit dependency if the solution above is not applicable:
 
     kotlin.sourceSets["commonMain2"].dependsOn(commonMain)
-
 See https://kotl.in/connecting-source-sets for more details.

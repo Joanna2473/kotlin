@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.gradle.plugin.diagnostics.*
 import org.jetbrains.kotlin.gradle.plugin.diagnostics.ToolingDiagnostic.Severity
 import org.jetbrains.kotlin.gradle.plugin.diagnostics.ToolingDiagnostic.Severity.ERROR
 import org.jetbrains.kotlin.gradle.plugin.diagnostics.ToolingDiagnostic.Severity.WARNING
+import org.jetbrains.kotlin.gradle.plugin.diagnostics.ToolingDiagnostic.ID
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.jetbrains.kotlin.gradle.util.applyKotlinJvmPlugin
 import org.jetbrains.kotlin.gradle.util.buildProject
@@ -105,7 +106,7 @@ class DiagnosticsReportingFunctionalTest {
         // using same diagnostic with same ID as in "per-project". They should be deduplicated properly.
         root.reportDiagnosticOncePerBuild(
             ToolingDiagnostic(
-                "TEST_DIAGNOSTIC_ONE_PER_PROJECT",
+                ID("TEST_DIAGNOSTIC_ONE_PER_PROJECT", "Test Diagnostic"),
                 "This is a test diagnostics that should be reported once per project\n\nIt has multiple lines of text",
                 WARNING
             )
@@ -120,7 +121,7 @@ class DiagnosticsReportingFunctionalTest {
         val project = buildProject()
 
         project.applyKotlinJvmPlugin()
-        val diagnostic = ToolingDiagnostic("DIAGNOSTIC_ID", "Sample diagnostic", WARNING)
+        val diagnostic = ToolingDiagnostic(ID("DIAGNOSTIC_ID", "Sample"), "Sample diagnostic", WARNING)
 
         project.kotlinToolingDiagnosticsCollector.report(project, diagnostic)
         project.kotlinToolingDiagnosticsCollector.report(project, diagnostic, reportOnce = true)
@@ -187,7 +188,11 @@ private fun buildProjectWithMockedCheckers(
 private fun Project.reportTestDiagnostic(severity: Severity = WARNING) {
     kotlinToolingDiagnosticsCollector.report(
         project,
-        ToolingDiagnostic("TEST_DIAGNOSTIC", "This is a test diagnostic\n\nIt has multiple lines of text", severity)
+        ToolingDiagnostic(
+            ID("TEST_DIAGNOSTIC", "Test"),
+            "This is a test diagnostic\n\nIt has multiple lines of text",
+            severity
+        )
     )
 }
 
@@ -195,7 +200,7 @@ private fun Project.reportOnePerProjectTestDiagnostic(severity: Severity = WARNI
     kotlinToolingDiagnosticsCollector.reportOncePerGradleProject(
         project,
         ToolingDiagnostic(
-            "TEST_DIAGNOSTIC_ONE_PER_PROJECT",
+            ID("TEST_DIAGNOSTIC_ONE_PER_PROJECT", "Test Diagnostic"),
             "This is a test diagnostics that should be reported once per project\n\nIt has multiple lines of text",
             severity
         )
@@ -206,7 +211,7 @@ private fun Project.reportOnePerBuildTestDiagnostic(severity: Severity = WARNING
     kotlinToolingDiagnosticsCollector.reportOncePerGradleBuild(
         project,
         ToolingDiagnostic(
-            "TEST_DIAGNOSTIC_ONE_PER_BUILD",
+            ID("TEST_DIAGNOSTIC_ONE_PER_BUILD", "Test Diagnostic"),
             "This is a test diagnostics that should be reported once per build\n\nIt has multiple lines of text",
             severity
         )

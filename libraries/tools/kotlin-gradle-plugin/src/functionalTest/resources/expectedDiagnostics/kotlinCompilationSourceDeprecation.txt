@@ -1,6 +1,5 @@
 [KotlinCompilationSourceDeprecation | WARNING] `KotlinCompilation.source(KotlinSourceSet)` method is deprecated
 and will be removed in upcoming Kotlin releases.
-
 See https://kotl.in/compilation-source-deprecation for details.
 ----
 [MultipleSourceSetRootsInCompilation | WARNING] Kotlin Source Sets: 'jvmCustom', 'customMain'

@@ -14,5 +14,4 @@ Explicit .dependsOn() edges were configured for the following source sets:
 Consider removing dependsOn-calls or disabling the default template by adding
     'kotlin.mpp.applyDefaultHierarchyTemplate=false'
 to your gradle.properties
-
 Learn more about hierarchy templates: https://kotl.in/hierarchy-template

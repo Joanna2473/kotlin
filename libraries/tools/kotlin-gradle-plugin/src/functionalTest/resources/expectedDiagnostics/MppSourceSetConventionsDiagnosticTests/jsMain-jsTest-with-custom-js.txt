@@ -1,26 +1,34 @@
 [PlatformSourceSetConventionUsedWithCustomTargetName | WARNING] Accessed 'source set jsMain', but js target used a custom name 'custom' (expected 'js'):
 
 Replace:
-    kotlin {
-        js("custom") /* <- custom name used */
-    }
+```
+kotlin {
+    js("custom") /* <- custom name used */
+}
+```
 
 With:
-   kotlin {
-       js()
-   }
+```
+kotlin {
+    js()
+}
+```
 ----
 [PlatformSourceSetConventionUsedWithCustomTargetName | WARNING] Accessed 'source set jsTest', but js target used a custom name 'custom' (expected 'js'):
 
 Replace:
-    kotlin {
-        js("custom") /* <- custom name used */
-    }
+```
+kotlin {
+    js("custom") /* <- custom name used */
+}
+```
 
 With:
-   kotlin {
-       js()
-   }
+```
+kotlin {
+    js()
+}
+```
 ----
 [UnusedSourceSetsWarning | WARNING] The following Kotlin source sets were configured but not added to any Kotlin compilation:
  * jsMain

@@ -13,7 +13,6 @@ For example:
 Or add explicit dependency if the solution above is not applicable:
 
     kotlin.sourceSets["myCustomCommonMain"].dependsOn(commonMain)
-
 See https://kotl.in/connecting-source-sets for more details.
 ----
 [MultipleSourceSetRootsInCompilation | WARNING] Kotlin Source Set 'myCustomCommonMain2' is included in compilations of Kotlin Targets: 'jvm', 'linuxX64'
@@ -27,7 +26,6 @@ For example:
 Or add explicit dependency if the solution above is not applicable:
 
     kotlin.sourceSets["myCustomCommonMain2"].dependsOn(commonMain)
-
 See https://kotl.in/connecting-source-sets for more details.
 ----
 [MultipleSourceSetRootsInCompilation | WARNING] Kotlin Source Set 'myCustomCommonTest' is included in compilations of Kotlin Targets: 'jvm', 'linuxX64'
@@ -41,7 +39,6 @@ For example:
 Or add explicit dependency if the solution above is not applicable:
 
     kotlin.sourceSets["myCustomCommonTest"].dependsOn(commonTest)
-
 See https://kotl.in/connecting-source-sets for more details.
 ----
 [MultipleSourceSetRootsInCompilation | WARNING] Kotlin Source Set 'myCustomCommonTest2' is included in compilations of Kotlin Targets: 'jvm', 'linuxX64'
@@ -55,5 +52,4 @@ For example:
 Or add explicit dependency if the solution above is not applicable:
 
     kotlin.sourceSets["myCustomCommonTest2"].dependsOn(commonTest)
-
 See https://kotl.in/connecting-source-sets for more details.
