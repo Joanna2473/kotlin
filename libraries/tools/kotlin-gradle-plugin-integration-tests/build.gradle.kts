@@ -189,7 +189,7 @@ fun Test.applyKotlinNativeFromCurrentBranchIfNeeded() {
         project.kotlinBuildProperties.isKotlinNativeEnabled && project.kotlinBuildProperties.useKotlinNativeLocalDistributionForTests
 
     //add native bundle dependencies for local test run
-    if (kotlinNativeFromMasterEnabled && !project.kotlinBuildProperties.isTeamcityBuild) {
+    if (kotlinNativeFromMasterEnabled) {
         dependsOn(prepareNativeBundleForGradleIT)
     }
 
@@ -200,13 +200,6 @@ fun Test.applyKotlinNativeFromCurrentBranchIfNeeded() {
         systemProperty("konanDataDirForIntegrationTests", konanDataDir)
     }
 
-    // Providing necessary properties for running tests with k/n built from master on the TeamCity
-    if (project.kotlinBuildProperties.isTeamcityBuild) {
-        System.getProperty("kotlinNativeVersionForGradleIT")?.let {
-            systemProperty("kotlinNativeVersion", it)
-        }
-        systemProperty("konanDataDirForIntegrationTests", konanDataDir)
-    }
     dependsOn(createProvisionedOkFiles)
 }
 
