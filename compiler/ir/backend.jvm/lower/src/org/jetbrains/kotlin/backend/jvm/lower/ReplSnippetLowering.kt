@@ -35,6 +35,7 @@ import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.NameUtils
 import org.jetbrains.kotlin.name.SpecialNames
+import org.jetbrains.kotlin.utils.addIfNotNull
 
 @PhaseDescription(name = "ReplSnippetsToClasses")
 internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : ModuleLoweringPass {
@@ -78,6 +79,27 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
             irSnippetClass.metadata = irSnippet.metadata
             irSnippet.targetClass = irSnippetClass.symbol
         }
+    }
+
+    private fun collectCapturingClasses(irSnippet: IrReplSnippet, irSnippetClass: IrClass, typeRemapper: SimpleTypeRemapper): Set<IrClassImpl> {
+        val externalReceivers = mutableSetOf<IrType>().also {
+            it.addIfNotNull(irSnippetClass.thisReceiver?.type)
+        }
+
+        irSnippet.receiversParameters.forEach {
+            externalReceivers.add(it.type)
+            externalReceivers.add(typeRemapper.remapType(it.type))
+        }
+
+        irSnippet.capturingDeclarationsFromOtherSnippets.forEach {
+            val type = (it.parent as? IrClass)?.thisReceiver?.type
+            if (type != null) {
+                externalReceivers.add(type)
+                externalReceivers.add(typeRemapper.remapType(type))
+            }
+        }
+
+        return irSnippet.body.statements.filterIsInstance<IrClass>().collectCapturersByReceivers(context, irSnippet, externalReceivers)
     }
 
     private fun finalizeReplSnippetClass(irSnippet: IrReplSnippet, symbolRemapper: ReplSnippetsToClassesSymbolRemapper) {
@@ -182,6 +204,8 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                 }
         }
 
+        val capturingClasses = collectCapturingClasses(irSnippet, irSnippetClass, typeRemapper)
+
         val scriptTransformer = ReplSnippetToClassTransformer(
             context,
             irSnippet,
@@ -189,7 +213,7 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
             irSnippetClassThisReceiver,
             typeRemapper,
             snippetAccessCallsGenerator,
-            emptySet(),
+            capturingClasses,
             valsToFields
         )
         val lambdaPatcher = ScriptFixLambdasTransformer(irSnippetClass)
@@ -203,6 +227,8 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
             it.transform(scriptTransformer, rootContext)
                 .transform(lambdaPatcher, ScriptFixLambdasTransformerContext())
         }
+
+
 
         irSnippetClass.annotations += (irSnippetClass.parent as IrFile).annotations
     }

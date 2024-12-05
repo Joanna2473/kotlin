@@ -132,6 +132,7 @@ class Fir2IrReplSnippetConfiguratorExtensionImpl(
                             else -> {}
                         }
                     }
+                    irSnippet.capturingDeclarationsFromOtherSnippets.add(this)
                 }
             }
         }
