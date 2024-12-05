@@ -9,7 +9,6 @@ val kotlin_libs: String by project
 repositories {
     maven(url = artifactsRepo)
     mavenCentral()
-    mavenLocal()
 }
 
 val modules = listOf(
