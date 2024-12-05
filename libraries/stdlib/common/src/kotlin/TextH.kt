@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2021 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
@@ -502,7 +502,12 @@ public expect fun String.toShort(radix: Int): Short
 
 /**
  * Parses the string as an [Int] number and returns the result.
- * @throws NumberFormatException if the string is not a valid representation of a number.
+ * The string must consist of an optional leading `+` or `-` sign and decimal digits (`0-9`),
+ * and fit the valid [Int] value range (within `Int.MIN_VALUE..Int.MAX_VALUE`),
+ * or [NumberFormatException] will be  thrown.
+ *
+ * @throws NumberFormatException if the string is not a valid representation of an [Int].
+ * @sample samples.text.Numbers.toInt
  */
 public expect fun String.toInt(): Int
 
