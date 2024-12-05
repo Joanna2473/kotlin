@@ -911,7 +911,7 @@ class Collections {
             assertPrints(sortedByValue, "[1, 2, 3, 4]")
 
             val mapping = mapOf(1 to "one", 2 to "two", 3 to "three", 4 to "four")
-            val sortedByPronunciation = unsorted.sortedByDescending {
+            val sortedByPronunciation = unsorted.sortedBy {
                 // take a key to sort by from the mapping
                 mapping.getOrDefault(it, "unknown")
             }
@@ -919,7 +919,7 @@ class Collections {
             assertPrints(sortedByPronunciation, "[4, 1, 3, 2]")
 
             // the original array remains unchanged
-            assertPrints(unsorted, "[3, 1, 2, 4]")
+            assertPrints(unsorted.toList(), "[3, 1, 2, 4]")
         }
 
         @Sample
@@ -957,7 +957,7 @@ class Collections {
             assertPrints(sortedByPronunciation, "[2, 3, 1, 4]")
 
             // the original array remains unchanged
-            assertPrints(unsorted, "[3, 1, 2, 4]")
+            assertPrints(unsorted.toList(), "[3, 1, 2, 4]")
         }
     }
 
