@@ -145,6 +145,8 @@ public inline fun <T> T.takeUnless(predicate: (T) -> Boolean): T? {
  *
  * A zero-based index of current iteration is passed as a parameter to [action].
  *
+ * If [times] parameter is negative or equal to zero, [action] is not invoked.
+ *
  * @sample samples.misc.ControlFlow.repeat
  */
 @kotlin.internal.InlineOnly
