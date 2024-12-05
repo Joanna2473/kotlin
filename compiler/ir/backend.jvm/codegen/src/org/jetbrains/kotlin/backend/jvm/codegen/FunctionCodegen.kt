@@ -263,20 +263,20 @@ class FunctionCodegen(private val irFunction: IrFunction, private val classCodeg
             frameMap.enter(contextReceiver, classCodegen.typeMapper.mapType(contextReceiver.type))
         }
         extensionReceiverParameter?.let {
-            frameMap.enter(it, classCodegen.typeMapper.mapType(it))
+            frameMap.enter(it, classCodegen.typeMapper.mapType(it.type, wrapInlineClassesForExposedFunctions(this, it)))
         }
         val regularParameters = valueParameters.subList(contextReceiverParametersCount, valueParameters.size)
         for (parameter in regularParameters) {
-            val type =
-                if (origin == JvmLoweredDeclarationOrigin.FUNCTION_WITH_EXPOSED_INLINE_CLASS && parameter.type.isInlineClassType()) {
-                    classCodegen.typeMapper.mapType(parameter.type, TypeMappingMode.DEFAULT.wrapInlineClassesMode())
-                } else {
-                    classCodegen.typeMapper.mapType(parameter.type)
-                }
+            val type = classCodegen.typeMapper.mapType(parameter.type, wrapInlineClassesForExposedFunctions(this, parameter))
             frameMap.enter(parameter, type)
         }
         return frameMap
     }
+
+    private fun wrapInlineClassesForExposedFunctions(function: IrFunction, parameter: IrValueParameter): TypeMappingMode =
+        if (function.origin == JvmLoweredDeclarationOrigin.FUNCTION_WITH_EXPOSED_INLINE_CLASS && parameter.type.isInlineClassType())
+            TypeMappingMode.DEFAULT.wrapInlineClassesMode()
+        else TypeMappingMode.DEFAULT
 
     private fun generateParameterAnnotations(
         irFunction: IrFunction,

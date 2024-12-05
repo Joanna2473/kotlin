@@ -31498,6 +31498,12 @@ public class FirBlackBoxCodegenTestWithInlineScopesGenerated extends AbstractFir
         runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/uint.kt");
       }
 
+      @Test
+      @TestMetadata("uintReceiver.kt")
+      public void testUintReceiver() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/uintReceiver.kt");
+      }
+
       @Nested
       @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/inherit")
       @TestDataPath("$PROJECT_ROOT")
