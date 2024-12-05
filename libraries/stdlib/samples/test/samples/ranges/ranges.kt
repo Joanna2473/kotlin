@@ -92,4 +92,12 @@ class Ranges {
         assertPrints(ascendingProgression.toList(), "[a, c, e]")
         assertPrints(descendingProgression.toList(), "[f, d, b]")
     }
+
+    @Sample
+    fun downTo() {
+        val descendingRange = 5 downTo 1
+        assertPrints(descendingRange.toList(), "[5, 4, 3, 2, 1]")
+        val emptyRange = 5 downTo 7
+        assertPrints(emptyRange.toList(), "[]")
+    }
 }
