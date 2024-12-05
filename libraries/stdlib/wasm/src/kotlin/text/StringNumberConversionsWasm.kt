@@ -44,7 +44,7 @@ public actual fun String.toShort(radix: Int): Short = toShortOrNull(radix) ?: nu
  * Parses the string as an [Int] number and returns the result.
  * The string must consist of an optional leading `+` or `-` sign and decimal digits (`0-9`),
  * and fit the valid [Int] value range (within `Int.MIN_VALUE..Int.MAX_VALUE`),
- * or [NumberFormatException] will be  thrown.
+ * otherwise [NumberFormatException] will be thrown.
  *
  * @throws NumberFormatException if the string is not a valid representation of an [Int].
  * @sample samples.text.Numbers.toInt
