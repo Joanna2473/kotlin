@@ -15,8 +15,13 @@ package kotlin.text
 public actual fun String?.toBoolean(): Boolean = this != null && this.lowercase() == "true"
 
 /**
- * Parses the string as a signed [Byte] number and returns the result.
- * @throws NumberFormatException if the string is not a valid representation of a number.
+ * Parses the string as a [Byte] number and returns the result.
+ * The string must consist of an optional leading `+` or `-` sign and decimal digits (`0-9`),
+ * and fit the valid [Byte] value range (within `Byte.MIN_VALUE..Byte.MAX_VALUE`),
+ * otherwise [NumberFormatException] will be thrown.
+ *
+ * @throws NumberFormatException if the string is not a valid representation of an [Byte].
+ * @sample samples.text.Numbers.toByte
  */
 public actual fun String.toByte(): Byte = toByteOrNull() ?: numberFormatError(this)
 

@@ -12,6 +12,24 @@ import kotlin.test.assertFailsWith
 class Numbers {
 
     @Sample
+    fun toByte() {
+        assertPrints("0".toByte(), "0")
+        assertPrints("42".toByte(), "42")
+        assertPrints("042".toByte(), "42")
+        assertPrints("-42".toByte(), "-42")
+        // Byte.MAX_VALUE
+        assertPrints("127".toByte(), "127")
+        // Byte overflow
+        assertFailsWith<NumberFormatException> { "128".toByte() }
+        // 'a' is not a digit
+        assertFailsWith<NumberFormatException> { "-1a".toByte() }
+        // underscore
+        assertFailsWith<NumberFormatException> { "1_000".toByte() }
+        // whitespaces
+        assertFailsWith<NumberFormatException> { " 1000 ".toByte() }
+    }
+
+    @Sample
     fun toInt() {
         assertPrints("0".toInt(), "0")
         assertPrints("42".toInt(), "42")
