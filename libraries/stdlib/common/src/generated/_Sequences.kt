@@ -613,6 +613,8 @@ public inline fun <T, R : Comparable<R>> Sequence<T>.sortedBy(crossinline select
  * The sort is _stable_. It means that equal elements preserve their order relative to each other after sorting.
  *
  * The operation is _intermediate_ and _stateful_.
+ * 
+ * @sample samples.collections.Collections.Sorting.sortedByDescending
  */
 public inline fun <T, R : Comparable<R>> Sequence<T>.sortedByDescending(crossinline selector: (T) -> R?): Sequence<T> {
     return sortedWith(compareByDescending(selector))

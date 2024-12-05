@@ -8,6 +8,7 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven(url = dokkaRepository)
+        mavenLocal()
         if ("-local" in dokkaVersion) {
             mavenLocal()
         }
@@ -20,6 +21,7 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
         maven(url = dokkaRepository)
+        mavenLocal()
         if ("-local" in dokkaVersion) {
             mavenLocal()
         }

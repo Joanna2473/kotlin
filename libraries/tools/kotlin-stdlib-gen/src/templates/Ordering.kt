@@ -431,6 +431,9 @@ object Ordering : TemplateGroupBase() {
         }
         if (f != ArraysOfPrimitives) {
             appendStableSortNote()
+            sample("samples.collections.Collections.Sorting.sortedBy")
+        } else {
+            sample("samples.collections.Collections.Sorting.sortedPrimitiveArrayBy")
         }
         specialFor(Sequences) {
             returns("SELF")
@@ -440,7 +443,6 @@ object Ordering : TemplateGroupBase() {
             appendStableSortNote()
             sequenceClassification(intermediate, stateful)
         }
-        sample("samples.collections.Collections.Sorting.sortedBy")
 
         body {
             "return sortedWith(compareBy(selector))"
@@ -475,6 +477,9 @@ object Ordering : TemplateGroupBase() {
         }
         if (f != ArraysOfPrimitives) {
             appendStableSortNote()
+            sample("samples.collections.Collections.Sorting.sortedByDescending")
+        } else {
+            sample("samples.collections.Collections.Sorting.sortedPrimitiveArrayByDescending")
         }
 
         specialFor(Sequences) {
