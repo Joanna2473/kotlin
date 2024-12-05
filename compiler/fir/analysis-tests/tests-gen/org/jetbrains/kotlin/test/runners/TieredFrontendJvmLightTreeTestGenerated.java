@@ -30064,6 +30064,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
     }
 
     @Test
+    @TestMetadata("contextParametersFunctions.kt")
+    public void testContextParametersFunctions() {
+      runTest("compiler/fir/analysis-tests/testData/resolveWithStdlib/contextParametersFunctions.kt");
+    }
+
+    @Test
     @TestMetadata("errorsInUnreachable.kt")
     public void testErrorsInUnreachable() {
       runTest("compiler/fir/analysis-tests/testData/resolveWithStdlib/errorsInUnreachable.kt");
