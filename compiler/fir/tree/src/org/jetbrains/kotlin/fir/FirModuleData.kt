@@ -73,6 +73,12 @@ abstract class FirModuleData : FirSessionComponent {
         return "Module $name"
     }
 
+    /**
+     * For the Analysis API-originated modules, returns the stable module name of the corresponding KaModule.
+     * See [org.jetbrains.kotlin.analysis.api.projectStructure.KaModule.stableModuleName]
+     *
+     * For others, returns null.
+     */
     abstract val stableModuleName: String?
 }
 
