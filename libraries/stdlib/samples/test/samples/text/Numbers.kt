@@ -24,9 +24,27 @@ class Numbers {
         // 'a' is not a digit
         assertFailsWith<NumberFormatException> { "-1a".toByte() }
         // underscore
-        assertFailsWith<NumberFormatException> { "1_000".toByte() }
+        assertFailsWith<NumberFormatException> { "1_00".toByte() }
         // whitespaces
-        assertFailsWith<NumberFormatException> { " 1000 ".toByte() }
+        assertFailsWith<NumberFormatException> { " 22 ".toByte() }
+    }
+
+    @Sample
+    fun toShort() {
+        assertPrints("0".toShort(), "0")
+        assertPrints("42".toShort(), "42")
+        assertPrints("042".toShort(), "42")
+        assertPrints("-42".toShort(), "-42")
+        // Short.MAX_VALUE
+        assertPrints("32767".toShort(), "32767")
+        // Short overflow
+        assertFailsWith<NumberFormatException> { "32768".toShort() }
+        // 'a' is not a digit
+        assertFailsWith<NumberFormatException> { "-1a".toShort() }
+        // underscore
+        assertFailsWith<NumberFormatException> { "1_000".toShort() }
+        // whitespaces
+        assertFailsWith<NumberFormatException> { " 1000 ".toShort() }
     }
 
     @Sample
@@ -45,5 +63,23 @@ class Numbers {
         assertFailsWith<NumberFormatException> { "1_000".toInt() }
         // whitespaces
         assertFailsWith<NumberFormatException> { " 1000 ".toInt() }
+    }
+
+    @Sample
+    fun toLong() {
+        assertPrints("0".toLong(), "0")
+        assertPrints("42".toLong(), "42")
+        assertPrints("042".toLong(), "42")
+        assertPrints("-42".toLong(), "-42")
+        // Long.MAX_VALUE
+        assertPrints("9223372036854775807".toLong(), "9223372036854775807")
+        // Long overflow
+        assertFailsWith<NumberFormatException> { "9223372036854775808".toLong() }
+        // 'a' is not a digit
+        assertFailsWith<NumberFormatException> { "-1a".toLong() }
+        // underscore
+        assertFailsWith<NumberFormatException> { "1_000".toLong() }
+        // whitespaces
+        assertFailsWith<NumberFormatException> { " 1000 ".toLong() }
     }
 }
