@@ -3,13 +3,14 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.backend.jvm.lower
+@file:OptIn(UnsafeDuringIrConstructionAPI::class)
+
+package org.jetbrains.kotlin.scripting.compiler.plugin.irLowerings
 
 import org.jetbrains.kotlin.backend.common.ModuleLoweringPass
+import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.phaser.PhaseDescription
-import org.jetbrains.kotlin.backend.jvm.JvmBackendContext
-import org.jetbrains.kotlin.backend.jvm.lower.scripting.*
 import org.jetbrains.kotlin.backend.jvm.originalSnippetValueSymbol
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
@@ -23,10 +24,7 @@ import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.*
-import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
-import org.jetbrains.kotlin.ir.symbols.IrFieldSymbol
-import org.jetbrains.kotlin.ir.symbols.IrVariableSymbol
+import org.jetbrains.kotlin.ir.symbols.*
 import org.jetbrains.kotlin.ir.symbols.impl.IrConstructorSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrFieldSymbolImpl
 import org.jetbrains.kotlin.ir.types.*
@@ -38,7 +36,7 @@ import org.jetbrains.kotlin.name.SpecialNames
 import org.jetbrains.kotlin.utils.addIfNotNull
 
 @PhaseDescription(name = "ReplSnippetsToClasses")
-internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : ModuleLoweringPass {
+internal class ReplSnippetsToClassesLowering(val context: IrPluginContext) : ModuleLoweringPass {
     override fun lower(irModule: IrModuleFragment) {
         val snippets = mutableListOf<IrReplSnippet>()
 
@@ -112,7 +110,11 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
         val valsToFields = mutableMapOf<IrVariableSymbol, IrFieldSymbol>()
 
         val irSnippetClassType = IrSimpleTypeImpl(irSnippetClass.symbol, false, emptyList(), emptyList())
-        val irSnippetClassThisReceiver = irSnippet.createThisReceiverParameter(context, IrDeclarationOrigin.INSTANCE_RECEIVER, irSnippetClassType)
+        val irSnippetClassThisReceiver = irSnippet.createThisReceiverParameter(
+            context,
+            IrDeclarationOrigin.INSTANCE_RECEIVER,
+            irSnippetClassType
+        )
         irSnippetClass.thisReceiver = irSnippetClassThisReceiver
 
         val stateField = irSnippetClass.addField {
@@ -137,7 +139,7 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
             evalFun.dispatchReceiverParameter =
                 buildReceiverParameter(evalFun, irSnippetClass.origin, irSnippetClass.defaultType, UNDEFINED_OFFSET, UNDEFINED_OFFSET)
             evalFun.body =
-                context.createIrBuilder(evalFun.symbol).irBlockBody {
+                context.irBuiltIns.createIrBuilder(evalFun.symbol).irBlockBody {
                     val flattenedStatements = irSnippet.body.statements.flatMap { snippetStatement ->
                         if (snippetStatement is IrComposite) {
                             snippetStatement.statements
@@ -258,7 +260,7 @@ internal class ReplSnippetsToClassesLowering(val context: JvmBackendContext) : M
                 origin = IrDeclarationOrigin.REPL_FROM_OTHER_SNIPPET
                 type = stateField.type
             }
-            irConstructor.body = context.createIrBuilder(irConstructor.symbol).irBlockBody {
+            irConstructor.body = context.irBuiltIns.createIrBuilder(irConstructor.symbol).irBlockBody {
                 +irDelegatingConstructorCall(context.irBuiltIns.anyClass.owner.constructors.single())
                 +irSetField(irGet(irSnippetClass.thisReceiver!!), stateField, irGet(irConstructor.parameters[0]))
             }
@@ -272,7 +274,7 @@ private class ReplSnippetsToClassesSymbolRemapper : SymbolRemapper.Empty() {
 }
 
 private class ReplSnippetAccessCallsGenerator(
-    context: JvmBackendContext,
+    context: IrPluginContext,
     snippetClassReceiver: IrValueParameter,
     implicitReceiversFieldsWithParameters: ArrayList<Pair<IrField, IrValueParameter>>,
     val irSnippetClass: IrClass,
@@ -368,7 +370,7 @@ private class ReplSnippetAccessCallsGenerator(
 }
 
 private class ReplSnippetToClassTransformer(
-    context: JvmBackendContext,
+    context: IrPluginContext,
     val irSnippet: IrReplSnippet,
     irSnippetClass: IrClass,
     snippetClassReceiver: IrValueParameter,
