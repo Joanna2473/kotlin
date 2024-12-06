@@ -108,7 +108,7 @@ public interface AbiValidationExtension : AbiValidationVariantSpec {
  *     }
  * }
  * ```
- * and for custom variant
+ * and for a custom variant
  *```kotlin
  * kotlin {
  *     abiValidation {
