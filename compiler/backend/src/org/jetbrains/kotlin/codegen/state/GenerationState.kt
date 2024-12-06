@@ -229,14 +229,6 @@ class GenerationState private constructor(
     val globalInlineContext: GlobalInlineContext = GlobalInlineContext()
     val factory: ClassFileFactory
 
-    val scriptSpecific = ForScript()
-
-    // TODO: review usages and consider replace mutability with explicit passing of input and output
-    class ForScript {
-        var resultFieldName: String? = null
-        var resultType: KotlinType? = null
-    }
-
     val jvmDefaultMode: JvmDefaultMode
         get() = config.jvmDefaultMode
 
