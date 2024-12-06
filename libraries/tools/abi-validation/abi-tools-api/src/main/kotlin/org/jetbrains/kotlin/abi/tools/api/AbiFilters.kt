@@ -69,7 +69,7 @@ public class AbiFilters(
      *
      * For exclusion filter it means that a class will be excluded from a dump, for inclusion filter it will keep a class or a member in a dump.
      *
-     * Only qualified names of annotations can be used.
+     * Only qualified annotation names can be used.
      * No wildcards are allowed.
      *
      * The annotation should not have [Retention] equal to [AnnotationRetention.SOURCE], otherwise, filtering by it will not work.
