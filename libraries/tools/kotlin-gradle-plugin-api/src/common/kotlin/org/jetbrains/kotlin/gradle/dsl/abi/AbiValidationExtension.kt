@@ -38,7 +38,7 @@ import org.jetbrains.kotlin.gradle.tasks.abi.KotlinAbiDumpTask
 @ExperimentalAbiValidation
 public interface AbiValidationExtension : AbiValidationVariantSpec {
     /**
-     * All ABI Validations report variant available in this project.
+     * All ABI Validations report variants available in this project.
      *
      * See [AbiValidationVariantSpec] for detailed information about report variants.
      *
