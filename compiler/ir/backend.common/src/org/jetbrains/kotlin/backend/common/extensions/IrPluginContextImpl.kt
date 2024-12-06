@@ -13,9 +13,12 @@ import org.jetbrains.kotlin.config.LanguageVersionSettings
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.descriptors.TypeAliasDescriptor
+import org.jetbrains.kotlin.diagnostics.DiagnosticReporter
+import org.jetbrains.kotlin.diagnostics.DiagnosticReporterFactory
 import org.jetbrains.kotlin.incremental.components.NoLookupLocation
 import org.jetbrains.kotlin.ir.IrBuiltIns
 import org.jetbrains.kotlin.ir.IrDiagnosticReporter
+import org.jetbrains.kotlin.ir.KtDiagnosticReporterWithImplicitIrBasedContext
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
@@ -45,6 +48,7 @@ open class IrPluginContextImpl constructor(
     override val irBuiltIns: IrBuiltIns,
     val linker: IrDeserializer,
     private val messageCollector: MessageCollector,
+    diagnosticReporter: DiagnosticReporter = DiagnosticReporterFactory.createReporter(messageCollector),
     override val symbols: BuiltinSymbolsBase = BuiltinSymbolsBase(irBuiltIns)
 ) : IrPluginContext {
 
@@ -98,8 +102,8 @@ open class IrPluginContextImpl constructor(
         }
     }
 
-    override val irDiagnosticReporter: IrDiagnosticReporter
-        get() = error("Should not be called")
+    override val irDiagnosticReporter: IrDiagnosticReporter =
+        KtDiagnosticReporterWithImplicitIrBasedContext(diagnosticReporter, languageVersionSettings)
 
     private fun <S : IrSymbol> resolveSymbolCollection(fqName: FqName, referencer: (MemberScope) -> Collection<S>): Collection<S> {
         val memberScope = resolveMemberScope(fqName) ?: return emptyList()
