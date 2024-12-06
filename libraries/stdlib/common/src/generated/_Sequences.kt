@@ -601,7 +601,7 @@ public fun <T : Comparable<T>> Sequence<T>.sorted(): Sequence<T> {
  *
  * The operation is _intermediate_ and _stateful_.
  * 
- * @sample samples.collections.Collections.Sorting.sortedBy
+ * @sample samples.collections.Sequences.Sorting.sortedBy
  */
 public inline fun <T, R : Comparable<R>> Sequence<T>.sortedBy(crossinline selector: (T) -> R?): Sequence<T> {
     return sortedWith(compareBy(selector))
@@ -614,7 +614,7 @@ public inline fun <T, R : Comparable<R>> Sequence<T>.sortedBy(crossinline select
  *
  * The operation is _intermediate_ and _stateful_.
  * 
- * @sample samples.collections.Collections.Sorting.sortedByDescending
+ * @sample samples.collections.Sequences.Sorting.sortedByDescending
  */
 public inline fun <T, R : Comparable<R>> Sequence<T>.sortedByDescending(crossinline selector: (T) -> R?): Sequence<T> {
     return sortedWith(compareByDescending(selector))

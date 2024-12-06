@@ -898,7 +898,6 @@ class Collections {
             // note that the sorting is stable, so the 🥦 is before the 🧃
             assertPrints(lightDishes, "[Dish(🥦: 34 cal, taste 2.3/5), Dish(🧃: 34 cal, taste 4.9/5), Dish(🍨: 207 cal, taste 4.7/5)]")
 
-
             // the original collection remains unchanged
             assertPrints(fridgeContent, "[Dish(🍨: 207 cal, taste 4.7/5), Dish(🥦: 34 cal, taste 2.3/5), Dish(🧃: 34 cal, taste 4.9/5)]")
         }

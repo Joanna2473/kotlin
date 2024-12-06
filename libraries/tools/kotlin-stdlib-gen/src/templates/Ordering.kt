@@ -429,12 +429,20 @@ object Ordering : TemplateGroupBase() {
             Returns a list of all elements sorted according to natural sort order of the value returned by specified [selector] function.
             """
         }
-        if (f != ArraysOfPrimitives) {
-            appendStableSortNote()
-            sample("samples.collections.Collections.Sorting.sortedBy")
-        } else {
-            sample("samples.collections.Collections.Sorting.sortedPrimitiveArrayBy")
+
+        when (f) {
+            ArraysOfPrimitives -> {
+                sample("samples.collections.Collections.Sorting.sortedPrimitiveArrayBy")
+            }
+            Sequences -> {
+                sample("samples.collections.Sequences.Sorting.sortedBy")
+            }
+            else -> {
+                appendStableSortNote()
+                sample("samples.collections.Collections.Sorting.sortedBy")
+            }
         }
+
         specialFor(Sequences) {
             returns("SELF")
             doc {
@@ -475,11 +483,18 @@ object Ordering : TemplateGroupBase() {
             Returns a list of all elements sorted descending according to natural sort order of the value returned by specified [selector] function.
             """
         }
-        if (f != ArraysOfPrimitives) {
-            appendStableSortNote()
-            sample("samples.collections.Collections.Sorting.sortedByDescending")
-        } else {
-            sample("samples.collections.Collections.Sorting.sortedPrimitiveArrayByDescending")
+
+        when (f) {
+            ArraysOfPrimitives -> {
+                sample("samples.collections.Collections.Sorting.sortedPrimitiveArrayByDescending")
+            }
+            Sequences -> {
+                sample("samples.collections.Sequences.Sorting.sortedByDescending")
+            }
+            else -> {
+                appendStableSortNote()
+                sample("samples.collections.Collections.Sorting.sortedByDescending")
+            }
         }
 
         specialFor(Sequences) {
