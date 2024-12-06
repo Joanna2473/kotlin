@@ -51,7 +51,7 @@ public interface AbiValidationExtension : AbiValidationVariantSpec {
      * }
      * ```
      *
-     * This is live mutable collection, new custom variant can be created via special functions like [NamedDomainObjectContainer.create] or [NamedDomainObjectContainer.register].
+     * This is a live mutable collection, new custom variant can be created via special functions like [NamedDomainObjectContainer.create] or [NamedDomainObjectContainer.register].
      * This variant can be configured at the time of its creation
      * ```kotlin
      * kotlin {
