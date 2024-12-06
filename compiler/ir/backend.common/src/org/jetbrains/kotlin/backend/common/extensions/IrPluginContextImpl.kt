@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.descriptors.TypeAliasDescriptor
 import org.jetbrains.kotlin.incremental.components.NoLookupLocation
 import org.jetbrains.kotlin.ir.IrBuiltIns
+import org.jetbrains.kotlin.ir.IrDiagnosticReporter
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
@@ -43,7 +44,7 @@ open class IrPluginContextImpl constructor(
     override val typeTranslator: TypeTranslator,
     override val irBuiltIns: IrBuiltIns,
     val linker: IrDeserializer,
-    private val diagnosticReporter: MessageCollector,
+    private val messageCollector: MessageCollector,
     override val symbols: BuiltinSymbolsBase = BuiltinSymbolsBase(irBuiltIns)
 ) : IrPluginContext {
 
@@ -86,16 +87,19 @@ open class IrPluginContextImpl constructor(
     }
 
     override fun createDiagnosticReporter(pluginId: String): MessageCollector {
-        return object : MessageCollector by diagnosticReporter {
+        return object : MessageCollector by messageCollector {
             override fun report(
                 severity: CompilerMessageSeverity,
                 message: String,
                 location: CompilerMessageSourceLocation?
             ) {
-                diagnosticReporter.report(severity, "[Plugin $pluginId] $message", location)
+                messageCollector.report(severity, "[Plugin $pluginId] $message", location)
             }
         }
     }
+
+    override val irDiagnosticReporter: IrDiagnosticReporter
+        get() = error("Should not be called")
 
     private fun <S : IrSymbol> resolveSymbolCollection(fqName: FqName, referencer: (MemberScope) -> Collection<S>): Collection<S> {
         val memberScope = resolveMemberScope(fqName) ?: return emptyList()
