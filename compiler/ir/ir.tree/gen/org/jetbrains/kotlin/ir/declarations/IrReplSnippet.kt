@@ -22,7 +22,7 @@ import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
 /**
  * Generated from: [org.jetbrains.kotlin.ir.generator.IrTree.replSnippet]
  */
-abstract class IrReplSnippet : IrDeclarationBase(), IrDeclarationWithName, IrDeclarationParent, IrMetadataSourceOwner {
+abstract class IrReplSnippet : IrDeclarationBase(), IrDeclarationWithName, IrDeclarationParent, IrMetadataSourceOwner, IrAttributeContainer {
     abstract override val symbol: IrReplSnippetSymbol
 
     @ObsoleteDescriptorBasedAPI

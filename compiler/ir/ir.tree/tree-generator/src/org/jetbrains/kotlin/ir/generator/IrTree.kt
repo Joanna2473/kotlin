@@ -546,6 +546,7 @@ object IrTree : AbstractTreeBuilder() {
         parent(declarationWithName)
         parent(declarationParent)
         parent(metadataSourceOwner)
+        parent(attributeContainer)
 
         +declaredSymbol(replSnippetSymbol)
         +descriptor("ReplSnippetDescriptor")

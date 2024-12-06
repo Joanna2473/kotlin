@@ -291,6 +291,7 @@ open class DeepCopyIrTreeWithSymbols(
             body = declaration.body.transform()
             returnType = declaration.returnType?.remapType()
             targetClass = declaration.targetClass?.let(symbolRemapper::getReferencedClass)
+            processAttributes(declaration)
         }
 
     override fun visitSimpleFunction(declaration: IrSimpleFunction): IrSimpleFunction =
