@@ -85,7 +85,7 @@ public interface AbiFiltersSpec {
 @ExperimentalAbiValidation
 public interface AbiFilterSetSpec {
     /**
-     * Filtering by class name.
+     * Filtering by a class name.
      *
      * The name filter works by comparing qualified class name with the value in the filter.
      * ```kotlin
