@@ -229,7 +229,8 @@ open class JvmIrCodegenFactory(
             psi2irContext.typeTranslator,
             psi2irContext.irBuiltIns,
             irLinker,
-            messageCollector
+            messageCollector,
+            input.diagnosticReporter
         ).takeIf { !ideCodegenSettings.doNotLoadDependencyModuleHeaders }
         if (pluginExtensions.isNotEmpty() && pluginContext != null) {
             for (extension in pluginExtensions) {
