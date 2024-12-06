@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.LanguageVersionSettings
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
+import org.jetbrains.kotlin.diagnostics.DiagnosticReporter
 import org.jetbrains.kotlin.progress.ProgressIndicatorAndCompilationCanceledStatus
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingContext
@@ -47,6 +48,7 @@ interface CodegenFactory {
         val files: Collection<KtFile>,
         val configuration: CompilerConfiguration,
         val module: ModuleDescriptor,
+        val diagnosticReporter: DiagnosticReporter,
         val bindingContext: BindingContext,
         val languageVersionSettings: LanguageVersionSettings,
         val ignoreErrors: Boolean,
@@ -56,7 +58,8 @@ interface CodegenFactory {
             fun fromGenerationStateAndFiles(state: GenerationState, files: Collection<KtFile>): IrConversionInput =
                 with(state) {
                     IrConversionInput(
-                        project, files, configuration, module, originalFrontendBindingContext, languageVersionSettings, ignoreErrors,
+                        project, files, configuration, module, state.diagnosticReporter, originalFrontendBindingContext,
+                        languageVersionSettings, ignoreErrors,
                         skipBodies = !state.classBuilderMode.generateBodies
                     )
                 }

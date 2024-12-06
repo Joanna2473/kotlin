@@ -32,6 +32,7 @@ import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.config.*
 import org.jetbrains.kotlin.config.CommonConfigurationKeys.LOOKUP_TRACKER
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
+import org.jetbrains.kotlin.diagnostics.DiagnosticReporter
 import org.jetbrains.kotlin.diagnostics.DiagnosticReporterFactory
 import org.jetbrains.kotlin.diagnostics.impl.BaseDiagnosticsCollector
 import org.jetbrains.kotlin.fir.backend.jvm.FirJvmBackendClassResolver
@@ -72,6 +73,7 @@ object KotlinToJVMBytecodeCompiler {
 
         val useFrontendIR = compilerConfiguration.getBoolean(CommonConfigurationKeys.USE_FIR)
         val messageCollector = environment.messageCollector
+        val diagnosticsReporter = DiagnosticReporterFactory.createReporter(messageCollector)
         val backendInputForMultiModuleChunk = if (useFrontendIR) {
             // K2/PSI: base checks
             val projectEnvironment =
@@ -98,10 +100,9 @@ object KotlinToJVMBytecodeCompiler {
 
             runFrontendAndGenerateIrForMultiModuleChunkUsingFrontendIRAndPsi(environment, projectEnvironment, compilerConfiguration, chunk)
         } else {
-            runFrontendAndGenerateIrUsingClassicFrontend(environment, compilerConfiguration, chunk)
+            runFrontendAndGenerateIrUsingClassicFrontend(environment, compilerConfiguration, chunk, diagnosticsReporter)
         } ?: return true
 
-        val diagnosticsReporter = DiagnosticReporterFactory.createReporter(messageCollector)
         return backendInputForMultiModuleChunk.runBackend(
             project,
             chunk,
@@ -170,7 +171,8 @@ object KotlinToJVMBytecodeCompiler {
     private fun runFrontendAndGenerateIrUsingClassicFrontend(
         environment: KotlinCoreEnvironment,
         compilerConfiguration: CompilerConfiguration,
-        chunk: List<Module>
+        chunk: List<Module>,
+        diagnosticsReporter: DiagnosticReporter
     ): BackendInputForMultiModuleChunk? {
         // K1: Frontend
         val result = repeatAnalysisIfNeeded(analyze(environment), environment)
@@ -187,7 +189,7 @@ object KotlinToJVMBytecodeCompiler {
         }
 
         // K1: PSI2IR
-        val (factory, input) = convertToIr(environment, result)
+        val (factory, input) = convertToIr(environment, result, diagnosticsReporter)
         return BackendInputForMultiModuleChunk(
             factory,
             input,
@@ -274,9 +276,9 @@ object KotlinToJVMBytecodeCompiler {
 
         result.throwIfError()
 
-        val (codegenFactory, backendInput) = convertToIr(environment, result)
         val messageCollector = environment.configuration.getNotNull(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY)
         val diagnosticsReporter = DiagnosticReporterFactory.createReporter(messageCollector)
+        val (codegenFactory, backendInput) = convertToIr(environment, result, diagnosticsReporter)
         val input = runLowerings(
             environment.project, environment.configuration, result.moduleDescriptor, result.bindingContext,
             environment.getSourceFiles(), null, codegenFactory, backendInput, diagnosticsReporter
@@ -284,7 +286,11 @@ object KotlinToJVMBytecodeCompiler {
         return runCodegen(input, input.state, codegenFactory, diagnosticsReporter, environment.configuration)
     }
 
-    private fun convertToIr(environment: KotlinCoreEnvironment, result: AnalysisResult): Pair<CodegenFactory, CodegenFactory.BackendInput> {
+    private fun convertToIr(
+        environment: KotlinCoreEnvironment,
+        result: AnalysisResult,
+        diagnosticsReporter: DiagnosticReporter
+    ): Pair<CodegenFactory, CodegenFactory.BackendInput> {
         val configuration = environment.configuration
         val codegenFactory = JvmIrCodegenFactory(configuration, configuration.phaseConfig)
 
@@ -293,6 +299,7 @@ object KotlinToJVMBytecodeCompiler {
             environment.getSourceFiles(),
             configuration,
             result.moduleDescriptor,
+            diagnosticsReporter,
             result.bindingContext,
             configuration.languageVersionSettings,
             ignoreErrors = false,
