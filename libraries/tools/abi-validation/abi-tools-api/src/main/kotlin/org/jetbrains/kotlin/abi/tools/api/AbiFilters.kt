@@ -67,7 +67,7 @@ public class AbiFilters(
      *
      * If class or class member is annotated with one of specified annotation - then this declaration matches the filter.
      *
-     * For exclusion filter it is means that class will be excluded from dump, for inclusion filter it will keep class or member in dump.
+     * For exclusion filter it means that a class will be excluded from a dump, for inclusion filter it will keep a class or a member in a dump.
      *
      * Only qualified names of annotations can be used.
      * No wildcards are allowed.
