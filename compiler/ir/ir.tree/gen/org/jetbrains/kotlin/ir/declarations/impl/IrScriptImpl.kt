@@ -36,6 +36,10 @@ class IrScriptImpl(
 
     override var metadata: MetadataSource? = null
 
+    override var attributeOwnerId: IrAttributeContainer = this
+
+    override var originalBeforeInline: IrAttributeContainer? = null
+
     @ObsoleteDescriptorBasedAPI
     override val descriptor: ScriptDescriptor
         get() = symbol.descriptor

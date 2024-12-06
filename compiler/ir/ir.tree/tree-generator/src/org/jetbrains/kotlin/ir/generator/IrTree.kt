@@ -516,6 +516,7 @@ object IrTree : AbstractTreeBuilder() {
         parent(declarationParent)
         parent(statementContainer)
         parent(metadataSourceOwner)
+        parent(attributeContainer)
 
         +declaredSymbol(scriptSymbol)
         +descriptor("ScriptDescriptor")

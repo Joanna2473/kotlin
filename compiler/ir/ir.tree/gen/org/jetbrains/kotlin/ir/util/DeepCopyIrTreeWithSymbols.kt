@@ -272,6 +272,7 @@ open class DeepCopyIrTreeWithSymbols(
             importedScripts = declaration.importedScripts?.memoryOptimizedMap { symbolRemapper.getReferencedScript(it) }
             earlierScripts = declaration.earlierScripts?.memoryOptimizedMap { symbolRemapper.getReferencedScript(it) }
             targetClass = declaration.targetClass?.let(symbolRemapper::getReferencedClass)
+            processAttributes(declaration)
         }
 
     override fun visitReplSnippet(declaration: IrReplSnippet): IrReplSnippet =
