@@ -33,7 +33,7 @@ import org.gradle.api.provider.Property
 @ExperimentalAbiValidation
 public interface AbiValidationMultiplatformExtension : AbiValidationMultiplatformVariantSpec {
     /**
-     * All ABI Validations report variant available in this project.
+     * All ABI Validations report variants available in this project.
      *
      * See [AbiValidationMultiplatformVariantSpec] for detailed information about report variants.
      *
