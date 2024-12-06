@@ -46,8 +46,6 @@ internal fun IrFunction.getDispatchReceiver(): IrValueParameterSymbol? = this.di
 
 internal fun IrFunction.getExtensionReceiver(): IrValueParameterSymbol? = this.extensionReceiverParameter?.symbol
 
-internal fun IrFunction.getReceiver(): IrSymbol? = this.getDispatchReceiver() ?: this.getExtensionReceiver()
-
 internal fun IrFunctionAccessExpression.getThisReceiver(): IrValueSymbol = this.symbol.owner.parentAsClass.thisReceiver!!.symbol
 
 internal fun IrConst.toPrimitive(): Primitive = when {
