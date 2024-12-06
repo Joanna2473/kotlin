@@ -83,7 +83,7 @@ public interface AbiValidationExtension : AbiValidationVariantSpec {
 }
 
 /**
- * Specification for ABI Validation report variant.
+ * Specification for the ABI Validation report variant.
  *
  * ABI Validation report variant - is a bunch of configurations (like filters, klib validation, etc.), for which a set of separate Gradle tasks is being created.
  * Different variants are used to generate ABI dumps for a different set of classes and targets without changing the build script.
