@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.fir.resolve.inference.model.ConeExplicitTypeParamete
 import org.jetbrains.kotlin.fir.scopes.FirTypeScope
 import org.jetbrains.kotlin.fir.scopes.FirUnstableSmartcastTypeScope
 import org.jetbrains.kotlin.fir.scopes.ProcessorAction
+import org.jetbrains.kotlin.fir.scopes.impl.outerDispatchReceiverTypeIfTypeAliasWithInnerRHS
 import org.jetbrains.kotlin.fir.scopes.impl.typeAliasForConstructor
 import org.jetbrains.kotlin.fir.scopes.processOverriddenFunctions
 import org.jetbrains.kotlin.fir.symbols.ConeTypeParameterLookupTag
@@ -156,6 +157,12 @@ object CheckDispatchReceiver : ResolutionStage() {
         }
 
         val dispatchReceiverValueType = candidate.dispatchReceiver?.expression?.resolvedType ?: return
+
+        (candidate.symbol.fir as? FirConstructor)?.outerDispatchReceiverTypeIfTypeAliasWithInnerRHS?.let {
+            // Dispatch receivers are different because their containing declarations are different
+            sink.yieldDiagnostic(InapplicableWrongReceiver(dispatchReceiverValueType, it))
+            return
+        }
 
         val isReceiverNullable = !AbstractNullabilityChecker.isSubtypeOfAny(context.session.typeContext, dispatchReceiverValueType)
 
