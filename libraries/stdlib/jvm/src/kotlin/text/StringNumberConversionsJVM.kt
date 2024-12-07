@@ -59,7 +59,7 @@ public actual inline fun String?.toBoolean(): Boolean = java.lang.Boolean.parseB
  *
  * The string must consist of an optional leading `+` or `-` sign and decimal digits (`0-9`),
  * and fit the valid [Byte] value range (within `Byte.MIN_VALUE..Byte.MAX_VALUE`),
- * otherwise [NumberFormatException] will be thrown.
+ * otherwise a [NumberFormatException] will be thrown.
  *
  * @throws NumberFormatException if the string is not a valid representation of a [Byte].
  * @sample samples.text.Numbers.toByte
@@ -82,7 +82,7 @@ public actual inline fun String.toByte(radix: Int): Byte = java.lang.Byte.parseB
  *
  * The string must consist of an optional leading `+` or `-` sign and decimal digits (`0-9`),
  * and fit the valid [Short] value range (within `Short.MIN_VALUE..Short.MAX_VALUE`),
- * otherwise [NumberFormatException] will be thrown.
+ * otherwise a [NumberFormatException] will be thrown.
  *
  * @throws NumberFormatException if the string is not a valid representation of a [Short].
  * @sample samples.text.Numbers.toShort
@@ -104,7 +104,7 @@ public actual inline fun String.toShort(radix: Int): Short = java.lang.Short.par
  *
  * The string must consist of an optional leading `+` or `-` sign and decimal digits (`0-9`),
  * and fit the valid [Int] value range (within `Int.MIN_VALUE..Int.MAX_VALUE`),
- * otherwise [NumberFormatException] will be thrown.
+ * otherwise a [NumberFormatException] will be thrown.
  *
  * @throws NumberFormatException if the string is not a valid representation of an [Int].
  * @sample samples.text.Numbers.toInt
@@ -126,7 +126,7 @@ public actual inline fun String.toInt(radix: Int): Int = java.lang.Integer.parse
  *
  * The string must consist of an optional leading `+` or `-` sign and decimal digits (`0-9`),
  * and fit the valid [Long] value range (within `Long.MIN_VALUE..Long.MAX_VALUE`),
- * otherwise [NumberFormatException] will be thrown.
+ * otherwise a [NumberFormatException] will be thrown.
  *
  * @throws NumberFormatException if the string is not a valid representation of a [Long].
  * @sample samples.text.Numbers.toLong
