@@ -30,6 +30,24 @@ class Numbers {
     }
 
     @Sample
+    fun toByteOrNull() {
+        assertPrints("0".toByteOrNull(), "0")
+        assertPrints("42".toByteOrNull(), "42")
+        assertPrints("042".toByteOrNull(), "42")
+        assertPrints("-42".toByteOrNull(), "-42")
+        // Byte.MAX_VALUE
+        assertPrints("127".toByteOrNull(), "127")
+        // Byte overflow
+        assertPrints("128".toByteOrNull(), "null")
+        // 'a' is not a digit
+        assertPrints("-1a".toByteOrNull(), "null")
+        // underscore
+        assertPrints("1_00".toByteOrNull(), "null")
+        // whitespaces
+        assertPrints(" 22 ".toByteOrNull(), "null")
+    }
+
+    @Sample
     fun toShort() {
         assertPrints("0".toShort(), "0")
         assertPrints("42".toShort(), "42")
@@ -45,6 +63,24 @@ class Numbers {
         assertFailsWith<NumberFormatException> { "1_000".toShort() }
         // whitespaces
         assertFailsWith<NumberFormatException> { " 1000 ".toShort() }
+    }
+
+    @Sample
+    fun toShortOrNull() {
+        assertPrints("0".toShortOrNull(), "0")
+        assertPrints("42".toShortOrNull(), "42")
+        assertPrints("042".toShortOrNull(), "42")
+        assertPrints("-42".toShortOrNull(), "-42")
+        // Short.MAX_VALUE
+        assertPrints("32767".toShortOrNull(), "32767")
+        // Short overflow
+        assertPrints("32768".toShortOrNull(), "null")
+        // 'a' is not a digit
+        assertPrints("-1a".toShortOrNull(), "null")
+        // underscore
+        assertPrints("1_00".toShortOrNull(), "null")
+        // whitespaces
+        assertPrints(" 22 ".toShortOrNull(), "null")
     }
 
     @Sample
@@ -66,6 +102,24 @@ class Numbers {
     }
 
     @Sample
+    fun toIntOrNull() {
+        assertPrints("0".toIntOrNull(), "0")
+        assertPrints("42".toIntOrNull(), "42")
+        assertPrints("042".toIntOrNull(), "42")
+        assertPrints("-42".toIntOrNull(), "-42")
+        // Int.MAX_VALUE
+        assertPrints("2147483647".toIntOrNull(), "2147483647")
+        // Int overflow
+        assertPrints("2147483648".toIntOrNull(), "null")
+        // 'a' is not a digit
+        assertPrints("-1a".toIntOrNull(), "null")
+        // underscore
+        assertPrints("1_00".toIntOrNull(), "null")
+        // whitespaces
+        assertPrints(" 22 ".toIntOrNull(), "null")
+    }
+
+    @Sample
     fun toLong() {
         assertPrints("0".toLong(), "0")
         assertPrints("42".toLong(), "42")
@@ -81,5 +135,23 @@ class Numbers {
         assertFailsWith<NumberFormatException> { "1_000".toLong() }
         // whitespaces
         assertFailsWith<NumberFormatException> { " 1000 ".toLong() }
+    }
+
+    @Sample
+    fun toLongOrNull() {
+        assertPrints("0".toLongOrNull(), "0")
+        assertPrints("42".toLongOrNull(), "42")
+        assertPrints("042".toLongOrNull(), "42")
+        assertPrints("-42".toLongOrNull(), "-42")
+        // Long.MAX_VALUE
+        assertPrints("9223372036854775807".toLongOrNull(), "9223372036854775807")
+        // Long overflow
+        assertPrints("9223372036854775808".toLongOrNull(), "null")
+        // 'a' is not a digit
+        assertPrints("-1a".toLongOrNull(), "null")
+        // underscore
+        assertPrints("1_00".toLongOrNull(), "null")
+        // whitespaces
+        assertPrints(" 22 ".toLongOrNull(), "null")
     }
 }
