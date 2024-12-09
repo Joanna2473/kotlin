@@ -42,6 +42,8 @@ sealed class FirMultipleDefaultsInheritedFromSupertypesChecker(mppKind: MppCheck
     }
 
     override fun check(declaration: FirRegularClass, context: CheckerContext, reporter: DiagnosticReporter) {
+        if (declaration.isExternal) return
+
         declaration.unsubstitutedScope(context).processAllFunctions {
             val originalIfSubstitutionOverride = it.unwrapSubstitutionOverrides()
 
@@ -82,7 +84,6 @@ sealed class FirMultipleDefaultsInheritedFromSupertypesChecker(mppKind: MppCheck
             val k1WouldMiss = overriddenFunctionsK1WouldConsider.count { it.valueParameterSymbols[index].hasDefaultValue } <= 1
 
             when {
-                declaration.isExternal -> return
                 !isExplicitOverride -> {
                     reportDiagnosticForImplicitOverride(
                         k1WouldMiss, declaration.source, function.name, parameter, basesWithDefaultValues, context, reporter
