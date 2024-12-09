@@ -6,13 +6,6 @@ sourceSets.named("test") {
     java.srcDir("src/test/kotlin")
 }
 
-tasks.compileTestKotlin {
-    compilerOptions {
-        // fix signatures and binary declarations
-        freeCompilerArgs.add("-Xjvm-default=all-compatibility")
-    }
-}
-
 publish()
 
 standardPublicJars()
@@ -24,6 +17,16 @@ tasks.withType<Test>().configureEach {
     systemProperty("overwrite.output", System.getProperty("overwrite.output", "false"))
     systemProperty("testCasesClassesDirs", sourceSets.test.get().output.classesDirs.asPath)
     jvmArgs("-ea")
+}
+
+tasks.compileTestKotlin {
+    compilerOptions {
+        // fix signatures and binary declarations
+        freeCompilerArgs.add("-Xjvm-default=all-compatibility")
+
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+    }
 }
 
 dependencies {

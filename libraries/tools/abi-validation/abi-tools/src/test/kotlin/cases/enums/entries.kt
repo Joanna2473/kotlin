@@ -6,7 +6,7 @@ fun test() {
         println(it)
     }
 
-    _root_ide_package_.cases.enums.JavaEnum.entries.forEach {
+    JavaEnum.entries.forEach {
         println(it)
     }
 }

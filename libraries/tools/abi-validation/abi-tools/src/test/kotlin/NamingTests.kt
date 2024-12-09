@@ -16,6 +16,7 @@ class NamingTests {
         assertEquals("foo.bar" to "Biz.\$\$Gz.\$X", "foo/bar/Biz\$\$\$Gz\$\$X".jvmInternalToCanonical())
         assertEquals("foo.bar" to "Biz", "foo/bar/Biz".jvmInternalToCanonical())
         assertEquals("" to "Foo.Bar", "Foo\$Bar".jvmInternalToCanonical())
+        assertEquals("" to "Foo.Bar\$", "Foo\$Bar\$".jvmInternalToCanonical())
         assertEquals("" to "Foo", "Foo".jvmInternalToCanonical())
     }
 
@@ -25,6 +26,7 @@ class NamingTests {
         assertEquals("foo.bar" to "Biz.\$\$Gz.\$X", "Lfoo/bar/Biz\$\$\$Gz\$\$X;".jvmTypeDescToCanonical())
         assertEquals("foo.bar" to "Biz", "Lfoo/bar/Biz;".jvmTypeDescToCanonical())
         assertEquals("" to "Foo.Bar", "LFoo\$Bar;".jvmTypeDescToCanonical())
+        assertEquals("" to "Foo.Bar\$", "LFoo\$Bar\$;".jvmTypeDescToCanonical())
         assertEquals("" to "Foo", "LFoo;".jvmTypeDescToCanonical())
     }
 
@@ -33,6 +35,7 @@ class NamingTests {
         assertEquals("foo.bar" to "Biz", "foo/bar/Biz".metadataNameToQualified())
         assertEquals("foo.bar" to "Biz.Gz", "foo/bar/Biz.Gz".metadataNameToQualified())
         assertEquals("foo.bar" to "\$Biz.\$Gz", "foo/bar/\$Biz.\$Gz".metadataNameToQualified())
+        assertEquals("foo.bar" to "\$Biz.\$Gz\$", "foo/bar/\$Biz.\$Gz\$".metadataNameToQualified())
         assertEquals("" to "Foo", "Foo".metadataNameToQualified())
     }
 }
