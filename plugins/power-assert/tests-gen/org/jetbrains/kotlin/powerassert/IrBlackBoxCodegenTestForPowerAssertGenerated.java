@@ -707,6 +707,12 @@ public class IrBlackBoxCodegenTestForPowerAssertGenerated extends AbstractIrBlac
     }
 
     @Test
+    @TestMetadata("Receivers.kt")
+    public void testReceivers() {
+      runTest("plugins/power-assert/testData/codegen/parameters/Receivers.kt");
+    }
+
+    @Test
     @TestMetadata("TypeParameters.kt")
     public void testTypeParameters() {
       runTest("plugins/power-assert/testData/codegen/parameters/TypeParameters.kt");
