@@ -5,12 +5,9 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
-/**
- * Spec for Yarn - package manager to install NPM dependencies
- */
-abstract class YarnRootEnvSpec : AbstractYarnRootEnvSpec() {
+@Deprecated("Use JsYarnRootEnvSpec instead", ReplaceWith("JsYarnRootEnvSpec"))
+abstract class YarnRootEnvSpec : JsYarnRootEnvSpec() {
     companion object {
-        const val YARN: String = "kotlinYarnSpec"
+        const val YARN: String = JsYarnRootEnvSpec.YARN
     }
-
 }

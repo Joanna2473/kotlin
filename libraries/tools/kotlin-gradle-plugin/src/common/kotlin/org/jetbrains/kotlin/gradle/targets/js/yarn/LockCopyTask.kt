@@ -11,7 +11,7 @@ import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockFileMismatchReport
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockStoreTask
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin.Companion.YARN_LOCK_MISMATCH_MESSAGE
+import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin.Companion.YARN_LOCK_MISMATCH_MESSAGE
 
 @DisableCachingByDefault
 abstract class YarnLockCopyTask : LockCopyTask()

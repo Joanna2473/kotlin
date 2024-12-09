@@ -8,25 +8,20 @@ package org.jetbrains.kotlin.gradle.targets.js.yarn
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 
+@Deprecated("Use JsYarnRootExtension instead", ReplaceWith("JsYarnRootExtension"))
 open class YarnRootExtension(
     project: Project,
     nodeJsRoot: NodeJsRootExtension,
-    yarnSpec: YarnRootEnvSpec,
+    yarnSpec: JsYarnRootEnvSpec,
 ) : AbstractYarnRootExtension(
     project,
     nodeJsRoot,
     yarnSpec,
 ) {
     companion object {
-        const val YARN: String = "kotlinYarn"
+        const val YARN: String = JsYarnRootExtension.YARN
 
-        operator fun get(project: Project): YarnRootExtension {
-            val rootProject = project.rootProject
-            rootProject.plugins.apply(YarnPlugin::class.java)
-            return rootProject.extensions.getByName(YARN) as YarnRootExtension
-        }
+        operator fun get(project: Project): JsYarnRootExtension =
+            JsYarnRootExtension.get(project)
     }
 }
-
-val Project.yarn: YarnRootExtension
-    get() = YarnRootExtension[this]

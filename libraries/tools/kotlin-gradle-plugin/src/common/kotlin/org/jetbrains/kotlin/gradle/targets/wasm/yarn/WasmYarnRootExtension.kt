@@ -1,14 +1,16 @@
 /*
- * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.gradle.targets.js.yarn
+package org.jetbrains.kotlin.gradle.targets.wasm.yarn
 
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmPlatformDisambiguate
+import org.jetbrains.kotlin.gradle.targets.js.yarn.AbstractYarnRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin
 
 open class WasmYarnRootExtension(
     project: Project,
@@ -25,7 +27,7 @@ open class WasmYarnRootExtension(
 
         operator fun get(project: Project): WasmYarnRootExtension {
             val rootProject = project.rootProject
-            rootProject.plugins.apply(YarnPlugin::class.java)
+            rootProject.plugins.apply(JsYarnPlugin::class.java)
             return rootProject.extensions.getByName(YARN) as WasmYarnRootExtension
         }
     }

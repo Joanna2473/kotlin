@@ -5866,44 +5866,46 @@ public class org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnRootExtensi
 	public final fun setYarnLockMismatchReport (Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnLockMismatchReport;)V
 }
 
-public final class org/jetbrains/kotlin/gradle/targets/js/yarn/LockCopyTaskKt {
-	public static final fun fromLockFileMismatchReport (Lorg/jetbrains/kotlin/gradle/targets/js/npm/LockFileMismatchReport;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnLockMismatchReport;
-}
-
-public class org/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnPlugin : org/gradle/api/Plugin {
-	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnPlugin$Companion;
+public class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin : org/jetbrains/kotlin/gradle/targets/yarn/CommonYarnPlugin {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin$Companion;
+	public static final field RESTORE_YARN_LOCK_NAME Ljava/lang/String;
+	public static final field STORE_YARN_LOCK_NAME Ljava/lang/String;
+	public static final field UPGRADE_YARN_LOCK Ljava/lang/String;
+	public static final field YARN_LOCK_MISMATCH_MESSAGE Ljava/lang/String;
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/Project;)V
 }
 
-public final class org/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnPlugin$Companion : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
-	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnRootExtension;
-	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
-	public fun getPlatformDisambiguate ()Ljava/lang/String;
+public final class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin$Companion {
+	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
 }
 
-public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnRootEnvSpec {
-	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnRootEnvSpec$Companion;
+public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnRootEnvSpec {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec$Companion;
+	public static final field YARN Ljava/lang/String;
 	public fun <init> ()V
 }
 
-public final class org/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnRootEnvSpec$Companion : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
-	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
-	public fun getPlatformDisambiguate ()Ljava/lang/String;
-	public final fun getYARN ()Ljava/lang/String;
+public final class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec$Companion {
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnRootExtension : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnRootExtension {
-	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnRootExtension$Companion;
-	public fun <init> (Lorg/gradle/api/Project;Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/WasmNodeJsRootExtension;Lorg/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnRootEnvSpec;)V
+public class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnRootExtension {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension$Companion;
+	public static final field YARN Ljava/lang/String;
+	public fun <init> (Lorg/gradle/api/Project;Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec;)V
 }
 
-public final class org/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnRootExtension$Companion : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
-	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
-	public final fun get (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/WasmYarnRootExtension;
-	public fun getPlatformDisambiguate ()Ljava/lang/String;
-	public final fun getYARN ()Ljava/lang/String;
+public final class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension$Companion {
+	public final fun get (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtensionKt {
+	public static final fun getYarn (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/js/yarn/LockCopyTaskKt {
+	public static final fun fromLockFileMismatchReport (Lorg/jetbrains/kotlin/gradle/targets/js/npm/LockFileMismatchReport;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnLockMismatchReport;
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/Yarn : org/jetbrains/kotlin/gradle/targets/js/npm/NpmApiExecution {
@@ -5989,19 +5991,17 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnLockStoreT
 	public final fun getYarnLockMismatchReport ()Lorg/gradle/api/provider/Provider;
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin : org/gradle/api/Plugin {
+public class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin : org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin$Companion;
 	public static final field RESTORE_YARN_LOCK_NAME Ljava/lang/String;
 	public static final field STORE_YARN_LOCK_NAME Ljava/lang/String;
 	public static final field UPGRADE_YARN_LOCK Ljava/lang/String;
 	public static final field YARN_LOCK_MISMATCH_MESSAGE Ljava/lang/String;
 	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/Project;)V
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin$Companion {
-	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension;
+	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnResolution : java/io/Serializable {
@@ -6019,7 +6019,7 @@ public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnResolutionsKt
 	public static final fun toVersionString (Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnResolution;)Ljava/lang/String;
 }
 
-public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnRootEnvSpec {
+public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootEnvSpec$Companion;
 	public static final field YARN Ljava/lang/String;
 	public fun <init> ()V
@@ -6031,15 +6031,11 @@ public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootEnvSpec$C
 public class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnRootExtension {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension$Companion;
 	public static final field YARN Ljava/lang/String;
-	public fun <init> (Lorg/gradle/api/Project;Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootEnvSpec;)V
+	public fun <init> (Lorg/gradle/api/Project;Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec;)V
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension$Companion {
-	public final fun get (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension;
-}
-
-public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtensionKt {
-	public static final fun getYarn (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension;
+	public final fun get (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
 }
 
 public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnSetupTask : org/jetbrains/kotlin/gradle/targets/js/AbstractSetupTask {
@@ -6653,6 +6649,45 @@ public abstract class org/jetbrains/kotlin/gradle/targets/native/toolchain/Unzip
 	public abstract fun getFileSystemOperations ()Lorg/gradle/api/file/FileSystemOperations;
 	public abstract fun getInputArtifact ()Lorg/gradle/api/provider/Provider;
 	public fun transform (Lorg/gradle/api/artifacts/transform/TransformOutputs;)V
+}
+
+public class org/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnPlugin : org/jetbrains/kotlin/gradle/targets/yarn/CommonYarnPlugin {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnPlugin$Companion;
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnPlugin$Companion : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
+	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnRootExtension;
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+}
+
+public abstract class org/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnRootEnvSpec {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnRootEnvSpec$Companion;
+	public fun <init> ()V
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnRootEnvSpec$Companion : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+	public final fun getYARN ()Ljava/lang/String;
+}
+
+public class org/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnRootExtension : org/jetbrains/kotlin/gradle/targets/js/yarn/AbstractYarnRootExtension {
+	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnRootExtension$Companion;
+	public fun <init> (Lorg/gradle/api/Project;Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/WasmNodeJsRootExtension;Lorg/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnRootEnvSpec;)V
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnRootExtension$Companion : org/jetbrains/kotlin/gradle/targets/js/HasPlatformDisambiguate {
+	public fun extensionName (Ljava/lang/String;)Ljava/lang/String;
+	public final fun get (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/wasm/yarn/WasmYarnRootExtension;
+	public fun getPlatformDisambiguate ()Ljava/lang/String;
+	public final fun getYARN ()Ljava/lang/String;
+}
+
+public abstract interface class org/jetbrains/kotlin/gradle/targets/yarn/CommonYarnPlugin : org/gradle/api/Plugin {
 }
 
 public abstract class org/jetbrains/kotlin/gradle/tasks/AbstractKotlinCompile : org/jetbrains/kotlin/gradle/tasks/AbstractKotlinCompileTool, org/jetbrains/kotlin/compilerRunner/UsesCompilerSystemPropertiesService, org/jetbrains/kotlin/gradle/incremental/UsesIncrementalModuleInfoBuildService, org/jetbrains/kotlin/gradle/internal/UsesClassLoadersCachingBuildService, org/jetbrains/kotlin/gradle/plugin/UsesBuildFinishedListenerService, org/jetbrains/kotlin/gradle/plugin/UsesVariantImplementationFactories, org/jetbrains/kotlin/gradle/plugin/diagnostics/UsesKotlinToolingDiagnostics, org/jetbrains/kotlin/gradle/plugin/internal/UsesBuildIdProviderService, org/jetbrains/kotlin/gradle/plugin/statistics/UsesBuildFusService, org/jetbrains/kotlin/gradle/report/UsesBuildMetricsService, org/jetbrains/kotlin/gradle/tasks/BaseKotlinCompile, org/jetbrains/kotlin/gradle/tasks/CompileUsingKotlinDaemonWithNormalization {
