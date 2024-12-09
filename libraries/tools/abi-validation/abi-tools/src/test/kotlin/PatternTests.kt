@@ -12,19 +12,19 @@ import kotlin.test.assertTrue
 class PatternTests {
     @Test
     fun testMappingToRegex() {
-        assertEquals("simple text", "simple text".wildcardsToRegex())
+        assertEquals("simple text", "simple text".wildcardsToRegex().pattern)
         // test escaping meta symbols <([{\^-=$!|]})+.>
         assertEquals(
             "\\(meta\\)\\^\\[symbols\\]:\\! \\| \\\\d\\=2\\+3\\.5 \\< 6 && 1€ \\> 1\\\$",
-            "(meta)^[symbols]:! | \\d=2+3.5 < 6 && 1€ > 1$".wildcardsToRegex()
+            "(meta)^[symbols]:! | \\d=2+3.5 < 6 && 1€ > 1$".wildcardsToRegex().pattern
         )
 
-        assertEquals("[^.]*prefix", "*prefix".wildcardsToRegex())
-        assertEquals(".*any prefix", "**any prefix".wildcardsToRegex())
-        assertEquals("suffix[^.]*", "suffix*".wildcardsToRegex())
-        assertEquals("any suffix.*", "any suffix**".wildcardsToRegex())
-        assertEquals("qu.stion.", "qu?stion?".wildcardsToRegex())
-        assertEquals("[^.]*mix.of.*wildcards[^.]*", "*mix?of**wildcards*".wildcardsToRegex())
+        assertEquals("[^.]*prefix", "*prefix".wildcardsToRegex().pattern)
+        assertEquals(".*any prefix", "**any prefix".wildcardsToRegex().pattern)
+        assertEquals("suffix[^.]*", "suffix*".wildcardsToRegex().pattern)
+        assertEquals("any suffix.*", "any suffix**".wildcardsToRegex().pattern)
+        assertEquals("qu.stion.", "qu?stion?".wildcardsToRegex().pattern)
+        assertEquals("[^.]*mix.of.*wildcards[^.]*", "*mix?of**wildcards*".wildcardsToRegex().pattern)
     }
 
     @Test
@@ -60,7 +60,7 @@ class PatternTests {
 
 
     private class Asserter(private val filter: String) {
-        private val regex: Regex = filter.wildcardsToRegex().toRegex()
+        private val regex: Regex = filter.wildcardsToRegex()
 
         fun matches(vararg strings: String): Asserter {
             strings.forEach { string ->

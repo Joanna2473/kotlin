@@ -275,7 +275,7 @@ private fun Iterable<String>.processClasses(): WildcardsMatcher {
         val hasStarWildcard = classFilter.indexOf('*') > -1
 
         if (hasQuestionWildcard) {
-            regex += classFilter.wildcardsToRegex().toRegex()
+            regex += classFilter.wildcardsToRegex()
             return@forEach
         }
 
@@ -304,7 +304,7 @@ private fun Iterable<String>.processClasses(): WildcardsMatcher {
             anyPostfix += classFilter.removeSuffix("**")
             return@forEach
         }
-        regex += classFilter.wildcardsToRegex().toRegex()
+        regex += classFilter.wildcardsToRegex()
     }
     return WildcardsMatcher(full, anyPostfix, anyRightSegment, anyPrefix, regex)
 }

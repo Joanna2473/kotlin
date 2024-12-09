@@ -8,7 +8,7 @@ package org.jetbrains.kotlin.abi.tools.filtering
 /**
  * Replaces characters `**` to `.*`, `*` to `[^.]*` and `?` to `.` regexp characters and also add escape char '\' before regexp metacharacters (see [regexMetacharactersSet]).
  */
-internal fun String.wildcardsToRegex(): String {
+internal fun String.wildcardsToRegex(): Regex {
     // in most cases, the characters `*` or `.` will be present therefore, we increase the capacity in advance
     val builder = StringBuilder(length * 2)
     var prevCharIsStar = false
@@ -48,7 +48,7 @@ internal fun String.wildcardsToRegex(): String {
         builder.append("[^.]*")
     }
 
-    return builder.toString()
+    return builder.toString().toRegex()
 }
 
 private val regexMetacharactersSet = "<([{\\^-=$!|]})+.>".toSet()
