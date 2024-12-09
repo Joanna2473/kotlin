@@ -1,6 +1,5 @@
 // RUN_PIPELINE_TILL: FRONTEND
 // COMPARE_WITH_LIGHT_TREE
-// LATEST_LV_DIFFERENCE
 
 fun List<String>.modify() {
     <!VARIABLE_EXPECTED!>this<!> += "Alpha"

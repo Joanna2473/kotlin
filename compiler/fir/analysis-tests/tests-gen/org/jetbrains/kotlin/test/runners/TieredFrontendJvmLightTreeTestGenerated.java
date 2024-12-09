@@ -941,6 +941,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
     }
 
     @Test
+    @TestMetadata("parenthesesWithAssignmentOrSet.kt")
+    public void testParenthesesWithAssignmentOrSet() {
+      runTest("compiler/testData/diagnostics/tests/parenthesesWithAssignmentOrSet.kt");
+    }
+
+    @Test
     @TestMetadata("parenthesesWithAssignmentOrSetValCornerCases.kt")
     public void testParenthesesWithAssignmentOrSetValCornerCases() {
       runTest("compiler/testData/diagnostics/tests/parenthesesWithAssignmentOrSetValCornerCases.kt");
@@ -950,6 +956,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
     @TestMetadata("parenthesesWithAssignmentOrSetVarCornerCases.kt")
     public void testParenthesesWithAssignmentOrSetVarCornerCases() {
       runTest("compiler/testData/diagnostics/tests/parenthesesWithAssignmentOrSetVarCornerCases.kt");
+    }
+
+    @Test
+    @TestMetadata("parenthesesWithIncrements.kt")
+    public void testParenthesesWithIncrements() {
+      runTest("compiler/testData/diagnostics/tests/parenthesesWithIncrements.kt");
     }
 
     @Test
@@ -1557,6 +1569,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       }
 
       @Test
+      @TestMetadata("blockLevelOnTheSameLineWarning.kt")
+      public void testBlockLevelOnTheSameLineWarning() {
+        runTest("compiler/testData/diagnostics/tests/annotations/blockLevelOnTheSameLineWarning.kt");
+      }
+
+      @Test
       @TestMetadata("classAnnotationsInLocalClass.kt")
       public void testClassAnnotationsInLocalClass() {
         runTest("compiler/testData/diagnostics/tests/annotations/classAnnotationsInLocalClass.kt");
@@ -2098,6 +2116,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       @TestMetadata("compiler/testData/diagnostics/tests/annotations/options")
       @TestDataPath("$PROJECT_ROOT")
       public class Options {
+        @Test
+        @TestMetadata("assignment.kt")
+        public void testAssignment() {
+          runTest("compiler/testData/diagnostics/tests/annotations/options/assignment.kt");
+        }
+
         @Test
         @TestMetadata("forParam.kt")
         public void testForParam() {
@@ -10567,17 +10591,6 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       }
 
       @Nested
-      @TestMetadata("compiler/testData/diagnostics/tests/inference/callableReferences")
-      @TestDataPath("$PROJECT_ROOT")
-      public class CallableReferences {
-        @Test
-        @TestMetadata("fromExpectedTypeInLambda.kt")
-        public void testFromExpectedTypeInLambda() {
-          runTest("compiler/testData/diagnostics/tests/inference/callableReferences/fromExpectedTypeInLambda.kt");
-        }
-      }
-
-      @Nested
       @TestMetadata("compiler/testData/diagnostics/tests/inference/capturedTypes")
       @TestDataPath("$PROJECT_ROOT")
       public class CapturedTypes {
@@ -11062,17 +11075,6 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
         @TestMetadata("returnAsLastStatementInLambda.kt")
         public void testReturnAsLastStatementInLambda() {
           runTest("compiler/testData/diagnostics/tests/inference/nothingType/returnAsLastStatementInLambda.kt");
-        }
-      }
-
-      @Nested
-      @TestMetadata("compiler/testData/diagnostics/tests/inference/operators")
-      @TestDataPath("$PROJECT_ROOT")
-      public class Operators {
-        @Test
-        @TestMetadata("elvisWithExpectedTypeComplex.kt")
-        public void testElvisWithExpectedTypeComplex() {
-          runTest("compiler/testData/diagnostics/tests/inference/operators/elvisWithExpectedTypeComplex.kt");
         }
       }
 
@@ -14391,6 +14393,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
         }
 
         @Test
+        @TestMetadata("syntheticPropertyThroughJava.kt")
+        public void testSyntheticPropertyThroughJava() {
+          runTest("compiler/testData/diagnostics/tests/j+k/properties/syntheticPropertyThroughJava.kt");
+        }
+
+        @Test
         @TestMetadata("unitVsVoid.kt")
         public void testUnitVsVoid() {
           runTest("compiler/testData/diagnostics/tests/j+k/properties/unitVsVoid.kt");
@@ -15211,6 +15219,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       @TestMetadata("friendModulePrivate.kt")
       public void testFriendModulePrivate() {
         runTest("compiler/testData/diagnostics/tests/multimodule/friendModulePrivate.kt");
+      }
+
+      @Test
+      @TestMetadata("InaccessibleGenericTypeVariousCases.kt")
+      public void testInaccessibleGenericTypeVariousCases() {
+        runTest("compiler/testData/diagnostics/tests/multimodule/InaccessibleGenericTypeVariousCases.kt");
       }
 
       @Test
@@ -18562,6 +18576,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
       @TestMetadata("kt1489_1728.kt")
       public void testKt1489_1728() {
         runTest("compiler/testData/diagnostics/tests/regressions/kt1489_1728.kt");
+      }
+
+      @Test
+      @TestMetadata("kt1550.kt")
+      public void testKt1550() {
+        runTest("compiler/testData/diagnostics/tests/regressions/kt1550.kt");
       }
 
       @Test
@@ -21931,6 +21951,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
         }
 
         @Test
+        @TestMetadata("classDelegationDeprecated.kt")
+        public void testClassDelegationDeprecated() {
+          runTest("compiler/testData/diagnostics/tests/smartCasts/varnotnull/classDelegationDeprecated.kt");
+        }
+
+        @Test
         @TestMetadata("classDelegationError.kt")
         public void testClassDelegationError() {
           runTest("compiler/testData/diagnostics/tests/smartCasts/varnotnull/classDelegationError.kt");
@@ -22066,6 +22092,18 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
         @TestMetadata("varNull.kt")
         public void testVarNull() {
           runTest("compiler/testData/diagnostics/tests/smartCasts/varnotnull/varNull.kt");
+        }
+
+        @Test
+        @TestMetadata("whileTrueWithBracketSet.kt")
+        public void testWhileTrueWithBracketSet() {
+          runTest("compiler/testData/diagnostics/tests/smartCasts/varnotnull/whileTrueWithBracketSet.kt");
+        }
+
+        @Test
+        @TestMetadata("whileTrueWithBrackets.kt")
+        public void testWhileTrueWithBrackets() {
+          runTest("compiler/testData/diagnostics/tests/smartCasts/varnotnull/whileTrueWithBrackets.kt");
         }
 
         @Test
@@ -22296,6 +22334,17 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
           runTest("compiler/testData/diagnostics/tests/suppress/allWarnings/suppressWarningsOnClass.kt");
         }
       }
+
+      @Nested
+      @TestMetadata("compiler/testData/diagnostics/tests/suppress/oneWarning")
+      @TestDataPath("$PROJECT_ROOT")
+      public class OneWarning {
+        @Test
+        @TestMetadata("onBlockStatementSameLine.kt")
+        public void testOnBlockStatementSameLine() {
+          runTest("compiler/testData/diagnostics/tests/suppress/oneWarning/onBlockStatementSameLine.kt");
+        }
+      }
     }
 
     @Nested
@@ -22404,6 +22453,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
         @TestMetadata("IsNaming.kt")
         public void testIsNaming() {
           runTest("compiler/testData/diagnostics/tests/syntheticExtensions/javaProperties/IsNaming.kt");
+        }
+
+        @Test
+        @TestMetadata("JavaOverridesKotlin.kt")
+        public void testJavaOverridesKotlin() {
+          runTest("compiler/testData/diagnostics/tests/syntheticExtensions/javaProperties/JavaOverridesKotlin.kt");
         }
 
         @Test
@@ -25294,6 +25349,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
         public void testJvmNameOnMangledNames() {
           runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/annotationApplicability/jvmNameOnMangledNames.kt");
         }
+
+        @Test
+        @TestMetadata("onPropertyAnnotation.kt")
+        public void testOnPropertyAnnotation() {
+          runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/annotationApplicability/onPropertyAnnotation.kt");
+        }
       }
 
       @Nested
@@ -25582,6 +25643,12 @@ public class TieredFrontendJvmLightTreeTestGenerated extends AbstractTieredFront
         @TestMetadata("kClassInvariantTP.kt")
         public void testKClassInvariantTP() {
           runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/kClass/kClassInvariantTP.kt");
+        }
+
+        @Test
+        @TestMetadata("kClassOutArrayInAnnotationsOutVariance.kt")
+        public void testKClassOutArrayInAnnotationsOutVariance() {
+          runTest("compiler/testData/diagnostics/testsWithStdLib/annotations/kClass/kClassOutArrayInAnnotationsOutVariance.kt");
         }
       }
 
