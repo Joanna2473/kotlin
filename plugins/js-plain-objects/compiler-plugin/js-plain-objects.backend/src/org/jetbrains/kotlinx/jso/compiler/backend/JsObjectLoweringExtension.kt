@@ -5,7 +5,6 @@
 package org.jetbrains.kotlinx.jspo.compiler.backend
 
 import org.jetbrains.kotlin.backend.common.DeclarationTransformer
-import org.jetbrains.kotlin.backend.common.compilationException
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.builtins.StandardNames
@@ -16,7 +15,6 @@ import org.jetbrains.kotlin.ir.declarations.impl.IrVariableImpl
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.impl.*
 import org.jetbrains.kotlin.ir.symbols.IrTypeParameterSymbol
-import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.symbols.impl.IrVariableSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.defaultType
@@ -36,7 +34,6 @@ private class MoveExternalInlineFunctionsWithBodiesOutsideLowering(private val c
 
     private val jsFunction = context.referenceFunctions(StandardIds.JS_FUNCTION_ID).single()
 
-    @OptIn(UnsafeDuringIrConstructionAPI::class)
     override fun transformFlat(declaration: IrDeclaration): List<IrDeclaration>? {
         val file = declaration.file
         val parent = declaration.parentClassOrNull
@@ -72,9 +69,14 @@ private class MoveExternalInlineFunctionsWithBodiesOutsideLowering(private val c
 
             copyValueParametersFrom(declaration, substitutionMap)
 
-            extensionReceiverParameter = dispatchReceiverParameter.takeIf { !parent.isCompanion }
-            dispatchReceiverParameter = null
+
             returnType = returnType.substitute(substitutionMap)
+
+            if (parent.isCompanion) {
+                parameters = parameters.filter { it.kind != IrParameterKind.DispatchReceiver }
+            } else {
+                dispatchReceiverParameter?.kind = IrParameterKind.ExtensionReceiver
+            }
 
             body = when (declaration.name) {
                 StandardNames.DATA_CLASS_COPY -> generateBodyForCopyFunction()
@@ -189,8 +191,9 @@ private class MoveExternalInlineFunctionsWithBodiesOutsideLowering(private val c
                     jsFunction,
                     0,
                 ).apply {
-                    val objectAssignCall = "Object.assign({}, ${selfName.identifier}, ${createValueParametersObject(declaration.valueParameters)})"
-                    putValueArgument(0, objectAssignCall.toIrConst(context.irBuiltIns.stringType))
+                    val objectAssignCall =
+                        "Object.assign({}, ${selfName.identifier}, ${createValueParametersObject(declaration.parameters.filter { it.kind == IrParameterKind.Regular })})"
+                    arguments[0] = objectAssignCall.toIrConst(context.irBuiltIns.stringType)
                 }
             )
         }

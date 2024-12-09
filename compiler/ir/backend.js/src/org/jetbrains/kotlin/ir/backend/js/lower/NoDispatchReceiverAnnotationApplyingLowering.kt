@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.ir.backend.js.lower
 
 import org.jetbrains.kotlin.backend.common.BodyLoweringPass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.expressions.IrBody
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
@@ -15,14 +16,14 @@ import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 import org.jetbrains.kotlin.name.JsStandardClassIds
 
-object JsNoDispatchReceiverAnnotationApplyingLowering : BodyLoweringPass {
+object NoDispatchReceiverAnnotationApplyingLowering : BodyLoweringPass {
     override fun lower(irBody: IrBody, container: IrDeclaration) {
         irBody.transformChildrenVoid(object : IrElementTransformerVoid() {
             override fun visitCall(expression: IrCall): IrExpression {
                 val callee = expression.symbol.owner
                 if (callee.hasAnnotation(JsStandardClassIds.Annotations.JsNoDispatchReceiver)) {
-                    expression.dispatchReceiver = null
-                    callee.dispatchReceiverParameter = null
+                    expression.removeDispatchReceiver()
+                    callee.parameters = callee.parameters.filter { it.kind != IrParameterKind.DispatchReceiver }
                 }
                 return super.visitCall(expression)
             }

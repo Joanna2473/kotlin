@@ -78,4 +78,6 @@ internal annotation class JsImplicitExport(val couldBeConvertedToExplicitExport:
  * It's used only internally (for now, only in js-plain-object plugin)
  */
 @Target(AnnotationTarget.FUNCTION)
+@PublishedApi
+@Suppress("unused") // used by @JsPlainObject compiler plugin
 internal annotation class JsNoDispatchReceiver
