@@ -5646,8 +5646,14 @@ internal val KT_DIAGNOSTIC_CONVERTER = KaDiagnosticConverterBuilder.buildConvert
             token,
         )
     }
-    add(FirJvmErrors.JMV_EXPOSE_BOXED_REDUNDANT_NAME) { firDiagnostic ->
-        JmvExposeBoxedRedundantNameImpl(
+    add(FirJvmErrors.JVM_EXPOSE_BOXED_REDUNDANT_NAME) { firDiagnostic ->
+        JvmExposeBoxedRedundantNameImpl(
+            firDiagnostic as KtPsiDiagnostic,
+            token,
+        )
+    }
+    add(FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_EXPOSE_SUSPEND) { firDiagnostic ->
+        JvmExposeBoxedCannotExposeSuspendImpl(
             firDiagnostic as KtPsiDiagnostic,
             token,
         )

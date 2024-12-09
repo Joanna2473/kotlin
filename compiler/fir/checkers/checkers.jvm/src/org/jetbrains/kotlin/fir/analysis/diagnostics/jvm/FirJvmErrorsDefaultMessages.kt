@@ -48,12 +48,13 @@ import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JAVA_MODUL
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JAVA_MODULE_DOES_NOT_READ_UNNAMED_MODULE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JAVA_SAM_INTERFACE_CONSTRUCTOR_REFERENCE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JAVA_TYPE_MISMATCH
-import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JMV_EXPOSE_BOXED_REDUNDANT_NAME
+import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_EXPOSE_BOXED_REDUNDANT_NAME
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_DEFAULT_IN_DECLARATION
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_DEFAULT_WITH_COMPATIBILITY_IN_DECLARATION
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_DEFAULT_WITH_COMPATIBILITY_NOT_ON_INTERFACE
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME_AS_JVM_NAME
+import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_EXPOSE_SUSPEND
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_EXPOSE_BOXED_METHOD_MUST_BE_EXPLICIT
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_EXPOSE_BOXED_METHOD_MUST_BE_EXPLICIT_WARNING
 import org.jetbrains.kotlin.fir.analysis.diagnostics.jvm.FirJvmErrors.JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT
@@ -288,8 +289,12 @@ object FirJvmErrorsDefaultMessages : BaseDiagnosticRendererFactory() {
             "'@JvmExposeBoxed' does nothing on this declaration - it is a callable declarations without inline class in its signature."
         )
         map.put(
-            JMV_EXPOSE_BOXED_REDUNDANT_NAME,
+            JVM_EXPOSE_BOXED_REDUNDANT_NAME,
             "Non-exposed declarations cannot be called from Java - redundant name."
+        )
+        map.put(
+            JVM_EXPOSE_BOXED_CANNOT_EXPOSE_SUSPEND,
+            "Suspend functions cannot be exposed by @JvmExposeBoxed."
         )
         map.put(
             JVM_EXPOSE_BOXED_REQUIRES_NAME,

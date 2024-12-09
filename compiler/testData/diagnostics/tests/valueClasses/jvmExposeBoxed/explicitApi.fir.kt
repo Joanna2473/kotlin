@@ -60,3 +60,5 @@ public class Foo
 public class Foo2 /* error */ <!JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT!>(ic: IC)<!>
 
 public class Foo3 /* error */ <!JVM_EXPOSE_BOXED_MUST_BE_EXPLICIT!>(ic: IC)<!>
+
+public suspend fun suspendMe(ic: IC) {}

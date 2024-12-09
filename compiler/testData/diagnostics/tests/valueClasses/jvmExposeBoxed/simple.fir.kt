@@ -76,3 +76,6 @@ inline fun <reified T> inlineMe(ic: IC) {}
 
 <!JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME!>@JvmExposeBoxed("same")<!>
 fun same(): IC = TODO()
+
+<!JVM_EXPOSE_BOXED_CANNOT_EXPOSE_SUSPEND!>@JvmExposeBoxed<!>
+suspend fun suspendMe(ic: IC) {}

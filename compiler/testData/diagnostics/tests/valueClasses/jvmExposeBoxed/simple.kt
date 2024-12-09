@@ -76,3 +76,6 @@ inline fun <reified T> inlineMe(ic: IC) {}
 
 @JvmExposeBoxed("same")
 fun same(): IC = TODO()
+
+@JvmExposeBoxed
+suspend fun suspendMe(ic: IC) {}

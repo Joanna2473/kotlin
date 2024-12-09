@@ -60,7 +60,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
 
         if (name != null) {
             if (!exposed) {
-                reporter.reportOn(name.source, FirJvmErrors.JMV_EXPOSE_BOXED_REDUNDANT_NAME, context)
+                reporter.reportOn(name.source, FirJvmErrors.JVM_EXPOSE_BOXED_REDUNDANT_NAME, context)
             }
 
             if (declaration.isContainer()) {
@@ -87,6 +87,10 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
             if (declaration is FirFunction && declaration.typeParameters.any { it.symbol.isReified }) {
                 reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.USELESS_JVM_EXPOSE_BOXED, context)
             }
+
+            if (declaration is FirFunction && declaration.isSuspend && exposed) {
+                reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_EXPOSE_SUSPEND, context)
+            }
         }
     }
 
@@ -96,6 +100,8 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
         reporter: DiagnosticReporter,
     ) {
         if (declaration !is FirCallableDeclaration) return
+
+        if (declaration.isSuspend) return
 
         if (declaration.isMangled(context.session)) {
             if (context.languageVersionSettings.getFlag(AnalysisFlags.explicitApiMode) == ExplicitApiMode.STRICT) {
@@ -187,7 +193,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
         return false
     }
 
-    /* Just like [isCallableWithInlineClass], but takes into account little quirks like globals, returning inline class. */
+    /* Just like [isMangled], but takes into account little quirks like globals, returning inline class. */
     private fun FirCallableDeclaration.isMangledOrWithResult(session: FirSession): Boolean {
         if (canBeOverloadedByExposed(session)) return true
         val containingClass = containingClassLookupTag()?.toRegularClassSymbol(session)

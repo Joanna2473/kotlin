@@ -60,3 +60,5 @@ public class Foo
 public class Foo2 /* error */ (ic: IC)
 
 public class Foo3 /* error */ (ic: IC)
+
+public suspend fun suspendMe(ic: IC) {}

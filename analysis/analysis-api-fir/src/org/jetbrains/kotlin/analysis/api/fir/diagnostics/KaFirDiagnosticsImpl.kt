@@ -4739,10 +4739,15 @@ internal class UselessJvmExposeBoxedImpl(
     token: KaLifetimeToken,
 ) : KaAbstractFirDiagnostic<PsiElement>(firDiagnostic, token), KaFirDiagnostic.UselessJvmExposeBoxed
 
-internal class JmvExposeBoxedRedundantNameImpl(
+internal class JvmExposeBoxedRedundantNameImpl(
     firDiagnostic: KtPsiDiagnostic,
     token: KaLifetimeToken,
-) : KaAbstractFirDiagnostic<PsiElement>(firDiagnostic, token), KaFirDiagnostic.JmvExposeBoxedRedundantName
+) : KaAbstractFirDiagnostic<PsiElement>(firDiagnostic, token), KaFirDiagnostic.JvmExposeBoxedRedundantName
+
+internal class JvmExposeBoxedCannotExposeSuspendImpl(
+    firDiagnostic: KtPsiDiagnostic,
+    token: KaLifetimeToken,
+) : KaAbstractFirDiagnostic<PsiElement>(firDiagnostic, token), KaFirDiagnostic.JvmExposeBoxedCannotExposeSuspend
 
 internal class JvmExposeBoxedRequiresNameImpl(
     firDiagnostic: KtPsiDiagnostic,

@@ -44,7 +44,8 @@ object JVM_DIAGNOSTICS_LIST : DiagnosticList("FirJvmErrors") {
 
         val INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME by error<PsiElement>()
         val USELESS_JVM_EXPOSE_BOXED by warning<PsiElement>()
-        val JMV_EXPOSE_BOXED_REDUNDANT_NAME by warning<PsiElement>()
+        val JVM_EXPOSE_BOXED_REDUNDANT_NAME by warning<PsiElement>()
+        val JVM_EXPOSE_BOXED_CANNOT_EXPOSE_SUSPEND by warning<PsiElement>()
         val JVM_EXPOSE_BOXED_REQUIRES_NAME by error<PsiElement>()
         val JVM_EXPOSE_BOXED_REQUIRES_NAMED_GETTER by error<PsiElement>()
         val JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME by error<PsiElement>()
