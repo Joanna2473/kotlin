@@ -200,6 +200,8 @@ def shadowJar = tasks.register("shadowJar", ShadowJar) {
     exclude "*trove4j*"
     exclude("META-INF/versions/9/module-info.class")
     configurations = [project.configurations.distPack]
+    // TODO(KT-73777): Make it compatible with CC
+    notCompatibleWithConfigurationCache("Caused by: groovy.lang.MissingPropertyException: archiveFile at upToDateWhen below")
     outputs.upToDateWhen {
         archiveFile.getOrNull()?.asFile?.exists() ?: false
     }
