@@ -27,8 +27,7 @@ import org.jetbrains.kotlin.fir.resolve.calls.getExpectedType
 import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
 import org.jetbrains.kotlin.fir.resolve.transformers.body.resolve.approximateDeclarationType
 import org.jetbrains.kotlin.fir.scopes.getDeclaredConstructors
-import org.jetbrains.kotlin.fir.scopes.impl.originalConstructorIfTypeAlias
-import org.jetbrains.kotlin.fir.scopes.impl.typeAliasForConstructor
+import org.jetbrains.kotlin.fir.scopes.impl.typeAliasConstructorInfo
 import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.*
 import org.jetbrains.kotlin.fir.symbols.lazyResolveToPhase
@@ -181,7 +180,7 @@ class CallAndReferenceGenerator(
                 if (function is FirConstructor) {
                     // The number of type parameters of typealias constructor may mismatch with that number in the original constructor.
                     // And for IR, we need to use the original constructor as a source of truth
-                    function = function.originalConstructorIfTypeAlias ?: function
+                    function = function?.typeAliasConstructorInfo?.originalConstructor ?: function
                 }
                 return if (adapterGenerator.needToGenerateAdaptedCallableReference(callableReferenceAccess, type, function)) {
                     // Receivers are being applied inside
@@ -939,7 +938,7 @@ class CallAndReferenceGenerator(
                     firConstructorSymbol.lazyResolveToPhase(FirResolvePhase.BODY_RESOLVE)
 
                     val fullyExpandedConstructorSymbol = firConstructorSymbol.let {
-                        it.fir.originalConstructorIfTypeAlias?.unwrapUseSiteSubstitutionOverrides()?.symbol ?: it
+                        it.fir.typeAliasConstructorInfo?.originalConstructor?.unwrapUseSiteSubstitutionOverrides()?.symbol ?: it
                     }
                     val irConstructor = declarationStorage.getIrConstructorSymbol(fullyExpandedConstructorSymbol)
 
@@ -1341,7 +1340,8 @@ class CallAndReferenceGenerator(
         // We need to map the type arguments using the expansion of the type alias.
 
         val typeArguments = (callableFir as? FirConstructor)
-            ?.typeAliasForConstructor
+            ?.typeAliasConstructorInfo
+            ?.typeAliasSymbol
             ?.let { originalTypeArguments.toExpandedTypeArguments(it) }
             ?: originalTypeArguments
 

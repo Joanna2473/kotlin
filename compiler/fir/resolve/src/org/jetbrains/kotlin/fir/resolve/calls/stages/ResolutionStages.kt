@@ -25,8 +25,7 @@ import org.jetbrains.kotlin.fir.resolve.inference.model.ConeExplicitTypeParamete
 import org.jetbrains.kotlin.fir.scopes.FirTypeScope
 import org.jetbrains.kotlin.fir.scopes.FirUnstableSmartcastTypeScope
 import org.jetbrains.kotlin.fir.scopes.ProcessorAction
-import org.jetbrains.kotlin.fir.scopes.impl.outerDispatchReceiverTypeIfTypeAliasWithInnerRHS
-import org.jetbrains.kotlin.fir.scopes.impl.typeAliasForConstructor
+import org.jetbrains.kotlin.fir.scopes.impl.typeAliasConstructorInfo
 import org.jetbrains.kotlin.fir.scopes.processOverriddenFunctions
 import org.jetbrains.kotlin.fir.symbols.ConeTypeParameterLookupTag
 import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
@@ -158,7 +157,7 @@ object CheckDispatchReceiver : ResolutionStage() {
 
         val dispatchReceiverValueType = candidate.dispatchReceiver?.expression?.resolvedType ?: return
 
-        (candidate.symbol.fir as? FirConstructor)?.outerDispatchReceiverTypeIfTypeAliasWithInnerRHS?.let {
+        (candidate.symbol.fir as? FirConstructor)?.typeAliasConstructorInfo?.outerDispatchReceiverTypeIfInnerRHS?.let {
             // Dispatch receivers are different because their containing declarations are different
             sink.yieldDiagnostic(InapplicableWrongReceiver(dispatchReceiverValueType, it))
             return
@@ -626,7 +625,7 @@ internal object CheckVisibility : ResolutionStage() {
         if (!visibilityChecker.isVisible(declaration, candidate)) {
             sink.yieldVisibilityError(callInfo)
         } else {
-            (declaration as? FirConstructor)?.typeAliasForConstructor?.let { typeAlias ->
+            (declaration as? FirConstructor)?.typeAliasConstructorInfo?.typeAliasSymbol?.let { typeAlias ->
                 if (!visibilityChecker.isVisible(typeAlias.fir, candidate)) {
                     sink.yieldVisibilityError(callInfo)
                 }
@@ -711,7 +710,7 @@ internal object CheckHiddenDeclaration : ResolutionStage() {
         val symbol = candidate.symbol as? FirCallableSymbol<*> ?: return
 
         if (symbol.isDeprecatedHidden(context, callInfo) ||
-            (symbol is FirConstructorSymbol && symbol.typeAliasForConstructor?.isDeprecatedHidden(context, callInfo) == true) ||
+            (symbol is FirConstructorSymbol && symbol.typeAliasConstructorInfo?.typeAliasSymbol?.isDeprecatedHidden(context, callInfo) == true) ||
             isHiddenForThisCallSite(symbol, callInfo, candidate, context.session, sink)
         ) {
             sink.yieldDiagnostic(HiddenCandidate)
