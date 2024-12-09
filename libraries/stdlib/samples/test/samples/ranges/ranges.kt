@@ -101,5 +101,9 @@ class Ranges {
         assertPrints(singleElementProgression.toList(), "[5]")
         val emptyProgression = 5 downTo 7
         assertPrints(emptyProgression.toList(), "[]")
+
+        for (i in 3 downTo 0) {
+            if (i > 0) println("$i...") else println("Launch!")
+        }
     }
 }
