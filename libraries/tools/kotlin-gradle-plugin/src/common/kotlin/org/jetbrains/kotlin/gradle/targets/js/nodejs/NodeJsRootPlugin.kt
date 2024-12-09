@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
-import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
+import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
 open class NodeJsRootPlugin : Plugin<Project> {
@@ -27,7 +27,7 @@ open class NodeJsRootPlugin : Plugin<Project> {
             rootDirectoryName = JsPlatformDisambiguate.jsPlatform,
             lockFileDirectory = { it.dir(LockCopyTask.KOTLIN_JS_STORE) },
             singleNodeJsPluginApply = { NodeJsPlugin.apply(it) },
-            yarnPlugin = YarnPlugin::class,
+            yarnPlugin = JsYarnPlugin::class,
             platformType = KotlinPlatformType.js,
         ).apply(target)
     }

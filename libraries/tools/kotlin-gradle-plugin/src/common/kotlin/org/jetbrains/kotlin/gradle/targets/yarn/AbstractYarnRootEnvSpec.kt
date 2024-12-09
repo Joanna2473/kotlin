@@ -1,17 +1,18 @@
 /*
- * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.gradle.targets.js.yarn
+package org.jetbrains.kotlin.gradle.targets.yarn
 
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.kotlin.gradle.targets.js.EnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenEnv
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.Platform
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnEnv
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnResolution
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import org.jetbrains.kotlin.gradle.utils.getFile
 
@@ -67,7 +68,7 @@ abstract class AbstractYarnRootEnvSpec : EnvSpec<YarnEnv>() {
 
     final override fun produceEnv(): Provider<YarnEnv> {
         return platform.map { platformValue ->
-            val cleanableStore = CleanableStore[installationDirectory.getFile().path]
+            val cleanableStore = CleanableStore.Companion[installationDirectory.getFile().path]
 
             val isWindows = platformValue.isWindows()
 
