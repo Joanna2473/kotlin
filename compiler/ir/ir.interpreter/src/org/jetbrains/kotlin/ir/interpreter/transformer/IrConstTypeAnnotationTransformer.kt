@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.ir.interpreter.transformer
 
 import org.jetbrains.kotlin.ir.IrElement
+import org.jetbrains.kotlin.ir.declarations.IrOverridableDeclaration
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.visitors.IrTypeVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
@@ -16,6 +17,9 @@ internal class IrConstTypeAnnotationTransformer(context: IrConstEvaluationContex
         element.acceptVoid(
             object : IrTypeVisitorVoid() {
                 override fun visitElement(element: IrElement) {
+                    if (element is IrOverridableDeclaration<*> && element.isFakeOverride) {
+                        return handleAsFakeOverride { element.acceptChildrenVoid(this) }
+                    }
                     element.acceptChildrenVoid(this)
                 }
 
