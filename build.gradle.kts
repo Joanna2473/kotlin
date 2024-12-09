@@ -1185,6 +1185,7 @@ plugins.withType(com.github.gradle.node.NodePlugin::class) {
     }
 }
 
+@Suppress("DEPRECATION")
 afterEvaluate {
     if (kotlinBuildProperties.isCacheRedirectorEnabled) {
         rootProject.plugins.withType(org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin::class.java) {
