@@ -34,7 +34,6 @@ import org.jetbrains.kotlin.fir.symbols.lazyResolveToPhase
 import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.types.builder.buildErrorTypeRef
 import org.jetbrains.kotlin.fir.types.builder.buildResolvedTypeRef
-import org.jetbrains.kotlin.fir.types.builder.buildTypeProjectionWithVariance
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.declarations.UNDEFINED_PARAMETER_INDEX
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -49,7 +48,6 @@ import org.jetbrains.kotlin.ir.util.render
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 import org.jetbrains.kotlin.types.AbstractTypeChecker
-import org.jetbrains.kotlin.types.Variance
 import org.jetbrains.kotlin.util.OperatorNameConventions
 import org.jetbrains.kotlin.utils.addToStdlib.runIf
 
@@ -1338,15 +1336,10 @@ class CallAndReferenceGenerator(
         // However, the type alias can map the type arguments arbitrarily (change order, change count by mapping K,V -> Map<K,V> or by
         // having an unused argument).
         // We need to map the type arguments using the expansion of the type alias.
-
-        val typeArguments = (callableFir as? FirConstructor)
-            ?.typeAliasConstructorInfo
-            ?.typeAliasSymbol
-            ?.let { originalTypeArguments.toExpandedTypeArguments(it) }
-            ?: originalTypeArguments
+        val refinedTypeArguments = refineTypeArguments(callableFir, originalTypeArguments)
 
         return applyTypeArguments(
-            typeArguments,
+            refinedTypeArguments,
             (callableFir as? FirTypeParametersOwner)?.typeParameters
         )
     }
@@ -1355,29 +1348,35 @@ class CallAndReferenceGenerator(
      * Applies the list of type arguments to the given type alias, expands it fully and returns the list of type arguments for the
      * resulting type.
      */
-    private fun List<FirTypeProjection>.toExpandedTypeArguments(typeAliasSymbol: FirTypeAliasSymbol): List<FirTypeProjection> {
-        return typeAliasSymbol
-            .constructType(map { it.toConeTypeProjection() }.toTypedArray())
-            .fullyExpandedType(session)
-            .typeArguments
-            .map { typeProjection ->
-                buildTypeProjectionWithVariance {
-                    variance = when (typeProjection) {
-                        is ConeKotlinTypeProjectionIn -> Variance.IN_VARIANCE
-                        is ConeKotlinTypeProjectionOut -> Variance.OUT_VARIANCE
-                        else -> Variance.INVARIANT
+    private fun refineTypeArguments(
+        callableFir: FirCallableDeclaration?,
+        originalTypeArguments: List<FirTypeProjection>
+    ): List<FirTypeRef> {
+        val typeAliasConstructorInfo = (callableFir as? FirConstructor)?.typeAliasConstructorInfo
+            ?: return originalTypeArguments.map { (it as FirTypeProjectionWithVariance).typeRef }
+        val typeAliasSymbol = typeAliasConstructorInfo.typeAliasSymbol
+        val constructedType = typeAliasSymbol.constructType(originalTypeArguments.map { it.toConeTypeProjection() }.toTypedArray())
+        val parametersSubstitutor = typeAliasSymbol.fir.createParametersSubstitutor(constructedType, session)
+
+        return buildList {
+            for ((index, typeArgument) in typeAliasSymbol.resolvedExpandedTypeRef.coneType.typeArguments.withIndex()) {
+                val typeProjection = parametersSubstitutor.substituteArgument(typeArgument, index) ?: typeArgument
+                val typeRef = if (typeProjection is ConeKotlinType) {
+                    buildResolvedTypeRef {
+                        coneType = typeProjection
                     }
-                    typeRef = (typeProjection as? ConeKotlinType)?.let {
-                        buildResolvedTypeRef { coneType = it }
-                    } ?: buildErrorTypeRef {
+                } else {
+                    buildErrorTypeRef {
                         diagnostic = ConeSimpleDiagnostic("Expansion contains unexpected type ${typeProjection.javaClass}")
                     }
                 }
+                add(typeRef)
             }
+        }
     }
 
     private fun IrExpression.applyTypeArguments(
-        typeArguments: List<FirTypeProjection>?,
+        typeArguments: List<FirTypeRef>?,
         typeParameters: List<FirTypeParameter>?,
     ): IrExpression {
         if (this !is IrMemberAccessExpression<*>) return this
@@ -1386,16 +1385,15 @@ class CallAndReferenceGenerator(
         if (argumentsCount <= typeArgumentsCount) {
             for ((index, argument) in typeArguments.withIndex()) {
                 val typeParameter = typeParameters?.get(index)
-                val argumentFirType = (argument as FirTypeProjectionWithVariance).typeRef
                 val argumentIrType = if (typeParameter?.isReified == true) {
-                    argumentFirType.approximateDeclarationType(
+                    argument.approximateDeclarationType(
                         session,
                         containingCallableVisibility = null,
                         isLocal = false,
                         stripEnhancedNullability = false
                     ).toIrType()
                 } else {
-                    argumentFirType.toIrType()
+                    argument.toIrType()
                 }
                 putTypeArgument(index, argumentIrType)
             }
