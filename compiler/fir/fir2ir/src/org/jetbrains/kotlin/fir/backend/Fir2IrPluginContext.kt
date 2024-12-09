@@ -41,6 +41,7 @@ class Fir2IrPluginContext(
     override val irBuiltIns: IrBuiltIns,
     @property:ObsoleteDescriptorBasedAPI override val moduleDescriptor: ModuleDescriptor,
     @property:ObsoleteDescriptorBasedAPI override val symbolTable: ReferenceSymbolTable,
+    override val messageCollector: MessageCollector,
     diagnosticReporter: DiagnosticReporter,
 ) : IrPluginContext {
     companion object {
@@ -128,11 +129,12 @@ class Fir2IrPluginContext(
         return callables.mapNotNull { c.declarationStorage.irExtractor(it) }.filterIsInstance<R>()
     }
 
+    @Deprecated("Use messageCollector or diagnosticReporter properties instead", level = DeprecationLevel.ERROR)
     override fun createDiagnosticReporter(pluginId: String): MessageCollector {
         error(ERROR_MESSAGE)
     }
 
-    override val irDiagnosticReporter: IrDiagnosticReporter =
+    override val diagnosticReporter: IrDiagnosticReporter =
         KtDiagnosticReporterWithImplicitIrBasedContext(diagnosticReporter, languageVersionSettings)
 
     @FirIncompatiblePluginAPI

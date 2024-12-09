@@ -47,7 +47,7 @@ open class IrPluginContextImpl constructor(
     override val typeTranslator: TypeTranslator,
     override val irBuiltIns: IrBuiltIns,
     val linker: IrDeserializer,
-    private val messageCollector: MessageCollector,
+    override val messageCollector: MessageCollector,
     diagnosticReporter: DiagnosticReporter = DiagnosticReporterFactory.createReporter(messageCollector),
     override val symbols: BuiltinSymbolsBase = BuiltinSymbolsBase(irBuiltIns)
 ) : IrPluginContext {
@@ -90,6 +90,7 @@ open class IrPluginContextImpl constructor(
         return symbol
     }
 
+    @Deprecated("Use messageCollector or diagnosticReporter properties instead", level = DeprecationLevel.ERROR)
     override fun createDiagnosticReporter(pluginId: String): MessageCollector {
         return object : MessageCollector by messageCollector {
             override fun report(
@@ -102,7 +103,7 @@ open class IrPluginContextImpl constructor(
         }
     }
 
-    override val irDiagnosticReporter: IrDiagnosticReporter =
+    override val diagnosticReporter: IrDiagnosticReporter =
         KtDiagnosticReporterWithImplicitIrBasedContext(diagnosticReporter, languageVersionSettings)
 
     private fun <S : IrSymbol> resolveSymbolCollection(fqName: FqName, referencer: (MemberScope) -> Collection<S>): Collection<S> {

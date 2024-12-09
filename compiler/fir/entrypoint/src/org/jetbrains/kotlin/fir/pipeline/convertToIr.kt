@@ -209,7 +209,8 @@ private class Fir2IrPipeline(
         val expectActualMap = irActualizer?.actualizeCallablesAndMergeModules() ?: IrExpectActualMap()
 
         val pluginContext = Fir2IrPluginContext(
-            componentsStorage, irBuiltIns, componentsStorage.moduleDescriptor, symbolTable, fir2IrConfiguration.diagnosticReporter
+            componentsStorage, irBuiltIns, componentsStorage.moduleDescriptor, symbolTable,
+            fir2IrConfiguration.messageCollector, fir2IrConfiguration.diagnosticReporter
         )
         if (fir2IrConfiguration.diagnosticReporter.hasErrors) {
             irActualizer?.runChecksAndFinalize(expectActualMap)
