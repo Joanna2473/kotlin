@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.fir.declarations.FirDeclarationOrigin
 import org.jetbrains.kotlin.fir.declarations.FirRegularClass
 import org.jetbrains.kotlin.fir.declarations.getSingleMatchedExpectForActualOrNull
 import org.jetbrains.kotlin.fir.declarations.utils.isExpect
+import org.jetbrains.kotlin.fir.declarations.utils.isExternal
 import org.jetbrains.kotlin.fir.declarations.utils.superConeTypes
 import org.jetbrains.kotlin.fir.scopes.processAllFunctions
 import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
@@ -81,6 +82,7 @@ sealed class FirMultipleDefaultsInheritedFromSupertypesChecker(mppKind: MppCheck
             val k1WouldMiss = overriddenFunctionsK1WouldConsider.count { it.valueParameterSymbols[index].hasDefaultValue } <= 1
 
             when {
+                declaration.isExternal -> return
                 !isExplicitOverride -> {
                     reportDiagnosticForImplicitOverride(
                         k1WouldMiss, declaration.source, function.name, parameter, basesWithDefaultValues, context, reporter

@@ -11,6 +11,7 @@ import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.fir.*
 import org.jetbrains.kotlin.fir.analysis.checkers.getContainingClassSymbol
+import org.jetbrains.kotlin.fir.builder.FirAnnotationContainerBuilder
 import org.jetbrains.kotlin.fir.declarations.FirResolvePhase
 import org.jetbrains.kotlin.fir.declarations.FirSimpleFunction
 import org.jetbrains.kotlin.fir.declarations.builder.buildRegularClass
@@ -40,9 +41,11 @@ import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.types.builder.buildResolvedTypeRef
 import org.jetbrains.kotlin.fir.types.impl.ConeTypeParameterTypeImpl
 import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.JsStandardClassIds
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
+import org.jetbrains.kotlin.types.ConstantValueKind
 import org.jetbrains.kotlin.util.OperatorNameConventions
 import org.jetbrains.kotlin.utils.addToStdlib.runIf
 import org.jetbrains.kotlinx.jspo.compiler.fir.services.ClassProperty
@@ -275,14 +278,7 @@ class JsPlainObjectsFunctionsGenerator(session: FirSession) : FirDeclarationGene
                 if (parent.isCompanion) parent.defaultType() else replacedJsPlainObjectType.coneType as ConeSimpleKotlinType
 
             if (parent.isCompanion) {
-                annotations += buildAnnotation {
-                    annotationTypeRef = buildResolvedTypeRef {
-                        val annotationClassId = JsStandardClassIds.Annotations.JsNoDispatchReceiver
-                        coneType = annotationClassId.toLookupTag()
-                            .constructClassType(typeArguments = ConeTypeProjection.EMPTY_ARRAY, isMarkedNullable = false)
-                    }
-                    argumentMapping = FirEmptyAnnotationArgumentMapping
-                }
+                annotateWith(JsStandardClassIds.Annotations.JsNoDispatchReceiver)
             }
 
             jsPlainObjectProperties.mapTo(valueParameters) {
@@ -304,5 +300,15 @@ class JsPlainObjectsFunctionsGenerator(session: FirSession) : FirDeclarationGene
                 }
             }
         }.also(functionTarget::bind)
+    }
+
+    private fun FirAnnotationContainerBuilder.annotateWith(classId: ClassId) {
+        annotations += buildAnnotation {
+            annotationTypeRef = buildResolvedTypeRef {
+                coneType = classId.toLookupTag()
+                    .constructClassType(typeArguments = ConeTypeProjection.EMPTY_ARRAY, isMarkedNullable = false)
+            }
+            argumentMapping = FirEmptyAnnotationArgumentMapping
+        }
     }
 }
