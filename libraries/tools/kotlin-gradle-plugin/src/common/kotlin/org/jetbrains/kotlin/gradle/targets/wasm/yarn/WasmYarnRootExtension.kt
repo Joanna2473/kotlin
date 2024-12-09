@@ -9,7 +9,7 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmPlatformDisambiguate
-import org.jetbrains.kotlin.gradle.targets.js.yarn.AbstractYarnRootExtension
+import org.jetbrains.kotlin.gradle.targets.yarn.AbstractYarnRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin
 
 open class WasmYarnRootExtension(

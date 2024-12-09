@@ -5,6 +5,8 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
+import org.jetbrains.kotlin.gradle.targets.yarn.AbstractYarnRootEnvSpec
+
 /**
  * Spec for Yarn - package manager to install NPM dependencies
  */

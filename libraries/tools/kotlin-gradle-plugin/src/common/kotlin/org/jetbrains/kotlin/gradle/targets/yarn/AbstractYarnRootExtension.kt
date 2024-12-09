@@ -1,9 +1,9 @@
 /*
- * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.gradle.targets.js.yarn
+package org.jetbrains.kotlin.gradle.targets.yarn
 
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -13,11 +13,21 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.targets.js.AbstractSettings
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.*
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnv
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NpmApiExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.Platform
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
-import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin.Companion.RESTORE_YARN_LOCK_NAME
-import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin.Companion.STORE_YARN_LOCK_NAME
+import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin
+import org.jetbrains.kotlin.gradle.targets.js.yarn.Yarn
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnEnv
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnEnvironment
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockCopyTask
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockStoreTask
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnResolution
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnSetupTask
+import org.jetbrains.kotlin.gradle.targets.js.yarn.asYarnEnvironment
 import org.jetbrains.kotlin.gradle.utils.property
 import java.io.File
 
@@ -43,7 +53,7 @@ open class AbstractYarnRootExtension(
     }
 
     override val additionalInstallOutput: FileCollection = project.objects.fileCollection().from(
-        nodeJsRoot.rootPackageDirectory.map { it.file(LockCopyTask.YARN_LOCK) }
+        nodeJsRoot.rootPackageDirectory.map { it.file(LockCopyTask.Companion.YARN_LOCK) }
     )
 
     override val preInstallTasks: ListProperty<TaskProvider<*>> = project.objects.listProperty(TaskProvider::class.java)
@@ -66,8 +76,8 @@ open class AbstractYarnRootExtension(
     override val downloadProperty: org.gradle.api.provider.Property<Boolean> = project.objects.property<Boolean>()
         .convention(true)
 
-    var lockFileName by Property(LockCopyTask.YARN_LOCK)
-    var lockFileDirectory: File by Property(project.rootDir.resolve(LockCopyTask.KOTLIN_JS_STORE))
+    var lockFileName by Property(LockCopyTask.Companion.YARN_LOCK)
+    var lockFileDirectory: File by Property(project.rootDir.resolve(LockCopyTask.Companion.KOTLIN_JS_STORE))
 
     var ignoreScripts by Property(true)
 
@@ -80,7 +90,7 @@ open class AbstractYarnRootExtension(
     val yarnSetupTaskProvider: TaskProvider<YarnSetupTask>
         get() = project.tasks
             .withType(YarnSetupTask::class.java)
-            .named(nodeJsRoot.extensionName(YarnSetupTask.NAME))
+            .named(nodeJsRoot.extensionName(YarnSetupTask.Companion.NAME))
 
     internal val platform: org.gradle.api.provider.Property<Platform> = project.objects.property(Platform::class.java)
 
@@ -107,9 +117,9 @@ open class AbstractYarnRootExtension(
 
     val restoreYarnLockTaskProvider: TaskProvider<YarnLockCopyTask>
         get() = project.tasks.withType(YarnLockCopyTask::class.java)
-            .named(nodeJsRoot.extensionName(RESTORE_YARN_LOCK_NAME))
+            .named(nodeJsRoot.extensionName(JsYarnPlugin.Companion.RESTORE_YARN_LOCK_NAME))
 
     val storeYarnLockTaskProvider: TaskProvider<YarnLockStoreTask>
         get() = project.tasks.withType(YarnLockStoreTask::class.java)
-            .named(nodeJsRoot.extensionName(STORE_YARN_LOCK_NAME))
+            .named(nodeJsRoot.extensionName(JsYarnPlugin.Companion.STORE_YARN_LOCK_NAME))
 }

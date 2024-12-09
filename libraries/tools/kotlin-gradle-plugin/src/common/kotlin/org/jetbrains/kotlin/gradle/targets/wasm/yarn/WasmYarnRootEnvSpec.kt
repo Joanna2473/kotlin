@@ -7,7 +7,7 @@ package org.jetbrains.kotlin.gradle.targets.wasm.yarn
 
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmPlatformDisambiguate
-import org.jetbrains.kotlin.gradle.targets.js.yarn.AbstractYarnRootEnvSpec
+import org.jetbrains.kotlin.gradle.targets.yarn.AbstractYarnRootEnvSpec
 
 /**
  * Spec for Yarn - package manager to install NPM dependencies

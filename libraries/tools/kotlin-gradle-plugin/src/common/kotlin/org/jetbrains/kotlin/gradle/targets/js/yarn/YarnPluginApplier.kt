@@ -18,6 +18,8 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin.Companion.RESTORE_YARN_LOCK_NAME
 import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin.Companion.STORE_YARN_LOCK_NAME
 import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin.Companion.UPGRADE_YARN_LOCK
+import org.jetbrains.kotlin.gradle.targets.yarn.AbstractYarnRootEnvSpec
+import org.jetbrains.kotlin.gradle.targets.yarn.AbstractYarnRootExtension
 import org.jetbrains.kotlin.gradle.tasks.CleanDataTask
 import org.jetbrains.kotlin.gradle.tasks.registerTask
 import org.jetbrains.kotlin.gradle.utils.detachedResolvable
