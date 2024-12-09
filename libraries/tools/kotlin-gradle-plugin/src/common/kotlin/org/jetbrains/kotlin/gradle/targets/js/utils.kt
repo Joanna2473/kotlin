@@ -87,12 +87,12 @@ internal fun writeWasmUnitTestRunner(workingDir: File, compiledFile: File): File
 internal fun <T> KotlinJsIrCompilation.targetVariant(
     jsVariant: T,
     wasmVariant: T,
-): T = (target as KotlinJsIrTarget).targetVariant(jsVariant, wasmVariant)
+): T = target.targetVariant(jsVariant, wasmVariant)
 
 internal fun <T> KotlinJsIrCompilation.targetVariant(
     jsVariant: () -> T,
     wasmVariant: () -> T,
-): T = (target as KotlinJsIrTarget).targetVariant(jsVariant, wasmVariant)
+): T = target.targetVariant(jsVariant, wasmVariant)
 
 internal fun <T> KotlinJsIrTarget.targetVariant(
     jsVariant: () -> T,
