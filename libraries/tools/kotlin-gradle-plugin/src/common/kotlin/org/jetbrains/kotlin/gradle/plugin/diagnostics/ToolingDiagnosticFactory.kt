@@ -17,7 +17,7 @@ abstract class ToolingDiagnosticFactory(
     protected fun build(
         name: String,
         message: String,
-        solution: String? = null,
+        solutions: List<String> = emptyList(),
         documentation: ToolingDiagnostic.Documentation? = null,
         severity: ToolingDiagnostic.Severity? = null,
         throwable: Throwable? = null,
@@ -39,7 +39,7 @@ abstract class ToolingDiagnosticFactory(
             identifier = ToolingDiagnostic.ID(id, name),
             message = message,
             severity = severity ?: predefinedSeverity!!,
-            solution = solution,
+            solutions = solutions,
             documentation = documentation,
             throwable = throwable
         )
@@ -50,22 +50,23 @@ abstract class ToolingDiagnosticFactory(
         throwable: Throwable? = null,
         builder: ToolingDiagnosticBuilder.() -> Unit,
     ) = ToolingDiagnosticBuilder().apply(builder).let {
-        build(it.name, it.message, it.solution, it.documentation, severity, throwable)
+        build(it.name, it.message, it.solutions, it.documentation, severity, throwable)
     }
 
     protected fun String.onlyIf(condition: Boolean) = if (condition) this else ""
 }
 
+@Suppress("unused")
 internal class ToolingDiagnosticBuilder {
 
     val name: String get() = _name ?: error("Name is not provided")
     val message: String get() = _message ?: error("Message is not provided")
-    val solution: String? get() = _solution
+    val solutions: List<String> get() = _solutions.toList()
     val documentation: ToolingDiagnostic.Documentation? get() = _documentation
 
     private var _name: String? = null
     private var _message: String? = null
-    private var _solution: String? = null
+    private var _solutions: MutableList<String> = mutableListOf()
     private var _documentation: ToolingDiagnostic.Documentation? = null
 
     fun name(string: () -> String) {
@@ -76,8 +77,27 @@ internal class ToolingDiagnosticBuilder {
         _message = string()
     }
 
-    fun solution(string: () -> String) {
-        _solution = string()
+    private fun checkSolutionIsSingleLine(text: String) {
+        check(text.lines().size == 1) {
+            """
+                Solution should not be multi-line:
+                $text
+            """.trimIndent()
+        }
+    }
+
+    fun solution(singleString: () -> String) {
+        singleString().takeIf { it.isNotBlank() }?.let {
+            checkSolutionIsSingleLine(it)
+            _solutions.add(it)
+        }
+    }
+
+    fun solutions(stringList: () -> List<String>) {
+        stringList().filter { it.isNotBlank() }.let { strings ->
+            strings.forEach(::checkSolutionIsSingleLine)
+            _solutions.addAll(strings)
+        }
     }
 
     fun documentation(url: String, urlBuilder: (String) -> String = { "See $url for more details." }) {

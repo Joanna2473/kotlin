@@ -22,7 +22,7 @@ data class ToolingDiagnostic(
     val identifier: ID,
     val message: String,
     val severity: Severity,
-    val solution: String? = null,
+    val solutions: List<String> = emptyList(),
     val documentation: Documentation? = null,
     val throwable: Throwable? = null,
 ) {
@@ -90,10 +90,7 @@ data class ToolingDiagnostic(
     override fun toString() = buildString {
         append("[$id | $severity]")
 
-        val subLines = listOfNotNull(
-            solution,
-            documentation?.urlWithHint
-        ).filter { it.isNotBlank() }
+        val subLines = solutions + listOfNotNull(documentation?.urlWithHint)
 
         if (subLines.isEmpty()) {
             append(" $message")
@@ -101,7 +98,7 @@ data class ToolingDiagnostic(
             appendLine(" $message")
         }
 
-        appendSubLines(subLines)
+        appendSubLines(subLines.filter { it.isNotBlank() })
     }
 }
 
