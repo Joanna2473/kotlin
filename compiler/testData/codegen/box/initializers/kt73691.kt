@@ -27,8 +27,6 @@ class A() {
 }
 
 // FILE: main.kt
-import kotlin.test.*
-
 fun box(): String {
     if (A().test() != 42) return "fail 1"
     if (test() != 42) return "fail 2"
