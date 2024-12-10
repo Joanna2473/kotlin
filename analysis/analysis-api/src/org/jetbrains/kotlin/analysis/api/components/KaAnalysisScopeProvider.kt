@@ -14,14 +14,14 @@ public interface KaAnalysisScopeProvider : KaSessionComponent {
     /**
      * A [GlobalSearchScope] which spans the files that can be analyzed by the current [KaSession].
      *
-     * [KaSymbol]s can only be built for declarations which are in the analysis scope.
+     * For example, [KaSymbol]s can only be built for declarations which are in the analysis scope.
      */
     public val analysisScope: GlobalSearchScope
 
     /**
      * Checks whether the [PsiElement] is inside the [analysisScope].
      *
-     * A [KaSymbol] can only be built for this [PsiElement] if it can be analyzed.
+     * For example, a [KaSymbol] can only be built for this [PsiElement] if it can be analyzed.
      */
     public fun PsiElement.canBeAnalysed(): Boolean
 }
