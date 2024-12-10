@@ -72,7 +72,7 @@ fun deserializeClassToSymbol(
         isCompanion = kind == ProtoBuf.Class.Kind.COMPANION_OBJECT
         isInner = Flags.IS_INNER.get(flags)
         isData = Flags.IS_DATA.get(classProto.flags)
-        isInline = Flags.IS_VALUE_CLASS.get(classProto.flags)
+        isValue = Flags.IS_VALUE_CLASS.get(classProto.flags)
         isExternal = Flags.IS_EXTERNAL_CLASS.get(classProto.flags)
         isFun = Flags.IS_FUN_INTERFACE.get(classProto.flags)
     }
