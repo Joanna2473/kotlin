@@ -56,7 +56,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
     ) {
         val name = jvmExposeBoxedAnnotation.findArgumentByName(JvmStandardClassIds.Annotations.ParameterNames.jvmExposeBoxedName)
         val exposedParam = jvmExposeBoxedAnnotation.findArgumentByName(JvmStandardClassIds.Annotations.ParameterNames.jvmExposeBoxedExpose)
-        val exposed = (exposedParam as? FirLiteralExpression)?.value as? Boolean != false
+        val exposed = exposedParam?.evaluateAs<FirLiteralExpression>(context.session)?.value as? Boolean != false
 
         if (name != null) {
             if (!exposed) {
@@ -67,7 +67,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
                 reporter.reportOn(name.source, FirJvmErrors.INAPPLICABLE_JVM_EXPOSE_BOXED_WITH_NAME, context)
             }
 
-            val value = (name as? FirLiteralExpression)?.value as? String
+            val value = name.evaluateAs<FirLiteralExpression>(context.session)?.value as? String
             if (value != null && !Name.isValidIdentifier(value)) {
                 reporter.reportOn(name.source, FirJvmErrors.ILLEGAL_JVM_NAME, context)
             }
@@ -81,7 +81,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
             }
 
             if (!declaration.canBeOverloadedByExposed(context.session)) {
-                checkJvmNameHasDifferentName(name, declaration, reporter, jvmExposeBoxedAnnotation, context)
+                checkJvmNameHasDifferentName(name, declaration, reporter, context)
             }
 
             if (declaration is FirFunction && declaration.typeParameters.any { it.symbol.isReified }) {
@@ -164,11 +164,10 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
         name: FirExpression?,
         declaration: FirDeclaration,
         reporter: DiagnosticReporter,
-        jvmExposeBoxedAnnotation: FirAnnotation,
         context: CheckerContext,
     ) {
         if (name != null) {
-            val value = (name as? FirLiteralExpression)?.value as? String
+            val value = name.evaluateAs<FirLiteralExpression>(context.session)?.value as? String
 
             if (value != null && value == declaration.findJvmNameValue()) {
                 reporter.reportOn(
@@ -179,7 +178,7 @@ object FirJvmExposeBoxedChecker : FirBasicDeclarationChecker(MppCheckerKind.Comm
             }
 
             if (declaration is FirFunction && declaration.nameOrSpecialName.asString() == value) {
-                reporter.reportOn(jvmExposeBoxedAnnotation.source, FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME, context)
+                reporter.reportOn(name.source, FirJvmErrors.JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME, context)
             }
         }
     }

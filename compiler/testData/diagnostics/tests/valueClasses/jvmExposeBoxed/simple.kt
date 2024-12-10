@@ -79,3 +79,6 @@ fun same(): IC = TODO()
 
 @JvmExposeBoxed
 suspend fun suspendMe(ic: IC) {}
+
+@JvmExposeBoxed("foo" + "bar")
+fun foobar(): IC = TODO()

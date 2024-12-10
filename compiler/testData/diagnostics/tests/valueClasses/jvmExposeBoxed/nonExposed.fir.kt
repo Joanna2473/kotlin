@@ -80,8 +80,11 @@ fun todo(ic: IC) {}
 <!USELESS_JVM_EXPOSE_BOXED!>@JvmExposeBoxed(expose = false)<!>
 inline fun <reified T> inlineMe(ic: IC) {}
 
-<!JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME!>@JvmExposeBoxed(<!JVM_EXPOSE_BOXED_REDUNDANT_NAME!>"same"<!>, expose = false)<!>
+@JvmExposeBoxed(<!JVM_EXPOSE_BOXED_CANNOT_BE_THE_SAME, JVM_EXPOSE_BOXED_REDUNDANT_NAME!>"same"<!>, expose = false)
 fun same(): IC = TODO()
 
 @JvmExposeBoxed(expose = false)
 suspend fun suspendMe(ic: IC) {}
+
+@JvmExposeBoxed(<!JVM_EXPOSE_BOXED_REDUNDANT_NAME!>"foo" + "bar"<!>, expose = false)
+fun foobar1(): IC = TODO()
