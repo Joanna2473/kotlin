@@ -23,17 +23,7 @@ import org.jetbrains.kotlin.gradle.targets.yarn.CommonYarnPlugin
 open class YarnPlugin : CommonYarnPlugin {
 
     override fun apply(target: Project) {
-        YarnPluginApplier(
-            platformDisambiguate = JsPlatformDisambiguate,
-            yarnRootKlass = JsYarnRootExtension::class,
-            yarnRootName = JsYarnRootExtension.YARN,
-            yarnEnvSpecKlass = JsYarnRootEnvSpec::class,
-            yarnEnvSpecName = JsYarnRootEnvSpec.YARN,
-            nodeJsRootApply = { NodeJsRootPlugin.apply(it) },
-            nodeJsRootExtension = { it.kotlinNodeJsRootExtension },
-            nodeJsEnvSpec = { it.kotlinNodeJsEnvSpec },
-            lockFileDirectory = { it.resolve(LockCopyTask.KOTLIN_JS_STORE) },
-        ).apply(target)
+        target.plugins.apply(JsYarnPlugin::class.java)
     }
 
     companion object {
