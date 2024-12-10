@@ -111,7 +111,7 @@ object IrTree : AbstractTreeBuilder() {
         +field("attributeOwnerId", rootElement, isChild = false) {
             deepCopyExcludeFromApply = true
             kDoc = """
-                original element before copying. Always satisfies the following
+                Original element before copying. Always satisfies the following
                 invariant: `this.attributeOwnerId == this.attributeOwnerId.attributeOwnerId`.
             """.trimIndent()
         }
