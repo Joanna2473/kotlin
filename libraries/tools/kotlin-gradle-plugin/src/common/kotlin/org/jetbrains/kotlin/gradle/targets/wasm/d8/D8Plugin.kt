@@ -1,9 +1,9 @@
 /*
- * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.gradle.targets.js.d8
+package org.jetbrains.kotlin.gradle.targets.wasm.d8
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -12,7 +12,6 @@ import org.gradle.api.plugins.ExtensionContainer
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.InternalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
-import org.jetbrains.kotlin.gradle.targets.js.d8.D8RootExtension.Companion.EXTENSION_NAME
 import org.jetbrains.kotlin.gradle.tasks.CleanDataTask
 import org.jetbrains.kotlin.gradle.tasks.registerTask
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
@@ -20,7 +19,7 @@ import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAwar
 @OptIn(ExperimentalWasmDsl::class)
 open class D8Plugin : Plugin<Project> {
     override fun apply(project: Project) {
-        MultiplePluginDeclarationDetector.detect(project)
+        MultiplePluginDeclarationDetector.Companion.detect(project)
 
         project.plugins.apply(BasePlugin::class.java)
 
@@ -28,7 +27,7 @@ open class D8Plugin : Plugin<Project> {
 
         if (project == project.rootProject) {
             project.extensions.create(
-                EXTENSION_NAME,
+                D8RootExtension.Companion.EXTENSION_NAME,
                 D8RootExtension::class.java,
                 project,
                 spec
@@ -48,7 +47,7 @@ open class D8Plugin : Plugin<Project> {
             }
         }
 
-        project.registerTask<CleanDataTask>("d8" + CleanDataTask.NAME_SUFFIX) {
+        project.registerTask<CleanDataTask>("d8" + CleanDataTask.Companion.NAME_SUFFIX) {
             it.cleanableStoreProvider = spec.env.map { it.cleanableStore }
             it.group = TASKS_GROUP_NAME
             it.description = "Clean unused local d8 version"
@@ -79,7 +78,7 @@ open class D8Plugin : Plugin<Project> {
         @InternalKotlinGradlePluginApi
         fun apply(project: Project): D8RootExtension {
             project.plugins.apply(D8Plugin::class.java)
-            return project.extensions.getByName(EXTENSION_NAME) as D8RootExtension
+            return project.extensions.getByName(D8RootExtension.Companion.EXTENSION_NAME) as D8RootExtension
         }
 
         internal fun applyWithEnvSpec(project: Project): D8EnvSpec {
@@ -89,11 +88,11 @@ open class D8Plugin : Plugin<Project> {
 
         private fun applyRootProject(project: Project): D8RootExtension {
             project.rootProject.plugins.apply(D8Plugin::class.java)
-            return project.rootProject.extensions.getByName(EXTENSION_NAME) as D8RootExtension
+            return project.rootProject.extensions.getByName(D8RootExtension.Companion.EXTENSION_NAME) as D8RootExtension
         }
 
         @InternalKotlinGradlePluginApi
         val Project.kotlinD8RootExtension: D8RootExtension
-            get() = extensions.getByName(EXTENSION_NAME).castIsolatedKotlinPluginClassLoaderAware()
+            get() = extensions.getByName(D8RootExtension.Companion.EXTENSION_NAME).castIsolatedKotlinPluginClassLoaderAware()
     }
 }
