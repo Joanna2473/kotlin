@@ -44,13 +44,11 @@ internal class KPropertyState(
 
     private fun createAccessorState(callInterceptor: CallInterceptor, accessor: IrSimpleFunction): KFunctionState {
         val irClass = callInterceptor.irBuiltIns.kFunctionN(accessor.parameters.size)
-        val boundParameters = (accessor.parameters zip boundValues)
-            .mapNotNull { (param, value) -> value?.let { param.symbol to value } }
         return KFunctionState(
             accessor,
             irClass,
             callInterceptor.environment,
-            boundParameters,
+            boundValues,
         )
     }
 

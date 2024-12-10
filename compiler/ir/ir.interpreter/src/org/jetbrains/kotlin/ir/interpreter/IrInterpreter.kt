@@ -16,7 +16,6 @@ import org.jetbrains.kotlin.ir.interpreter.exceptions.*
 import org.jetbrains.kotlin.ir.interpreter.proxy.CommonProxy.Companion.asProxy
 import org.jetbrains.kotlin.ir.interpreter.proxy.Proxy
 import org.jetbrains.kotlin.ir.interpreter.stack.CallStack
-import org.jetbrains.kotlin.ir.interpreter.stack.Field
 import org.jetbrains.kotlin.ir.interpreter.state.*
 import org.jetbrains.kotlin.ir.interpreter.state.reflection.KClassState
 import org.jetbrains.kotlin.ir.interpreter.state.reflection.KFunctionState
@@ -492,9 +491,9 @@ class IrInterpreter(internal val environment: IrInterpreterEnvironment, internal
                         val functionClass = invokeFunction.getLastOverridden().parentAsClass
 
                         // receiver will be stored as up value
-                        val dispatchReceiver = invokeFunction.dispatchReceiverParameter!!.symbol to state
+                        val boundValues = listOf(state)
                         val newInvoke = invokeFunction.deepCopyWithSymbols(samClass).apply { dispatchReceiverParameter = null }
-                        KFunctionState(newInvoke, functionClass, environment, listOf(dispatchReceiver)).apply {
+                        KFunctionState(newInvoke, functionClass, environment, boundValues).apply {
                             this.funInterface = typeOperand
                         }
                     }
@@ -595,13 +594,11 @@ class IrInterpreter(internal val environment: IrInterpreterEnvironment, internal
 
     private fun interpretFunctionReference(reference: IrFunctionReference) {
         val irFunction = reference.symbol.owner
-        val boundParameters = irFunction.parameters.mapNotNull { param ->
-            reference.arguments[param]?.let { param.symbol to callStack.popState() }
-        }
+        val boundValues = reference.arguments.mapNotNull { it?.let { callStack.popState() } }
         val function = KFunctionState(
             reference,
             environment,
-            boundParameters
+            boundValues
         )
         if (irFunction.isLocal) callStack.storeUpValues(function)
         callStack.pushState(function)

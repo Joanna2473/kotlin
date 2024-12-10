@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.ir.interpreter.proxy.reflection.KTypeParameterProxy
 import org.jetbrains.kotlin.ir.interpreter.proxy.reflection.KTypeProxy
 import org.jetbrains.kotlin.ir.interpreter.stack.Field
 import org.jetbrains.kotlin.ir.interpreter.stack.Variable
+import org.jetbrains.kotlin.ir.interpreter.state.State
 import org.jetbrains.kotlin.ir.interpreter.state.StateWithClosure
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
@@ -36,12 +37,16 @@ internal class KFunctionState(
     val irFunction: IrFunction,
     override val irClass: IrClass,
     environment: IrInterpreterEnvironment,
-    boundParameters: List<Field> = emptyList(),
+    /**
+     * Non-null values in [boundValues] are always passed as arguments to [irFunction].
+     * Other arguments have to be provided at call-site when invoking [invokeSymbol].
+     */
+    boundValues: List<State?> = emptyList(),
 ) : ReflectionState(), StateWithClosure {
     constructor(
         functionReference: IrFunctionReference,
         environment: IrInterpreterEnvironment,
-        boundParameters: List<Field>,
+        boundParameters: List<State?>,
     ) : this(
         functionReference.symbol.owner,
         functionReference.type.classOrNull!!.owner,
@@ -53,14 +58,16 @@ internal class KFunctionState(
     val invokeSymbol: IrFunctionSymbol
 
     init {
-        for ((symbol, state) in boundParameters) {
-            setField(symbol, state)
+        val boundParameters = mutableSetOf<IrValueParameter>()
+        for ((param, value) in (irFunction.parameters zip boundValues)) {
+            if (value != null) {
+                boundParameters += param
+                setField(param.symbol, value)
+                // bound parameters are used in comparison of two functions in KFunctionProxy
+                upValues += param.symbol to Variable(value)
+            }
         }
 
-        // bound parameters are used in comparison of two functions in KFunctionProxy
-        upValues += fields.map { it.key to Variable(it.value) }
-
-        val boundParameters = irFunction.parameters.filter { getField(it.symbol) != null }.toSet()
         invokeSymbol = environment.getCachedFunction(irFunction.symbol, boundParameters) ?: environment.setCachedFunction(
             irFunction.symbol, boundParameters,
             newFunction = createInvokeFunction(irFunction, irClass, boundParameters).symbol
