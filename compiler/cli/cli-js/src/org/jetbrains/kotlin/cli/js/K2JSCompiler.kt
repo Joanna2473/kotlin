@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.cli.js.klib.*
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.plugins.PluginCliParser
 import org.jetbrains.kotlin.cli.pipeline.js.CommonWebConfigurationUpdater
+import org.jetbrains.kotlin.cli.pipeline.js.JsCliPipeline
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.Services
@@ -53,6 +54,14 @@ class K2JSCompiler : CLICompiler<K2JSCompilerArguments>() {
 
     override fun createArguments(): K2JSCompilerArguments {
         return K2JSCompilerArguments()
+    }
+
+    override fun doExecutePhased(
+        arguments: K2JSCompilerArguments,
+        services: Services,
+        basicMessageCollector: MessageCollector,
+    ): ExitCode? {
+        return JsCliPipeline.execute(arguments, services, basicMessageCollector)
     }
 
     override fun doExecute(

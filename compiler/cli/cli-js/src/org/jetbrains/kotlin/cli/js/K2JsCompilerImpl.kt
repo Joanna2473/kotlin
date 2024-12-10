@@ -6,17 +6,15 @@
 package org.jetbrains.kotlin.cli.js
 
 import com.intellij.openapi.Disposable
-import org.jetbrains.kotlin.backend.common.CompilationException
 import org.jetbrains.kotlin.backend.js.JsGenerationGranularity
 import org.jetbrains.kotlin.cli.common.*
 import org.jetbrains.kotlin.cli.common.ExitCode.*
 import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.INFO
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.cli.pipeline.js.JsBackendPipelinePhase
 import org.jetbrains.kotlin.cli.pipeline.js.JsConfigurationUpdater
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.phaseConfig
@@ -184,33 +182,17 @@ internal class K2JsCompilerImpl(
         targetConfiguration: CompilerConfiguration,
         moduleKind: ModuleKind?
     ): ExitCode {
-
-        val moduleKind = moduleKind ?: return INTERNAL_ERROR
-
-        val beforeIc2Js = System.currentTimeMillis()
-
-        val jsArtifacts = icCaches.artifacts.filterIsInstance<JsModuleArtifact>()
-        val jsExecutableProducer = JsExecutableProducer(
-            mainModuleName = moduleName,
-            moduleKind = moduleKind,
-            sourceMapsInfo = SourceMapsInfo.from(targetConfiguration),
-            caches = jsArtifacts,
-            relativeRequirePath = true
+        JsBackendPipelinePhase.compileWithIC(
+            icCaches,
+            configuration,
+            moduleKind ?: return INTERNAL_ERROR,
+            moduleName,
+            outputDir,
+            outputName,
+            arguments.granularity,
+            arguments.dtsStrategy
         )
-        val (outputs, rebuiltModules) = jsExecutableProducer.buildExecutable(arguments.granularity, outJsProgram = false)
-        outputs.writeAll(outputDir, outputName, arguments.dtsStrategy, moduleName, moduleKind)
-
         performanceManager?.notifyIRTranslationFinished()
-
-        messageCollector.report(INFO, "Executable production duration (IC): ${System.currentTimeMillis() - beforeIc2Js}ms")
-        for ((event, duration) in jsExecutableProducer.getStopwatchLaps()) {
-            messageCollector.report(INFO, "  $event: ${(duration / 1e6).toInt()}ms")
-        }
-
-        for (module in rebuiltModules) {
-            messageCollector.report(INFO, "IC module builder rebuilt JS for module [${File(module).name}]")
-        }
-
         return OK
     }
 
@@ -222,38 +204,20 @@ internal class K2JsCompilerImpl(
 
         val moduleKind = moduleKind ?: return INTERNAL_ERROR
 
-        if (arguments.irDceDumpReachabilityInfoToFile != null) {
-            messageCollector.report(STRONG_WARNING, "Dumping the reachability info to file is not supported for Kotlin/Js.")
-        }
-        if (arguments.irDceDumpDeclarationIrSizesToFile != null) {
-            messageCollector.report(STRONG_WARNING, "Dumping the size of declarations to file is not supported for Kotlin/Js.")
-        }
+        JsConfigurationUpdater.checkWasmArgumentsUsage(arguments, messageCollector)
 
         configuration.phaseConfig = createPhaseConfig(getJsPhases(configuration), arguments, messageCollector)
+        val ir2JsTransformer = Ir2JsTransformer(arguments, module, messageCollector, mainCallArguments)
+        val outputs = JsBackendPipelinePhase.compileWithoutIC(
+            messageCollector,
+            ir2JsTransformer,
+            moduleKind,
+            moduleName,
+            outputDir,
+            outputName,
+            arguments.dtsStrategy
+        )
 
-        val start = System.currentTimeMillis()
-
-        try {
-            val ir2JsTransformer = Ir2JsTransformer(arguments, module, messageCollector, mainCallArguments)
-            val outputs = ir2JsTransformer.compileAndTransformIrNew()
-
-            messageCollector.report(INFO, "Executable production duration: ${System.currentTimeMillis() - start}ms")
-
-            outputs.writeAll(outputDir, outputName, arguments.dtsStrategy, moduleName, moduleKind)
-        } catch (e: CompilationException) {
-            messageCollector.report(
-                ERROR,
-                e.stackTraceToString(),
-                CompilerMessageLocation.create(
-                    path = e.path,
-                    line = e.line,
-                    column = e.column,
-                    lineContent = e.content
-                )
-            )
-            return INTERNAL_ERROR
-        }
-
-        return OK
+        return if (outputs != null) OK else INTERNAL_ERROR
     }
 }

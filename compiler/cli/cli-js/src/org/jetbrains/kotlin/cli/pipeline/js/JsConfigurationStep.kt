@@ -7,33 +7,42 @@ package org.jetbrains.kotlin.cli.pipeline.js
 
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.text.StringUtil
-import org.jetbrains.kotlin.cli.common.allowKotlinPackage
+import org.jetbrains.kotlin.backend.wasm.getWasmPhases
+import org.jetbrains.kotlin.cli.common.*
 import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
-import org.jetbrains.kotlin.cli.common.arguments.K2JsArgumentConstants
+import org.jetbrains.kotlin.cli.common.arguments.cliArgument
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
-import org.jetbrains.kotlin.cli.common.incrementalCompilationIsEnabledForJs
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.ERROR
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.WARNING
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.common.renderDiagnosticInternalName
-import org.jetbrains.kotlin.cli.common.setupCommonKlibArguments
 import org.jetbrains.kotlin.cli.js.*
-import org.jetbrains.kotlin.cli.pipeline.ArgumentsPipelineArtifact
-import org.jetbrains.kotlin.cli.pipeline.ConfigurationUpdater
-import org.jetbrains.kotlin.cli.pipeline.SuccessfulPipelineExecutionException
+import org.jetbrains.kotlin.cli.pipeline.*
 import org.jetbrains.kotlin.config.*
 import org.jetbrains.kotlin.incremental.components.ExpectActualTracker
 import org.jetbrains.kotlin.incremental.components.LookupTracker
 import org.jetbrains.kotlin.incremental.js.IncrementalDataProvider
 import org.jetbrains.kotlin.incremental.js.IncrementalNextRoundChecker
 import org.jetbrains.kotlin.incremental.js.IncrementalResultsConsumer
+import org.jetbrains.kotlin.ir.backend.js.JsPreSerializationLoweringPhasesProvider
+import org.jetbrains.kotlin.ir.backend.js.getJsPhases
 import org.jetbrains.kotlin.ir.linkage.partial.setupPartialLinkageConfig
 import org.jetbrains.kotlin.js.config.*
+import org.jetbrains.kotlin.library.metadata.KlibMetadataVersion
+import org.jetbrains.kotlin.metadata.deserialization.BinaryVersion
 import org.jetbrains.kotlin.platform.wasm.WasmTarget
 import org.jetbrains.kotlin.serialization.js.ModuleKind
 import org.jetbrains.kotlin.wasm.config.WasmConfigurationKeys
 import java.io.File
 import java.io.IOException
+
+object JsConfigurationPhase : AbstractConfigurationPhase<K2JSCompilerArguments>(
+    name = "JsConfigurationPhase",
+    postActions = setOf(CheckCompilationErrors.CheckMessageCollector),
+    configurationUpdaters = listOf(CommonWebConfigurationUpdater, JsConfigurationUpdater, WasmConfigurationUpdater)
+) {
+    override fun createMetadataVersion(versionArray: IntArray): BinaryVersion {
+        return KlibMetadataVersion(*versionArray)
+    }
+}
 
 /**
  * Contains configuration updating logic shared between JS and WASM CLIs
@@ -46,7 +55,20 @@ object CommonWebConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArgument
         val (arguments, services, rootDisposable, _, _) = input
         setupPlatformSpecificArgumentsAndServices(configuration, arguments, services)
         initializeCommonConfiguration(configuration, arguments)
-        checkOutputArguments(arguments, configuration.messageCollector)
+
+        val messageCollector = configuration.messageCollector
+        when (val outputName = arguments.moduleName) {
+            null -> messageCollector.report(ERROR, "IR: Specify output name via ${K2JSCompilerArguments::moduleName.cliArgument}", null)
+            else -> configuration.outputName = outputName
+        }
+        when (val outputDir = arguments.outputDir) {
+            null -> messageCollector.report(ERROR, "IR: Specify output dir via ${K2JSCompilerArguments::outputDir.cliArgument}", null)
+            else -> try {
+                configuration.outputDir = File(outputDir).canonicalFile
+            } catch (_: IOException) {
+                messageCollector.report(ERROR, "Could not resolve output directory", location = null)
+            }
+        }
 
         configuration.wasmCompilation = arguments.wasm
         arguments.includes?.let { configuration.includes = it }
@@ -54,18 +76,33 @@ object CommonWebConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArgument
         configuration.produceKlibDir = arguments.irProduceKlibDir
         configuration.granularity = arguments.granularity
         configuration.tsCompilationStrategy = arguments.dtsStrategy
-        configuration.callMain = arguments.main != K2JsArgumentConstants.NO_CALL
+        arguments.main?.let { configuration.callMainMode = it }
 
         val zipAccessor = DisposableZipFileSystemAccessor(64)
         Disposer.register(rootDisposable, zipAccessor)
         configuration.zipFileSystemAccessor = zipAccessor
-
-//        TODO: move to facade
-//        if (arguments.verbose) {
-//            reportCompiledSourcesList(messageCollector, sourcesFiles)
-//        }
-
         configuration.perModuleOutputName = arguments.irPerModuleOutputName
+        configuration.icCacheDirectory = arguments.cacheDirectory
+        configuration.icCacheReadOnly = arguments.icCacheReadonly
+        configuration.preserveIcOrder = arguments.preserveIcOrder
+
+        // setup phase config for the first compilation stage (KLib compilation)
+        if (arguments.includes == null) {
+            configuration.phaseConfig = createPhaseConfig(
+                JsPreSerializationLoweringPhasesProvider.lowerings(configuration),
+                arguments,
+                configuration.messageCollector,
+            )
+        }
+
+        if (arguments.includes == null && arguments.irProduceJs) {
+            configuration.messageCollector.report(
+                ERROR,
+                "It's not possible to produce KLib (`${K2JSCompilerArguments::includes.cliArgument} = null`) "
+                        + "and compile resulting JS binary (`${K2JSCompilerArguments::irProduceJs.cliArgument}`) at the same time "
+                        + "with K2 compiler"
+            )
+        }
     }
 
     /**
@@ -229,16 +266,6 @@ object CommonWebConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArgument
         configuration.allowKotlinPackage = arguments.allowKotlinPackage
         configuration.renderDiagnosticInternalName = arguments.renderInternalDiagnosticNames
     }
-
-    private fun checkOutputArguments(arguments: K2JSCompilerArguments, messageCollector: MessageCollector) {
-        if (arguments.outputDir == null) {
-            messageCollector.report(ERROR, "IR: Specify output dir via -ir-output-dir", location = null)
-        }
-
-        if (arguments.moduleName == null) {
-            messageCollector.report(ERROR, "IR: Specify output name via -ir-output-name", location = null)
-        }
-    }
 }
 
 object JsConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArguments>() {
@@ -246,7 +273,15 @@ object JsConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArguments>() {
         input: ArgumentsPipelineArtifact<K2JSCompilerArguments>,
         configuration: CompilerConfiguration,
     ) {
-        fillConfiguration(configuration, input.arguments)
+        if (configuration.wasmCompilation) return
+        val arguments = input.arguments
+        fillConfiguration(configuration, arguments)
+        checkWasmArgumentsUsage(arguments, configuration.messageCollector)
+
+        // setup phase config for the second compilation stage (JS codegen)
+        if (arguments.includes != null) {
+            configuration.phaseConfig = createPhaseConfig(getJsPhases(configuration), arguments, configuration.messageCollector)
+        }
     }
 
     /**
@@ -274,12 +309,6 @@ object JsConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArguments>() {
 
         arguments.platformArgumentsProviderJsExpression?.let {
             configuration.definePlatformMainFunctionArguments = it
-        }
-
-        try {
-            configuration.outputDir = File(arguments.outputDir!!).canonicalFile
-        } catch (_: IOException) {
-            messageCollector.report(ERROR, "Could not resolve output directory", location = null)
         }
     }
 
@@ -311,6 +340,15 @@ object JsConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArguments>() {
         }
         return targetVersion
     }
+
+    internal fun checkWasmArgumentsUsage(arguments: K2JSCompilerArguments, messageCollector: MessageCollector) {
+        if (arguments.irDceDumpReachabilityInfoToFile != null) {
+            messageCollector.report(STRONG_WARNING, "Dumping the reachability info to file is not supported for Kotlin/Js.")
+        }
+        if (arguments.irDceDumpDeclarationIrSizesToFile != null) {
+            messageCollector.report(STRONG_WARNING, "Dumping the size of declarations to file is not supported for Kotlin/Js.")
+        }
+    }
 }
 
 object WasmConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArguments>() {
@@ -318,7 +356,18 @@ object WasmConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArguments>() 
         input: ArgumentsPipelineArtifact<K2JSCompilerArguments>,
         configuration: CompilerConfiguration,
     ) {
-        fillConfiguration(configuration, input.arguments)
+        if (!configuration.wasmCompilation) return
+        val arguments = input.arguments
+        fillConfiguration(configuration, arguments)
+
+        // setup phase config for the second compilation stage (Wasm codegen)
+        if (arguments.includes != null) {
+            configuration.phaseConfig = createPhaseConfig(
+                getWasmPhases(configuration, isIncremental = false),
+                arguments,
+                configuration.messageCollector
+            )
+        }
     }
 
     /**
@@ -327,11 +376,13 @@ object WasmConfigurationUpdater : ConfigurationUpdater<K2JSCompilerArguments>() 
      */
     fun fillConfiguration(configuration: CompilerConfiguration, arguments: K2JSCompilerArguments) {
         configuration.put(WasmConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, arguments.wasmEnableArrayRangeChecks)
+        configuration.put(WasmConfigurationKeys.WASM_DEBUG, arguments.wasmDebug)
         configuration.put(WasmConfigurationKeys.WASM_ENABLE_ASSERTS, arguments.wasmEnableAsserts)
         configuration.put(WasmConfigurationKeys.WASM_GENERATE_WAT, arguments.wasmGenerateWat)
         configuration.put(WasmConfigurationKeys.WASM_USE_TRAPS_INSTEAD_OF_EXCEPTIONS, arguments.wasmUseTrapsInsteadOfExceptions)
         configuration.put(WasmConfigurationKeys.WASM_USE_NEW_EXCEPTION_PROPOSAL, arguments.wasmUseNewExceptionProposal)
         configuration.put(WasmConfigurationKeys.WASM_USE_JS_TAG, arguments.wasmUseJsTag ?: arguments.wasmUseNewExceptionProposal)
         configuration.putIfNotNull(WasmConfigurationKeys.WASM_TARGET, arguments.wasmTarget?.let(WasmTarget::fromName))
+        configuration.putIfNotNull(WasmConfigurationKeys.DCE_DUMP_DECLARATION_IR_SIZES_TO_FILE, arguments.irDceDumpDeclarationIrSizesToFile)
     }
 }

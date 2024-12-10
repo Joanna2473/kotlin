@@ -203,7 +203,7 @@ fun compileModulesToAnalyzedFirWithLightTree(
 fun transformFirToIr(
     moduleStructure: ModulesStructure,
     firOutputs: List<ModuleCompilerAnalyzedOutput>,
-    diagnosticsReporter: PendingDiagnosticsCollectorWithSuppress,
+    diagnosticsReporter: BaseDiagnosticsCollector,
 ): Fir2IrActualizedResult {
     val fir2IrExtensions = Fir2IrExtensions.Default
 

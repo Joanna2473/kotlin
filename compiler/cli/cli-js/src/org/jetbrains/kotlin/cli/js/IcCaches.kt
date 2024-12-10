@@ -5,6 +5,7 @@
 
 package org.jetbrains.kotlin.cli.js
 
+import org.jetbrains.kotlin.backend.js.JsGenerationGranularity
 import org.jetbrains.kotlin.backend.wasm.ic.WasmICContext
 import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.INFO
@@ -20,9 +21,48 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
 
+data class IcCachesConfigurationData(
+    val wasmCompilation: Boolean,
+    val wasmDebug: Boolean,
+    val preserveIcOrder: Boolean,
+    val granularity: JsGenerationGranularity,
+    val includes: String
+)
+
 internal fun prepareIcCaches(
     cacheDirectory: String,
     arguments: K2JSCompilerArguments,
+    messageCollector: MessageCollector,
+    outputDir: File,
+    libraries: List<String>,
+    friendLibraries: List<String>,
+    targetConfiguration: CompilerConfiguration,
+    mainCallArguments: List<String>?,
+    icCacheReadOnly: Boolean,
+): IcCachesArtifacts {
+    val data = IcCachesConfigurationData(
+        wasmCompilation = arguments.wasm,
+        arguments.wasmDebug,
+        arguments.preserveIcOrder,
+        arguments.granularity,
+        arguments.includes!!
+    )
+    return prepareIcCaches(
+        cacheDirectory,
+        data,
+        messageCollector,
+        outputDir,
+        libraries,
+        friendLibraries,
+        targetConfiguration,
+        mainCallArguments,
+        icCacheReadOnly
+    )
+}
+
+internal fun prepareIcCaches(
+    cacheDirectory: String,
+    data: IcCachesConfigurationData,
     messageCollector: MessageCollector,
     outputDir: File,
     libraries: List<String>,
@@ -40,27 +80,27 @@ internal fun prepareIcCaches(
 
     val start = System.currentTimeMillis()
 
-    val icContext = if (arguments.wasm) {
+    val icContext = if (data.wasmCompilation) {
         WasmICContext(
             allowIncompleteImplementations = false,
-            skipLocalNames = !arguments.wasmDebug,
-            safeFragmentTags = arguments.preserveIcOrder
+            skipLocalNames = !data.wasmDebug,
+            safeFragmentTags = data.preserveIcOrder
         )
     } else {
         JsICContext(
             mainCallArguments,
-            arguments.granularity,
+            data.granularity,
         )
     }
 
     val cacheUpdater = CacheUpdater(
-        mainModule = arguments.includes!!,
+        mainModule = data.includes,
         allModules = libraries,
         mainModuleFriends = friendLibraries,
         cacheDir = cacheDirectory,
         compilerConfiguration = targetConfiguration,
         icContext = icContext,
-        checkForClassStructuralChanges = arguments.wasm,
+        checkForClassStructuralChanges = data.wasmCompilation,
         commitIncrementalCache = !icCacheReadOnly,
     )
 
