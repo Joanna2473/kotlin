@@ -5,6 +5,8 @@
 
 package org.jetbrains.kotlin.analysis.low.level.api.fir.lazy.resolve
 
+import org.jetbrains.kotlin.analysis.api.KaIdeApi
+import org.jetbrains.kotlin.analysis.api.platform.resolution.KotlinResolutionHelperService
 import org.jetbrains.kotlin.analysis.low.level.api.fir.LLFirModuleResolveComponents
 import org.jetbrains.kotlin.analysis.low.level.api.fir.api.targets.LLFirResolveTarget
 import org.jetbrains.kotlin.analysis.low.level.api.fir.projectStructure.llFirModuleData
@@ -122,18 +124,26 @@ internal class LLFirModuleLazyDeclarationResolver(val moduleComponents: LLFirMod
         }
     }
 
+    @OptIn(KaIdeApi::class)
     private fun lazyResolveTargets(target: LLFirResolveTarget, toPhase: FirResolvePhase) {
         var currentPhase = getMinResolvePhase(target).coerceAtLeast(FirResolvePhase.IMPORTS)
         if (currentPhase >= toPhase) return
 
-        while (currentPhase < toPhase) {
-            currentPhase = currentPhase.next
-            checkCanceled()
+        val helper = KotlinResolutionHelperService.getInstance(moduleComponents.module.project)
+        try {
+            helper?.enterBlockWithCompilerContractChecks()
 
-            LLFirLazyResolverRunner.runLazyResolverByPhase(
-                phase = currentPhase,
-                target = target,
-            )
+            while (currentPhase < toPhase) {
+                currentPhase = currentPhase.next
+                checkCanceled()
+
+                LLFirLazyResolverRunner.runLazyResolverByPhase(
+                    phase = currentPhase,
+                    target = target,
+                )
+            }
+        } finally {
+            helper?.exitBlockWithCompilerContractChecks()
         }
     }
 
