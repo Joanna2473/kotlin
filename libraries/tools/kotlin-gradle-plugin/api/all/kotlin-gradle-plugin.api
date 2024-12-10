@@ -4006,7 +4006,7 @@ public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsExec$Comp
 	public static synthetic fun register$default (Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsExec$Companion;Lorg/jetbrains/kotlin/gradle/targets/js/ir/KotlinJsIrCompilation;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/gradle/api/tasks/TaskProvider;
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsPlugin : org/gradle/api/Plugin {
+public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsPlugin : org/jetbrains/kotlin/gradle/targets/web/nodejs/CommonNodeJsPlugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsPlugin$Companion;
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
@@ -4029,7 +4029,7 @@ public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension :
 public final class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension$Companion {
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootPlugin : org/gradle/api/Plugin {
+public class org/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootPlugin : org/jetbrains/kotlin/gradle/targets/web/nodejs/CommonNodeJsRootPlugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootPlugin$Companion;
 	public static final field TASKS_GROUP_NAME Ljava/lang/String;
 	public fun <init> ()V
@@ -4571,7 +4571,7 @@ public final class org/jetbrains/kotlin/gradle/targets/js/npm/NpmRangeVisitor : 
 public final class org/jetbrains/kotlin/gradle/targets/js/npm/NpmRangeVisitor$Companion {
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/npm/NpmResolverPlugin : org/gradle/api/Plugin {
+public class org/jetbrains/kotlin/gradle/targets/js/npm/NpmResolverPlugin : org/jetbrains/kotlin/gradle/targets/web/npm/CommonNpmResolverPlugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/npm/NpmResolverPlugin$Companion;
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
@@ -6598,7 +6598,7 @@ public final class org/jetbrains/kotlin/gradle/targets/wasm/npm/WasmNpmExtension
 	public fun getPlatformDisambiguate ()Ljava/lang/String;
 }
 
-public final class org/jetbrains/kotlin/gradle/targets/wasm/npm/WasmNpmResolverPlugin : org/gradle/api/Plugin {
+public final class org/jetbrains/kotlin/gradle/targets/wasm/npm/WasmNpmResolverPlugin : org/jetbrains/kotlin/gradle/targets/web/npm/CommonNpmResolverPlugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/wasm/npm/WasmNpmResolverPlugin$Companion;
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
@@ -6694,6 +6694,9 @@ public abstract interface class org/jetbrains/kotlin/gradle/targets/web/nodejs/C
 }
 
 public abstract interface class org/jetbrains/kotlin/gradle/targets/web/nodejs/CommonNodeJsRootPlugin : org/gradle/api/Plugin {
+}
+
+public abstract interface class org/jetbrains/kotlin/gradle/targets/web/npm/CommonNpmResolverPlugin : org/gradle/api/Plugin {
 }
 
 public abstract class org/jetbrains/kotlin/gradle/targets/web/yarn/AbstractYarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/js/EnvSpec {
