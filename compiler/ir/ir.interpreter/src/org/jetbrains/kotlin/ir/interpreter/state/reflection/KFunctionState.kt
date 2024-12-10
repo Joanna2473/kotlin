@@ -50,7 +50,6 @@ internal class KFunctionState(
     )
 
     override val upValues: MutableMap<IrSymbol, Variable> = mutableMapOf()
-    val unboundParameters: List<IrValueParameter>
     val invokeSymbol: IrFunctionSymbol
 
     init {
@@ -61,9 +60,7 @@ internal class KFunctionState(
         // bound parameters are used in comparison of two functions in KFunctionProxy
         upValues += fields.map { it.key to Variable(it.value) }
 
-        val (boundParams, notBoundParams) = irFunction.parameters.partition { getField(it.symbol) != null }
-        unboundParameters = notBoundParams
-        val boundParameters = boundParams.toSet()
+        val boundParameters = irFunction.parameters.filter { getField(it.symbol) != null }.toSet()
         invokeSymbol = environment.getCachedFunction(irFunction.symbol, boundParameters) ?: environment.setCachedFunction(
             irFunction.symbol, boundParameters,
             newFunction = createInvokeFunction(irFunction, irClass, boundParameters).symbol
@@ -75,7 +72,8 @@ internal class KFunctionState(
             field = value ?: return
             val samFunction = value.classOrNull!!.owner.getSingleAbstractMethod()
             if (samFunction.parameters.any { it.kind == IrParameterKind.ExtensionReceiver }) {
-                // this change of parameter is needed because of difference in `invoke` and sam calls
+                // this change of parameter is needed because of difference in `invoke` and sam calls.
+                // TODO: probably needs adjustment to support context parameters.
                 invokeSymbol.owner.parameters
                     .first { it.kind == IrParameterKind.Regular}
                     .kind = IrParameterKind.ExtensionReceiver
@@ -150,6 +148,7 @@ internal class KFunctionState(
     fun getParameters(callInterceptor: CallInterceptor): List<KParameter> {
         if (_parameters != null) return _parameters!!
         val kParameterIrClass = callInterceptor.environment.kParameterClass.owner
+        val unboundParameters = irFunction.parameters.filter { getField(it.symbol) == null }
         _parameters = unboundParameters.map { param ->
             val kind = when (param.kind) {
                 IrParameterKind.DispatchReceiver -> KParameter.Kind.INSTANCE

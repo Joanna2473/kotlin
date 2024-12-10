@@ -6,12 +6,10 @@
 package org.jetbrains.kotlin.ir.interpreter.state.reflection
 
 import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrPropertyReference
 import org.jetbrains.kotlin.ir.interpreter.CallInterceptor
-import org.jetbrains.kotlin.ir.interpreter.proxy.reflection.KParameterProxy
 import org.jetbrains.kotlin.ir.interpreter.proxy.reflection.KTypeProxy
 import org.jetbrains.kotlin.ir.interpreter.state.State
 import org.jetbrains.kotlin.ir.types.classOrNull
@@ -22,7 +20,11 @@ internal class KPropertyState(
     callInterceptor: CallInterceptor,
     val property: IrProperty,
     override val irClass: IrClass,
-    val boundValues: List<State?>,
+    /**
+     * Non-null values in [boundValues] are always passed as arguments to both getter and setter.
+     * Other arguments (including `value`, in case of setter) have to be provided at call-site when invoking the accessor.
+     */
+    private val boundValues: List<State?> = emptyList(),
 ) : ReflectionState() {
     constructor(
         callInterceptor: CallInterceptor,
@@ -37,10 +39,10 @@ internal class KPropertyState(
 
     private var _returnType: KType? = null
 
-    val getterState = property.getter?.let { crateAccessorState(callInterceptor, it) }
-    val setterState = property.setter?.let { crateAccessorState(callInterceptor, it) }
+    val getterState = property.getter?.let { createAccessorState(callInterceptor, it) }
+    val setterState = property.setter?.let { createAccessorState(callInterceptor, it) }
 
-    private fun crateAccessorState(callInterceptor: CallInterceptor, accessor: IrSimpleFunction): KFunctionState {
+    private fun createAccessorState(callInterceptor: CallInterceptor, accessor: IrSimpleFunction): KFunctionState {
         val irClass = callInterceptor.irBuiltIns.kFunctionN(accessor.parameters.size)
         val boundParameters = (accessor.parameters zip boundValues)
             .mapNotNull { (param, value) -> value?.let { param.symbol to value } }

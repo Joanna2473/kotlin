@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.ir.interpreter.CallInterceptor
 import org.jetbrains.kotlin.ir.interpreter.internalName
 import org.jetbrains.kotlin.ir.interpreter.proxy.reflection.*
 import org.jetbrains.kotlin.ir.types.classOrNull
-import org.jetbrains.kotlin.ir.util.nonDispatchParameters
 import kotlin.reflect.KCallable
 import kotlin.reflect.KFunction
 import kotlin.reflect.KType
@@ -37,7 +36,7 @@ internal class KClassState(val classReference: IrClass, override val irClass: Ir
                     is IrProperty -> {
                         val parameterCount = member.getter!!.parameters.size
                         val irClass = callInterceptor.irBuiltIns.getKPropertyClass(member.isVar, parameterCount).owner
-                        val propertyState = KPropertyState(callInterceptor, member, irClass, emptyList())
+                        val propertyState = KPropertyState(callInterceptor, member, irClass)
                         when (parameterCount) {
                             0 -> error("\"Static\" properties are not supported")
                             1 -> if (member.isVar) KMutableProperty1Proxy(propertyState, callInterceptor)

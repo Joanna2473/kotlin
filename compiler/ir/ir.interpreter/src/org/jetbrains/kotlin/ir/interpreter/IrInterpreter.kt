@@ -609,10 +609,8 @@ class IrInterpreter(internal val environment: IrInterpreterEnvironment, internal
 
     private fun interpretPropertyReference(propertyReference: IrPropertyReference) {
         val getter = propertyReference.getter?.owner
-        val boundParameters = getter?.parameters?.map { param ->
-            propertyReference.arguments[param.indexInParameters]?.let { callStack.popState() }
-        } ?: emptyList()
-        val propertyState = KPropertyState(callInterceptor, propertyReference, boundParameters)
+        val boundValues = propertyReference.arguments.mapNotNull { it?.let { callStack.popState() } }
+        val propertyState = KPropertyState(callInterceptor, propertyReference, boundValues)
 
         fun List<IrTypeParameter>.addToFields() {
             propertyReference.typeArguments.indices.forEach { index ->
