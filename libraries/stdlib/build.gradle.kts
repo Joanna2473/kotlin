@@ -421,7 +421,11 @@ kotlin {
                 val unimplementedNativeBuiltIns =
                     (file(jvmBuiltinsDir).list()!!.toSortedSet() - file("$jsDir/builtins/").list()!!)
                         .map { "$jvmBuiltinsRelativeDir/$it" }
-                        .filterNot { it == "$jvmBuiltinsRelativeDir/Atomics.jvm.kt" || it == "$jvmBuiltinsRelativeDir/AtomicArrays.jvm.kt" }
+                        // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73740),
+                        // builtins from kotlin.concurrent package are kept till Atomic API is completely moved to kotlin.concurrent.atomics
+                        // and built with the new bootstrap compiler which provides builtins from the new package.
+                        .filterNot { it == "$jvmBuiltinsRelativeDir/Atomics.jvm.kt" || it == "$jvmBuiltinsRelativeDir/AtomicArrays.jvm.kt" ||
+                                     it == "$jvmBuiltinsRelativeDir/Atomics.kt" || it == "$jvmBuiltinsRelativeDir/AtomicArrays.kt" }
 
                 val sources = unimplementedNativeBuiltIns
 
@@ -485,7 +489,11 @@ kotlin {
                 val sources = unimplementedNativeBuiltIns
 
                 val excluded = listOf(
+                    // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73740),
+                    // builtins from kotlin.concurrent package are kept till Atomic API is completely moved to kotlin.concurrent.atomics
+                    // and built with the new bootstrap compiler which provides builtins from the new package.
                     "Atomics.jvm.kt", "AtomicArrays.jvm.kt",
+                    "Atomics.kt", "AtomicArrays.kt",
                     // Included with K/N collections
                     "Collections.kt", "Iterator.kt"
                 )
