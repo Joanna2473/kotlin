@@ -9,20 +9,17 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsEnvSpec
 
-@Deprecated(
-    "Use JsNodeJsEnvSpec instead",
-    ReplaceWith(
-        "JsNodeJsEnvSpec",
-        "org.jetbrains.kotlin.gradle.targets.js.yarn.JsNodeJsEnvSpec"
-    )
-)
-abstract class NodeJsEnvSpec : AbstractNodeJsEnvSpec() {
+/**
+ * Spec for Node.js - common JS and Wasm runtime.
+ */
+@Suppress("DEPRECATION")
+abstract class JsNodeJsEnvSpec : NodeJsEnvSpec() {
 
     override val Project.nodeJsSetupTaskProvider: TaskProvider<out NodeJsSetupTask>
         get() = project.tasks.withType(NodeJsSetupTask::class.java)
             .named(NodeJsSetupTask.NAME)
 
     companion object {
-        const val EXTENSION_NAME: String = JsNodeJsEnvSpec.EXTENSION_NAME
+        const val EXTENSION_NAME: String = "kotlinNodeJsSpec"
     }
 }

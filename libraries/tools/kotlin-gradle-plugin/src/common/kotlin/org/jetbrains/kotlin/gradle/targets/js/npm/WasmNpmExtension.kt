@@ -7,7 +7,7 @@ package org.jetbrains.kotlin.gradle.targets.js.npm
 
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmPlatformDisambiguate
 
@@ -24,7 +24,7 @@ open class WasmNpmExtension(
 
         operator fun get(project: Project): WasmNpmExtension {
             val rootProject = project.rootProject
-            rootProject.plugins.apply(NodeJsRootPlugin::class.java)
+            rootProject.plugins.apply(JsNodeJsRootPlugin::class.java)
             return rootProject.extensions.getByName(EXTENSION_NAME) as WasmNpmExtension
         }
     }

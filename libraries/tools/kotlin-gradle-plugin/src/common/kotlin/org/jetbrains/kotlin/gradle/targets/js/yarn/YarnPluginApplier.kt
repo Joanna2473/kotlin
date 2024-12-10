@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
 import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinNpmInstallTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin.Companion.RESTORE_YARN_LOCK_NAME
@@ -79,7 +79,7 @@ internal class YarnPluginApplier(
                 it.dependsOn(project.nodeJsSetupTaskProvider)
             }
 
-            it.group = NodeJsRootPlugin.TASKS_GROUP_NAME
+            it.group = JsNodeJsRootPlugin.TASKS_GROUP_NAME
             it.description = "Download and install a local yarn version"
 
             it.configuration = it.ivyDependencyProvider.map { ivyDependency ->

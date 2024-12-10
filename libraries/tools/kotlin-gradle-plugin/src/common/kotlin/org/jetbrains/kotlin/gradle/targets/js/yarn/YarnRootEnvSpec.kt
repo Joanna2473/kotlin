@@ -7,7 +7,13 @@ package org.jetbrains.kotlin.gradle.targets.js.yarn
 
 import org.jetbrains.kotlin.gradle.targets.web.yarn.AbstractYarnRootEnvSpec
 
-@Deprecated("Use JsYarnRootEnvSpec instead", ReplaceWith("JsYarnRootEnvSpec"))
+@Deprecated(
+    "Use JsYarnRootEnvSpec instead",
+    ReplaceWith(
+        "JsYarnRootEnvSpec",
+        "org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnRootEnvSpec"
+    )
+)
 abstract class YarnRootEnvSpec : AbstractYarnRootEnvSpec() {
     companion object {
         const val YARN: String = JsYarnRootEnvSpec.YARN

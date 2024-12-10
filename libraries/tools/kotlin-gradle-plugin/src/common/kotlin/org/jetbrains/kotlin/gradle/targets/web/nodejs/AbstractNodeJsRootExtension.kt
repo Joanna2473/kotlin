@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.NpmVersions
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnv
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsSetupTask
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NpmApiExt
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.TasksRequirements
@@ -30,7 +30,7 @@ import java.io.File
 
 abstract class AbstractNodeJsRootExtension(
     val project: Project,
-    private val nodeJs: () -> NodeJsEnvSpec,
+    private val nodeJs: () -> JsNodeJsEnvSpec,
     rootDir: String,
 ) : HasPlatformDisambiguate {
 

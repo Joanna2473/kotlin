@@ -44,7 +44,7 @@ internal interface UsesKotlinNpmResolutionManager : Task {
  * In [KotlinCompilationNpmResolver] one can get [KotlinCompilationNpmResolver.compilationNpmResolution] to get resolution,
  * but it must be called only after all projects were registered in [KotlinRootNpmResolver]
  *
- * After configuration phase, on execution, tasks can call [org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.kotlinNpmResolutionManager]
+ * After configuration phase, on execution, tasks can call [org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootPlugin.kotlinNpmResolutionManager]
  * It provides [KotlinRootNpmResolution] into [KotlinNpmResolutionManager] and since then it stores all information about resolution process in execution phase
  */
 abstract class KotlinNpmResolutionManager : BuildService<KotlinNpmResolutionManager.Parameters> {

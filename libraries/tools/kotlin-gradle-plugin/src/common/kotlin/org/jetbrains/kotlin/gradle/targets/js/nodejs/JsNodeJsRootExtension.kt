@@ -9,14 +9,7 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsRootExtension
 
-@Deprecated(
-    "Use JsNodeJsRootExtension instead",
-    ReplaceWith(
-        expression = "JsNodeJsRootExtension",
-        "org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootExtension"
-    )
-)
-open class NodeJsRootExtension(
+open class JsNodeJsRootExtension(
     project: Project,
     nodeJs: () -> JsNodeJsEnvSpec,
     rootDir: String,
@@ -26,6 +19,6 @@ open class NodeJsRootExtension(
     rootDir
 ), HasPlatformDisambiguate by JsPlatformDisambiguate {
     companion object {
-        const val EXTENSION_NAME: String = JsNodeJsRootExtension.EXTENSION_NAME
+        const val EXTENSION_NAME: String = "kotlinNodeJs"
     }
 }

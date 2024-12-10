@@ -7,26 +7,26 @@ package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.web.nodejs.NodeJsPluginApplier
-import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
+@Deprecated(
+    "Use JsNodeJsPlugin instead",
+    ReplaceWith(
+        expression = "JsNodeJsPlugin",
+        "org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsPlugin"
+    )
+)
 open class NodeJsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        NodeJsPluginApplier(
-            platformDisambiguate = JsPlatformDisambiguate,
-            nodeJsEnvSpecKlass = NodeJsEnvSpec::class,
-            nodeJsEnvSpecName = NodeJsEnvSpec.EXTENSION_NAME,
-            nodeJsRootApply = { NodeJsRootPlugin.apply(it) }
-        ).apply(target)
+        target.plugins.apply(JsNodeJsPlugin::class.java)
     }
 
     companion object {
-        fun apply(project: Project): NodeJsEnvSpec {
-            project.plugins.apply(NodeJsPlugin::class.java)
-            return project.extensions.getByName(NodeJsEnvSpec.EXTENSION_NAME) as NodeJsEnvSpec
-        }
+        fun apply(project: Project): JsNodeJsEnvSpec =
+            JsNodeJsPlugin.apply(project)
 
-        val Project.kotlinNodeJsEnvSpec: NodeJsEnvSpec
-            get() = extensions.getByName(NodeJsEnvSpec.EXTENSION_NAME).castIsolatedKotlinPluginClassLoaderAware()
+        val Project.kotlinNodeJsEnvSpec: JsNodeJsEnvSpec
+            get() = with(JsNodeJsPlugin.Companion) {
+                this@kotlinNodeJsEnvSpec.kotlinNodeJsEnvSpec
+            }
     }
 }

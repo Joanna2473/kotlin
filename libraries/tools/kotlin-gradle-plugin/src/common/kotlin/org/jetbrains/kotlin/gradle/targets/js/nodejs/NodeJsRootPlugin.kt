@@ -8,50 +8,36 @@ package org.jetbrains.kotlin.gradle.targets.js.nodejs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
-import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
-import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
-import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin
-import org.jetbrains.kotlin.gradle.targets.web.nodejs.NodeJsRootPluginApplier
-import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
+@Deprecated(
+    "Use JsNodeJsRootPlugin instead",
+    ReplaceWith(
+        expression = "JsNodeJsRootPlugin",
+        "org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootPlugin"
+    )
+)
 open class NodeJsRootPlugin : Plugin<Project> {
 
     override fun apply(target: Project) {
-        NodeJsRootPluginApplier(
-            platformDisambiguate = JsPlatformDisambiguate,
-            nodeJsRootKlass = NodeJsRootExtension::class,
-            nodeJsRootName = NodeJsRootExtension.EXTENSION_NAME,
-            npmKlass = NpmExtension::class,
-            npmName = NpmExtension.EXTENSION_NAME,
-            rootDirectoryName = JsPlatformDisambiguate.jsPlatform,
-            lockFileDirectory = { it.dir(LockCopyTask.KOTLIN_JS_STORE) },
-            singleNodeJsPluginApply = { NodeJsPlugin.apply(it) },
-            yarnPlugin = JsYarnPlugin::class,
-            platformType = KotlinPlatformType.js,
-        ).apply(target)
+        target.plugins.apply(JsNodeJsRootPlugin::class.java)
     }
 
     companion object {
-        const val TASKS_GROUP_NAME: String = "nodeJs"
+        const val TASKS_GROUP_NAME: String = JsNodeJsRootPlugin.TASKS_GROUP_NAME
 
-        fun apply(rootProject: Project): NodeJsRootExtension {
-            check(rootProject == rootProject.rootProject)
-            rootProject.plugins.apply(NodeJsRootPlugin::class.java)
-            return rootProject.extensions.getByName(NodeJsRootExtension.EXTENSION_NAME) as NodeJsRootExtension
-        }
+        fun apply(rootProject: Project): JsNodeJsRootExtension =
+            JsNodeJsRootPlugin.apply(rootProject)
 
-        val Project.kotlinNodeJsRootExtension: NodeJsRootExtension
-            get() = extensions.getByName(NodeJsRootExtension.EXTENSION_NAME).castIsolatedKotlinPluginClassLoaderAware()
+        val Project.kotlinNodeJsRootExtension: JsNodeJsRootExtension
+            get() = with(JsNodeJsPlugin.Companion) {
+                this@kotlinNodeJsRootExtension.kotlinNodeJsRootExtension
+            }
 
         val Project.kotlinNpmResolutionManager: Provider<KotlinNpmResolutionManager>
             get() {
-                return project.gradle.sharedServices.registerIfAbsent(
-                    KotlinNpmResolutionManager::class.java.name,
-                    KotlinNpmResolutionManager::class.java
-                ) {
-                    error("Must be already registered")
+                return with(JsNodeJsPlugin.Companion) {
+                    this@kotlinNpmResolutionManager.kotlinNpmResolutionManager
                 }
             }
     }

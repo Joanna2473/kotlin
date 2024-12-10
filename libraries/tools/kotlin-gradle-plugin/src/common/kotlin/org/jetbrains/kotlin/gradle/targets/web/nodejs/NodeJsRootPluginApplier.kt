@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.MultiplePluginDeclarationDetector
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.TasksRequirements
 import org.jetbrains.kotlin.gradle.targets.js.npm.AbstractNpmExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.GradleNodeModulesCache
@@ -135,7 +135,7 @@ internal class NodeJsRootPluginApplier(
 
         val rootPackageJson =
             project.tasks.register(platformDisambiguate.extensionName(RootPackageJsonTask.Companion.NAME), RootPackageJsonTask::class.java) { task ->
-                task.group = NodeJsRootPlugin.Companion.TASKS_GROUP_NAME
+                task.group = JsNodeJsRootPlugin.Companion.TASKS_GROUP_NAME
                 task.description = "Create root package.json"
 
                 task.configureNodeJsEnvironmentTasks(
@@ -164,7 +164,7 @@ internal class NodeJsRootPluginApplier(
                 with(nodeJs) {
                     npmInstall.dependsOn(project.nodeJsSetupTaskProvider)
                 }
-                npmInstall.group = NodeJsRootPlugin.Companion.TASKS_GROUP_NAME
+                npmInstall.group = JsNodeJsRootPlugin.Companion.TASKS_GROUP_NAME
                 npmInstall.description = "Find, download and link NPM dependencies and projects"
 
                 npmInstall.configureNodeJsEnvironmentTasks(
@@ -292,7 +292,7 @@ internal class NodeJsRootPluginApplier(
 
         project.tasks.register(platformDisambiguate.extensionName("node" + CleanDataTask.Companion.NAME_SUFFIX), CleanDataTask::class.java) {
             it.cleanableStoreProvider = nodeJs.env.map { it.cleanableStore }
-            it.group = NodeJsRootPlugin.Companion.TASKS_GROUP_NAME
+            it.group = JsNodeJsRootPlugin.Companion.TASKS_GROUP_NAME
             it.description = "Clean unused local node version"
         }
 

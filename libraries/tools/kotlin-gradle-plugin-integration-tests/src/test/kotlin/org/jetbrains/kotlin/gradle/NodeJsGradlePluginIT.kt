@@ -7,8 +7,8 @@ package org.jetbrains.kotlin.gradle
 
 import org.gradle.api.Action
 import org.gradle.util.GradleVersion
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsPlugin
 import org.jetbrains.kotlin.gradle.testbase.*
 import org.jetbrains.kotlin.test.TestMetadata
 import org.junit.jupiter.api.DisplayName
@@ -72,8 +72,8 @@ class NodeJsGradlePluginIT : KGPBaseTest() {
         ) {
             @Suppress("DEPRECATION")
             buildScriptInjection {
-                project.rootProject.plugins.withType(NodeJsPlugin::class.java, Action {
-                    project.rootProject.extensions.getByType(NodeJsEnvSpec::class.java).version.set("22.3.0")
+                project.rootProject.plugins.withType(JsNodeJsPlugin::class.java, Action {
+                    project.rootProject.extensions.getByType(JsNodeJsEnvSpec::class.java).version.set("22.3.0")
                 })
             }
 

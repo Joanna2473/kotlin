@@ -6,13 +6,19 @@
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.web.yarn.AbstractYarnRootExtension
 
-@Deprecated("Use JsYarnRootExtension instead", ReplaceWith("JsYarnRootExtension"))
+@Deprecated(
+    "Use JsYarnRootExtension instead",
+    ReplaceWith(
+        "JsYarnRootExtension",
+        "org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnRootExtension"
+    )
+)
 open class YarnRootExtension(
     project: Project,
-    nodeJsRoot: NodeJsRootExtension,
+    nodeJsRoot: JsNodeJsRootExtension,
     yarnSpec: JsYarnRootEnvSpec,
 ) : AbstractYarnRootExtension(
     project,
@@ -26,6 +32,3 @@ open class YarnRootExtension(
             JsYarnRootExtension[project]
     }
 }
-
-val Project.yarn: JsYarnRootExtension
-    get() = JsYarnRootExtension[this]

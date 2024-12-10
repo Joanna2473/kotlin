@@ -101,11 +101,11 @@ constructor(
             val target = compilation.target
             val project = target.project
             val nodeJsRoot = compilation.targetVariant(
-                { NodeJsRootPlugin.apply(project.rootProject) },
+                { JsNodeJsRootPlugin.apply(project.rootProject) },
                 { WasmNodeJsRootPlugin.apply(project.rootProject) },
             )
             val nodeJsEnvSpec = compilation.targetVariant(
-                { NodeJsPlugin.apply(project) },
+                { JsNodeJsPlugin.apply(project) },
                 { WasmNodeJsPlugin.apply(project) },
             )
 
@@ -118,7 +118,7 @@ constructor(
                 it.versions.value(nodeJsRoot.versions)
                     .disallowChanges()
                 it.executable = nodeJsEnvSpec.executable.get()
-                if ((compilation.target as? KotlinJsIrTarget)?.wasmTargetType != KotlinWasmTargetType.WASI) {
+                if (compilation.target.wasmTargetType != KotlinWasmTargetType.WASI) {
                     it.workingDir(npmProject.dir)
                     it.dependsOn(
                         nodeJsRoot.npmInstallTaskProvider,

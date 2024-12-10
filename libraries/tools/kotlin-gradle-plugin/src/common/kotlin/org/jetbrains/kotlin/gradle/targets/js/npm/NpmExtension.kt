@@ -6,13 +6,12 @@
 package org.jetbrains.kotlin.gradle.targets.js.npm
 
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootPlugin
 
 open class NpmExtension(
     project: Project,
-    nodeJsRoot: NodeJsRootExtension,
+    nodeJsRoot: JsNodeJsRootExtension,
 ) : AbstractNpmExtension(
     project,
     nodeJsRoot
@@ -22,7 +21,7 @@ open class NpmExtension(
 
         operator fun get(project: Project): NpmExtension {
             val rootProject = project.rootProject
-            rootProject.plugins.apply(NodeJsRootPlugin::class.java)
+            rootProject.plugins.apply(JsNodeJsRootPlugin::class.java)
             return rootProject.extensions.getByName(EXTENSION_NAME) as NpmExtension
         }
     }
