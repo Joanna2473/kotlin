@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsRootExtension
 
 open class NodeJsRootExtension(
     project: Project,

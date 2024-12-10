@@ -6,12 +6,7 @@
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsPlatformDisambiguate
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
-import org.jetbrains.kotlin.gradle.targets.yarn.CommonYarnPlugin
+import org.jetbrains.kotlin.gradle.targets.web.yarn.CommonYarnPlugin
 
 @Deprecated(
     "Use JsYarnPlugin instead",

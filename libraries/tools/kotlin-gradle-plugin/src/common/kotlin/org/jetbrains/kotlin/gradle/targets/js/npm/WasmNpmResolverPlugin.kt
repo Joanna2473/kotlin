@@ -7,8 +7,8 @@ package org.jetbrains.kotlin.gradle.targets.js.npm
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsPlugin
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootPlugin
 
 class WasmNpmResolverPlugin : Plugin<Project> {
     override fun apply(project: Project) {

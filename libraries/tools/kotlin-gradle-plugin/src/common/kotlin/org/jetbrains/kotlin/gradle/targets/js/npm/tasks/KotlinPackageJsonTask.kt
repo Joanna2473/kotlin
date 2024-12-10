@@ -15,7 +15,7 @@ import org.gradle.api.tasks.*
 import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.NormalizeLineEndings
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrCompilation
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.kotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.*
@@ -26,7 +26,7 @@ import org.jetbrains.kotlin.gradle.utils.CompositeProjectComponentArtifactMetada
 import org.jetbrains.kotlin.gradle.utils.`is`
 import org.jetbrains.kotlin.gradle.utils.mapToFile
 import java.io.File
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNpmResolutionManager as wasmKotlinNpmResolutionManager
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNpmResolutionManager as wasmKotlinNpmResolutionManager
 
 @DisableCachingByDefault
 abstract class KotlinPackageJsonTask :

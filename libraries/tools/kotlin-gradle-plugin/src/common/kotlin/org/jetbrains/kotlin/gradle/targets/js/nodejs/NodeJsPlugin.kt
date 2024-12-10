@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.NodeJsPluginApplier
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
 open class NodeJsPlugin : Plugin<Project> {

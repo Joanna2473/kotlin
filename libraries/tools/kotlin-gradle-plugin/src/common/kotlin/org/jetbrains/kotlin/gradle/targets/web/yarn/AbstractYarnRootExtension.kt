@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.gradle.targets.yarn
+package org.jetbrains.kotlin.gradle.targets.web.yarn
 
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -13,7 +13,6 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.targets.js.AbstractSettings
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnv
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NpmApiExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.Platform
@@ -28,6 +27,7 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockStoreTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnResolution
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnSetupTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.asYarnEnvironment
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.utils.property
 import java.io.File
 

@@ -6,7 +6,7 @@
 package org.jetbrains.kotlin.gradle.targets.js.npm
 
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.AbstractNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.npm.resolver.implementing
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.utils.whenEvaluated

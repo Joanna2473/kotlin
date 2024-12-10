@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotl
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 import org.jetbrains.kotlin.gradle.targets.js.targetVariant
 import org.jetbrains.kotlin.gradle.targets.js.writeWasmUnitTestRunner
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin.Companion.kotlinNodeJsEnvSpec as wasmKotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsPlugin.Companion.kotlinNodeJsEnvSpec as wasmKotlinNodeJsEnvSpec
 
 internal class KotlinWasmNode(kotlinJsTest: KotlinJsTest) : KotlinJsTestFramework {
     override val settingsState: String = "KotlinWasmNode"

@@ -6,14 +6,8 @@
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
 import org.gradle.api.Project
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
-import org.jetbrains.kotlin.gradle.targets.js.EnvSpec
-import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
-import org.jetbrains.kotlin.gradle.utils.getFile
-import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
-import java.io.File
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsEnvSpec
 
 /**
  * Spec for Node.js - common JS and Wasm runtime.

@@ -7,7 +7,7 @@ package org.jetbrains.kotlin.gradle.targets.js.yarn
 
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.yarn.AbstractYarnRootExtension
+import org.jetbrains.kotlin.gradle.targets.web.yarn.AbstractYarnRootExtension
 
 @Deprecated("Use JsYarnRootExtension instead", ReplaceWith("JsYarnRootExtension"))
 open class YarnRootExtension(

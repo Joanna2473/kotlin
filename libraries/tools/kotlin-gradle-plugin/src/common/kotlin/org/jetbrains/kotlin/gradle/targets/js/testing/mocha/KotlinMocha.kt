@@ -24,7 +24,7 @@ import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTestFramework
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinTestRunnerCliArgs
 import org.jetbrains.kotlin.gradle.utils.getFile
 import org.jetbrains.kotlin.gradle.utils.getValue
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension as wasmKotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension as wasmKotlinNodeJsRootExtension
 
 class KotlinMocha(@Transient override val compilation: KotlinJsIrCompilation, private val basePath: String) :
     KotlinJsTestFramework {

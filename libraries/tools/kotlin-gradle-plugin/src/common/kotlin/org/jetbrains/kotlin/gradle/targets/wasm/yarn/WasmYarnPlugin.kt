@@ -7,13 +7,13 @@ package org.jetbrains.kotlin.gradle.targets.wasm.yarn
 
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsPlugin.Companion.kotlinNodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.WasmPlatformDisambiguate
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsPlugin.Companion.kotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootPlugin.Companion.kotlinNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPluginApplier
-import org.jetbrains.kotlin.gradle.targets.yarn.CommonYarnPlugin
+import org.jetbrains.kotlin.gradle.targets.web.yarn.CommonYarnPlugin
 
 open class WasmYarnPlugin : CommonYarnPlugin {
     override fun apply(target: Project) {

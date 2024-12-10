@@ -1,22 +1,23 @@
 /*
- * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.gradle.targets.js.nodejs
+package org.jetbrains.kotlin.gradle.targets.wasm.nodejs
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.CommonNodeJsPlugin
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.NodeJsPluginApplier
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
-open class WasmNodeJsPlugin : Plugin<Project> {
+open class WasmNodeJsPlugin : CommonNodeJsPlugin {
     override fun apply(target: Project) {
         NodeJsPluginApplier(
             platformDisambiguate = WasmPlatformDisambiguate,
             nodeJsEnvSpecKlass = WasmNodeJsEnvSpec::class,
             nodeJsEnvSpecName = WasmNodeJsEnvSpec.EXTENSION_NAME,
-            nodeJsRootApply = { WasmNodeJsRootPlugin.apply(it) }
+            nodeJsRootApply = { WasmNodeJsRootPlugin.Companion.apply(it) }
         ).apply(target)
     }
 

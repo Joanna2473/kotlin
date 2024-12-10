@@ -1,18 +1,20 @@
 /*
- * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.gradle.targets.js.nodejs
+package org.jetbrains.kotlin.gradle.targets.web.nodejs
 
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.targets.js.EnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnv
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsSetupTask
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.Platform
 import org.jetbrains.kotlin.gradle.tasks.internal.CleanableStore
 import org.jetbrains.kotlin.gradle.utils.getFile
-import org.jetbrains.kotlin.gradle.utils.lowerCamelCaseName
 import java.io.File
 
 /**
@@ -36,7 +38,7 @@ abstract class AbstractNodeJsEnvSpec : EnvSpec<NodeJsEnv>() {
 
             val versionValue = version.get()
             val nodeDirName = "node-v$versionValue-$name-$architecture"
-            val cleanableStore = CleanableStore[installationDirectory.getFile().absolutePath]
+            val cleanableStore = CleanableStore.Companion[installationDirectory.getFile().absolutePath]
             val nodeDir = cleanableStore[nodeDirName].use()
             val isWindows = platformValue.isWindows()
             val nodeBinDir = if (isWindows) nodeDir else nodeDir.resolve("bin")

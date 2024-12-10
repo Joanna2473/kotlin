@@ -3,6 +3,7 @@ package org.jetbrains.kotlin.gradle.targets.js.nodejs
 import org.gradle.api.tasks.Internal
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.kotlin.gradle.targets.js.AbstractSetupTask
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.utils.getFile
 import java.io.File
 import java.nio.file.Files

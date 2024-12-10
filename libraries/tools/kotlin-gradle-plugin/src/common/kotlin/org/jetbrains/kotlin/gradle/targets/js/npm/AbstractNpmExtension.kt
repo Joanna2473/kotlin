@@ -15,6 +15,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.internal.ConfigurationPhaseAware
 import org.jetbrains.kotlin.gradle.logging.kotlinInfo
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.*
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsRootExtension
 
 open class AbstractNpmExtension(
     val project: Project,
