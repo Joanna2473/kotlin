@@ -5754,7 +5754,7 @@ public final class org/jetbrains/kotlin/gradle/targets/js/webpack/WebpackLogClie
 public final class org/jetbrains/kotlin/gradle/targets/js/webpack/WebpackLogClient$Companion {
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin : org/jetbrains/kotlin/gradle/targets/yarn/CommonYarnPlugin {
+public class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin : org/gradle/api/Plugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin$Companion;
 	public static final field RESTORE_YARN_LOCK_NAME Ljava/lang/String;
 	public static final field STORE_YARN_LOCK_NAME Ljava/lang/String;
@@ -5769,7 +5769,7 @@ public final class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin$Comp
 	public final fun apply (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
 }
 
-public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/yarn/AbstractYarnRootEnvSpec {
+public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootEnvSpec {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec$Companion;
 	public static final field YARN Ljava/lang/String;
 	public fun <init> ()V
@@ -5778,7 +5778,7 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvS
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec$Companion {
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension : org/jetbrains/kotlin/gradle/targets/yarn/AbstractYarnRootExtension {
+public class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension : org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension$Companion;
 	public static final field YARN Ljava/lang/String;
 	public fun <init> (Lorg/gradle/api/Project;Lorg/jetbrains/kotlin/gradle/targets/js/nodejs/NodeJsRootExtension;Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec;)V
@@ -5786,10 +5786,6 @@ public class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension : o
 
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension$Companion {
 	public final fun get (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
-}
-
-public final class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtensionKt {
-	public static final fun getYarn (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/LockCopyTaskKt {
@@ -5879,13 +5875,15 @@ public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnLockStoreT
 	public final fun getYarnLockMismatchReport ()Lorg/gradle/api/provider/Provider;
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin : org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin {
+public class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin : org/jetbrains/kotlin/gradle/targets/yarn/CommonYarnPlugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin$Companion;
 	public static final field RESTORE_YARN_LOCK_NAME Ljava/lang/String;
 	public static final field STORE_YARN_LOCK_NAME Ljava/lang/String;
 	public static final field UPGRADE_YARN_LOCK Ljava/lang/String;
 	public static final field YARN_LOCK_MISMATCH_MESSAGE Ljava/lang/String;
 	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
 }
 
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin$Companion {
@@ -5907,7 +5905,7 @@ public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnResolutionsKt
 	public static final fun toVersionString (Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnResolution;)Ljava/lang/String;
 }
 
-public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootEnvSpec {
+public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootEnvSpec : org/jetbrains/kotlin/gradle/targets/yarn/AbstractYarnRootEnvSpec {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootEnvSpec$Companion;
 	public static final field YARN Ljava/lang/String;
 	public fun <init> ()V
@@ -5924,6 +5922,10 @@ public class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension : org
 
 public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtension$Companion {
 	public final fun get (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
+}
+
+public final class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnRootExtensionKt {
+	public static final fun getYarn (Lorg/gradle/api/Project;)Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnRootExtension;
 }
 
 public abstract class org/jetbrains/kotlin/gradle/targets/js/yarn/YarnSetupTask : org/jetbrains/kotlin/gradle/targets/js/AbstractSetupTask {
