@@ -30,13 +30,13 @@ open class NodeJsRootPlugin : Plugin<Project> {
             JsNodeJsRootPlugin.apply(rootProject)
 
         val Project.kotlinNodeJsRootExtension: JsNodeJsRootExtension
-            get() = with(JsNodeJsPlugin.Companion) {
+            get() = with(JsNodeJsRootPlugin.Companion) {
                 this@kotlinNodeJsRootExtension.kotlinNodeJsRootExtension
             }
 
         val Project.kotlinNpmResolutionManager: Provider<KotlinNpmResolutionManager>
             get() {
-                return with(JsNodeJsPlugin.Companion) {
+                return with(JsNodeJsRootPlugin.Companion) {
                     this@kotlinNpmResolutionManager.kotlinNpmResolutionManager
                 }
             }
