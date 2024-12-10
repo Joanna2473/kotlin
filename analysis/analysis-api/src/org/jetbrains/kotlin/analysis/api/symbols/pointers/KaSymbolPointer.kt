@@ -20,7 +20,8 @@ public abstract class KaSymbolPointer<out S : KaSymbol> {
     /**
      * Returns the restored [KaSymbol] (possibly a new symbol instance) if the pointer is still valid, `null` otherwise.
      *
-     * Consider using [KaSession.restoreSymbol][org.jetbrains.kotlin.analysis.api.KaSession.restoreSymbol].
+     * Do not use this function directly, as it is an implementation detail. Use [KaSession.restoreSymbol][org.jetbrains.kotlin.analysis.api.KaSession.restoreSymbol]
+     * instead.
      */
     @KaImplementationDetail
     public abstract fun restoreSymbol(analysisSession: KaSession): S?
