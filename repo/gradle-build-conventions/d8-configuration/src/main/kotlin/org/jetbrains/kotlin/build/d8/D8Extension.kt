@@ -15,7 +15,6 @@ import org.jetbrains.kotlin.gradle.targets.js.d8.D8RootExtension
 
 abstract class D8Extension(
     private val d8envSpec: D8EnvSpec,
-    private val d8Root: D8RootExtension
 ) {
     val Project.v8Version: String get() = property("versions.v8") as String
 
@@ -23,10 +22,7 @@ abstract class D8Extension(
         with(d8envSpec) {
             dependsOn(project.d8SetupTaskProvider)
         }
-        dependsOn(d8Root.setupTaskProvider)
-        val v8ExecutablePath = project.provider {
-            d8Root.requireConfigured().executablePath.absolutePath
-        }
+        val v8ExecutablePath = d8envSpec.executable
         doFirst {
             systemProperty("javascript.engine.path.V8", v8ExecutablePath.get())
         }

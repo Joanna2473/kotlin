@@ -5,7 +5,6 @@
 
 package org.jetbrains.kotlin.gradle.targets.wasm.d8
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.ExtensionContainer
@@ -17,7 +16,7 @@ import org.jetbrains.kotlin.gradle.tasks.registerTask
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
 @OptIn(ExperimentalWasmDsl::class)
-open class D8Plugin : Plugin<Project> {
+open class D8Plugin : org.jetbrains.kotlin.gradle.targets.js.d8.D8Plugin() {
     override fun apply(project: Project) {
         MultiplePluginDeclarationDetector.Companion.detect(project)
 
