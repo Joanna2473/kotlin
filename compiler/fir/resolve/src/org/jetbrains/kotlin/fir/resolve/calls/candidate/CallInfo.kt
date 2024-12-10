@@ -64,7 +64,6 @@ open class CallInfo(
      */
     val arguments: List<FirExpression>
         get() = (argumentList as? FirResolvedArgumentList)?.originalArgumentList?.arguments ?: argumentList.arguments
-    val argumentCount: Int get() = arguments.size
     val argumentAtoms: List<ConeResolutionAtom> = arguments.map { createRawAtom(it) }
 
     fun replaceWithVariableAccess(): CallInfo =
