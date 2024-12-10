@@ -6,7 +6,7 @@
 package org.jetbrains.kotlin.ir.generator.print
 
 import org.jetbrains.kotlin.CompilerVersionOfApiDeprecation
-import org.jetbrains.kotlin.DeprecatedForRemovalCompilerApi
+import org.jetbrains.kotlin.DeprecatedCompilerApi
 import org.jetbrains.kotlin.generators.tree.*
 import org.jetbrains.kotlin.generators.tree.imports.ImportCollecting
 import org.jetbrains.kotlin.generators.tree.printer.ImportCollectingPrinter
@@ -62,5 +62,5 @@ internal class TransformerPrinter(
         get() = deprecatedVisitorInterface(irTransformerType)
 
     override val annotations: List<Annotation>
-        get() = listOf(DeprecatedForRemovalCompilerApi(CompilerVersionOfApiDeprecation._2_1_20, replaceWith = "IrTransformer"))
+        get() = listOf(DeprecatedCompilerApi(CompilerVersionOfApiDeprecation._2_1_20, replaceWith = "IrTransformer"))
 }
