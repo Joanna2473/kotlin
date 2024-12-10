@@ -9,6 +9,11 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
+@ExperimentalWasmDsl
+@Deprecated(
+    "Use 'org.jetbrains.kotlin.gradle.targets.wasm.d8.D8Plugin' instead",
+    ReplaceWith("D8EnvSpec", "org.jetbrains.kotlin.gradle.targets.wasm.d8.D8Plugin")
+)
 @OptIn(ExperimentalWasmDsl::class)
 open class D8Plugin : Plugin<Project> {
     override fun apply(project: Project) {

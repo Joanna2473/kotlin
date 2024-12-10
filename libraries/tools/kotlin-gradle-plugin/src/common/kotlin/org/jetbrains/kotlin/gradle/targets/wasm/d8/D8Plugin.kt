@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.gradle.tasks.CleanDataTask
 import org.jetbrains.kotlin.gradle.tasks.registerTask
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
+@Suppress("DEPRECATION")
 @OptIn(ExperimentalWasmDsl::class)
 open class D8Plugin : org.jetbrains.kotlin.gradle.targets.js.d8.D8Plugin() {
     override fun apply(project: Project) {
