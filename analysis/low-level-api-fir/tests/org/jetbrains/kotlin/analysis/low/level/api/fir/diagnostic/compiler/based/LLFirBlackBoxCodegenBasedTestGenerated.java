@@ -31618,6 +31618,12 @@ public class LLFirBlackBoxCodegenBasedTestGenerated extends AbstractLLFirBlackBo
       }
 
       @Test
+      @TestMetadata("suspend.kt")
+      public void testSuspend() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/suspend.kt");
+      }
+
+      @Test
       @TestMetadata("uint.kt")
       public void testUint() {
         runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/uint.kt");

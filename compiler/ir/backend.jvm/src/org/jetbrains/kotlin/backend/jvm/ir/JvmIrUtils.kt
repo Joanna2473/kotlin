@@ -281,6 +281,8 @@ fun IrDeclaration.shouldBeExposedByAnnotation(): Boolean {
 fun IrDeclaration.isFunctionWithInlineClassesInSignature(): Boolean {
     if (this !is IrFunction || origin == IrDeclarationOrigin.GENERATED_SINGLE_FIELD_VALUE_CLASS_MEMBER) return false
 
+    if (isSuspend) return false
+
     if (explicitParameters.any { it.type.isInlineClassType() }) return true
     if (!returnType.isInlineClassType()) return false
     // It is not explicitly annotated, global and returns inline class, do not expose it, since otherwise
