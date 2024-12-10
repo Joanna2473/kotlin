@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.fir.resolve.calls.getExpectedType
 import org.jetbrains.kotlin.fir.resolve.substitution.ConeSubstitutor
 import org.jetbrains.kotlin.fir.resolve.transformers.body.resolve.approximateDeclarationType
 import org.jetbrains.kotlin.fir.scopes.getDeclaredConstructors
+import org.jetbrains.kotlin.fir.scopes.impl.toConeType
 import org.jetbrains.kotlin.fir.scopes.impl.typeAliasConstructorInfo
 import org.jetbrains.kotlin.fir.symbols.FirBasedSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.*
@@ -1357,9 +1358,23 @@ class CallAndReferenceGenerator(
         val typeAliasSymbol = typeAliasConstructorInfo.typeAliasSymbol
         val constructedType = typeAliasSymbol.constructType(originalTypeArguments.map { it.toConeTypeProjection() }.toTypedArray())
         val parametersSubstitutor = typeAliasSymbol.fir.createParametersSubstitutor(constructedType, session)
+        val typeAliasConstructorSubstitutor = typeAliasConstructorInfo.substitutor
+
+        val containingInnerClass = typeAliasConstructorInfo.originalConstructor.takeIf { it.isInner }?.getContainingClass()
+        val ignoredTypeArguments = if (typeAliasConstructorSubstitutor != null && containingInnerClass != null) {
+            mutableSetOf<ConeKotlinType>().apply {
+                containingInnerClass.typeParameters.filterIsInstance<FirOuterClassTypeParameterRef>().mapNotNullTo(this) {
+                    typeAliasConstructorSubstitutor.substituteOrNull(it.toConeType())
+                }
+            }
+        } else {
+            emptySet()
+        }
 
         return buildList {
             for ((index, typeArgument) in typeAliasSymbol.resolvedExpandedTypeRef.coneType.typeArguments.withIndex()) {
+                if (ignoredTypeArguments.contains(typeArgument)) continue
+
                 val typeProjection = parametersSubstitutor.substituteArgument(typeArgument, index) ?: typeArgument
                 val typeRef = if (typeProjection is ConeKotlinType) {
                     buildResolvedTypeRef {
