@@ -9,15 +9,16 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.HasPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.web.nodejs.AbstractNodeJsRootExtension
 
+@Suppress("DEPRECATION")
 open class JsNodeJsRootExtension(
     project: Project,
     nodeJs: () -> JsNodeJsEnvSpec,
     rootDir: String,
-) : AbstractNodeJsRootExtension(
+) : NodeJsRootExtension(
     project,
     nodeJs,
-    rootDir
-), HasPlatformDisambiguate by JsPlatformDisambiguate {
+    rootDir,
+) {
     companion object {
         const val EXTENSION_NAME: String = "kotlinNodeJs"
     }

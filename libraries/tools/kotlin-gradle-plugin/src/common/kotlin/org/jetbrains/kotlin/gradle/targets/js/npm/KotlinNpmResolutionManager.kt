@@ -37,7 +37,7 @@ internal interface UsesKotlinNpmResolutionManager : Task {
  * `*Resolution` means entities which should be created from `*Resolver` in the end of Configuration phase (when all projects are registered themselves)
  *
  * The process is following:
- * Every project register itself via [NpmResolverPlugin] in [KotlinRootNpmResolver].
+ * Every project register itself via [JsNpmResolverPlugin] in [KotlinRootNpmResolver].
  * [KotlinRootNpmResolver] creates for every project [KotlinProjectNpmResolver],
  * and [KotlinProjectNpmResolver] creates [KotlinCompilationNpmResolver] for every compilation.
  * [KotlinCompilationNpmResolver] exist to resolve all JS-related dependencies (inter-project dependencies and NPM dependencies)`.

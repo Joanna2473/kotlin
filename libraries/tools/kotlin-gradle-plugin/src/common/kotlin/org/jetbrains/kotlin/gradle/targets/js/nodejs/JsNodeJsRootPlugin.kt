@@ -5,26 +5,26 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
-import org.jetbrains.kotlin.gradle.targets.js.npm.NpmExtension
+import org.jetbrains.kotlin.gradle.targets.js.npm.JsNpmExtension
 import org.jetbrains.kotlin.gradle.targets.js.yarn.JsYarnPlugin
 import org.jetbrains.kotlin.gradle.targets.web.nodejs.NodeJsRootPluginApplier
 import org.jetbrains.kotlin.gradle.utils.castIsolatedKotlinPluginClassLoaderAware
 
-open class JsNodeJsRootPlugin : Plugin<Project> {
+@Suppress("DEPRECATION")
+open class JsNodeJsRootPlugin : NodeJsRootPlugin() {
 
     override fun apply(target: Project) {
         NodeJsRootPluginApplier(
             platformDisambiguate = JsPlatformDisambiguate,
             nodeJsRootKlass = JsNodeJsRootExtension::class,
             nodeJsRootName = JsNodeJsRootExtension.EXTENSION_NAME,
-            npmKlass = NpmExtension::class,
-            npmName = NpmExtension.EXTENSION_NAME,
+            npmKlass = JsNpmExtension::class,
+            npmName = JsNpmExtension.EXTENSION_NAME,
             rootDirectoryName = JsPlatformDisambiguate.jsPlatform,
             lockFileDirectory = { it.dir(LockCopyTask.KOTLIN_JS_STORE) },
             singleNodeJsPluginApply = { JsNodeJsPlugin.apply(it) },

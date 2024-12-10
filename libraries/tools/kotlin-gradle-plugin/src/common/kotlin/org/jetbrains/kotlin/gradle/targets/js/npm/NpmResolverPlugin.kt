@@ -7,20 +7,20 @@ package org.jetbrains.kotlin.gradle.targets.js.npm
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsPlugin
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootPlugin
 
-class NpmResolverPlugin : Plugin<Project> {
+@Deprecated(
+    "Use NpmResolverPlugin instead",
+    ReplaceWith(
+        "NpmResolverPlugin",
+        "org.jetbrains.kotlin.gradle.targets.js.npm.NpmResolverPlugin"
+    )
+)
+open class NpmResolverPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        NpmResolverPluginApplier(
-            { JsNodeJsRootPlugin.apply(project.rootProject) },
-            { JsNodeJsPlugin.apply(project) },
-        ).apply(project)
+        project.plugins.apply(JsNpmResolverPlugin::class.java)
     }
 
     companion object {
-        fun apply(project: Project) {
-            project.plugins.apply(NpmResolverPlugin::class.java)
-        }
+        fun apply(project: Project) = JsNpmResolverPlugin.apply(project)
     }
 }

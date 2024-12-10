@@ -7,25 +7,23 @@ package org.jetbrains.kotlin.gradle.targets.js.npm
 
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootPlugin
 
-@Deprecated(
-    "Use JsNpmExtension instead",
-    ReplaceWith(
-        "JsNpmExtension",
-        "org.jetbrains.kotlin.gradle.targets.js.npm.JsNpmExtension"
-    )
-)
-open class NpmExtension(
+@Suppress("DEPRECATION")
+open class JsNpmExtension(
     project: Project,
     nodeJsRoot: JsNodeJsRootExtension,
-) : AbstractNpmExtension(
+) : NpmExtension(
     project,
     nodeJsRoot
 ) {
     companion object {
-        const val EXTENSION_NAME: String = JsNpmExtension.EXTENSION_NAME
+        const val EXTENSION_NAME: String = "kotlinNpm"
 
-        operator fun get(project: Project): JsNpmExtension =
-            JsNpmExtension.Companion.get(project)
+        operator fun get(project: Project): JsNpmExtension {
+            val rootProject = project.rootProject
+            rootProject.plugins.apply(JsNodeJsRootPlugin::class.java)
+            return rootProject.extensions.getByName(EXTENSION_NAME) as JsNpmExtension
+        }
     }
 }
