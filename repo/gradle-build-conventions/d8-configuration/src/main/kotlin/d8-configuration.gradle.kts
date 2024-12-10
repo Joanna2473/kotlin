@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalWasmDsl::class)
+@file:Suppress("DEPRECATION")
 
 import org.jetbrains.kotlin.build.d8.D8Extension
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl

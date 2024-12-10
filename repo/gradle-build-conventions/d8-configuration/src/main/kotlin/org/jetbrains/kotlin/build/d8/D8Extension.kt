@@ -4,6 +4,7 @@
  */
 
 @file:OptIn(ExperimentalWasmDsl::class)
+@file:Suppress("DEPRECATION")
 
 package org.jetbrains.kotlin.build.d8
 

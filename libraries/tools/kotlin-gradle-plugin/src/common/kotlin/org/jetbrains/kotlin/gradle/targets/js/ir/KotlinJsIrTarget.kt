@@ -15,7 +15,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation.Companion.MAIN_COMPI
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.resources.publication.setUpResourcesVariant
 import org.jetbrains.kotlin.gradle.targets.js.*
-import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenExec
+import org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenExec
 import org.jetbrains.kotlin.gradle.targets.js.dsl.*
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrTargetConfigurator.Companion.configureJsDefaultOptions
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsPlugin
