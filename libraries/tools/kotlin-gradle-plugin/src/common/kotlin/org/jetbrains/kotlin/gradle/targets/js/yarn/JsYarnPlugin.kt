@@ -5,7 +5,6 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.JsPlatformDisambiguate
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
@@ -14,7 +13,7 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin.Companion.
 import org.jetbrains.kotlin.gradle.targets.js.npm.LockCopyTask
 
 @Suppress("DEPRECATION")
-open class JsYarnPlugin : Plugin<Project> {
+open class JsYarnPlugin : YarnPlugin() {
     override fun apply(target: Project) {
         YarnPluginApplier(
             platformDisambiguate = JsPlatformDisambiguate,

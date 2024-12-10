@@ -5754,7 +5754,7 @@ public final class org/jetbrains/kotlin/gradle/targets/js/webpack/WebpackLogClie
 public final class org/jetbrains/kotlin/gradle/targets/js/webpack/WebpackLogClient$Companion {
 }
 
-public class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin : org/gradle/api/Plugin {
+public class org/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin : org/jetbrains/kotlin/gradle/targets/js/yarn/YarnPlugin {
 	public static final field Companion Lorg/jetbrains/kotlin/gradle/targets/js/yarn/JsYarnPlugin$Companion;
 	public static final field RESTORE_YARN_LOCK_NAME Ljava/lang/String;
 	public static final field STORE_YARN_LOCK_NAME Ljava/lang/String;
