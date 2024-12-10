@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.analysis.api.symbols.KaCallableSymbol
  */
 public interface KaPartiallyAppliedSymbol<out S : KaCallableSymbol, out C : KaCallableSignature<S>> : KaLifetimeOwner {
     /**
-     * The function or property declaration.
+     * The function or variable declaration.
      */
     public val signature: C
 
