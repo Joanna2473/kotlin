@@ -5,13 +5,13 @@
 
 package org.jetbrains.kotlin.gradle.targets.wasm.npm
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsPlugin
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.web.npm.CommonNpmResolverPlugin
 import org.jetbrains.kotlin.gradle.targets.web.npm.NpmResolverPluginApplier
 
-class WasmNpmResolverPlugin : Plugin<Project> {
+class WasmNpmResolverPlugin : CommonNpmResolverPlugin {
     override fun apply(project: Project) {
         NpmResolverPluginApplier(
             { WasmNodeJsRootPlugin.Companion.apply(project.rootProject) },

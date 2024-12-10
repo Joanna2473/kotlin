@@ -5,10 +5,10 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.CommonNodeJsRootPlugin
 
 @Deprecated(
     "Use JsNodeJsRootPlugin instead",
@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.gradle.targets.js.npm.KotlinNpmResolutionManager
         "org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsRootPlugin"
     )
 )
-open class NodeJsRootPlugin : Plugin<Project> {
+open class NodeJsRootPlugin : CommonNodeJsRootPlugin {
 
     override fun apply(target: Project) {
         target.plugins.apply(JsNodeJsRootPlugin::class.java)

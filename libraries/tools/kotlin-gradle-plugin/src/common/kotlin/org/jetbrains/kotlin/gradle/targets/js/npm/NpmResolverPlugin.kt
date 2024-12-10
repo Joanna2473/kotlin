@@ -5,8 +5,8 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.npm
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.targets.web.npm.CommonNpmResolverPlugin
 
 @Deprecated(
     "Use NpmResolverPlugin instead",
@@ -15,7 +15,7 @@ import org.gradle.api.Project
         "org.jetbrains.kotlin.gradle.targets.js.npm.NpmResolverPlugin"
     )
 )
-open class NpmResolverPlugin : Plugin<Project> {
+open class NpmResolverPlugin : CommonNpmResolverPlugin {
     override fun apply(project: Project) {
         project.plugins.apply(JsNpmResolverPlugin::class.java)
     }

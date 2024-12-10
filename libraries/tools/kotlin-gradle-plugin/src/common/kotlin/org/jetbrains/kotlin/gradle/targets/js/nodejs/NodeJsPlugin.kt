@@ -5,8 +5,8 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.nodejs
 
-import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.targets.web.nodejs.CommonNodeJsPlugin
 
 @Deprecated(
     "Use JsNodeJsPlugin instead",
@@ -15,7 +15,7 @@ import org.gradle.api.Project
         "org.jetbrains.kotlin.gradle.targets.js.nodejs.JsNodeJsPlugin"
     )
 )
-open class NodeJsPlugin : Plugin<Project> {
+open class NodeJsPlugin : CommonNodeJsPlugin {
     override fun apply(target: Project) {
         target.plugins.apply(JsNodeJsPlugin::class.java)
     }
