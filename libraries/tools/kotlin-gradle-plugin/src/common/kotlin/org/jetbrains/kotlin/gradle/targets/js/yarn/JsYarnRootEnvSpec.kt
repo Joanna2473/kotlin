@@ -1,16 +1,15 @@
 /*
- * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package org.jetbrains.kotlin.gradle.targets.js.yarn
 
-import org.jetbrains.kotlin.gradle.targets.yarn.AbstractYarnRootEnvSpec
-
 /**
  * Spec for Yarn - package manager to install NPM dependencies
  */
-abstract class JsYarnRootEnvSpec : AbstractYarnRootEnvSpec() {
+@Suppress("DEPRECATION")
+abstract class JsYarnRootEnvSpec : YarnRootEnvSpec() {
     companion object {
         const val YARN: String = "kotlinYarnSpec"
     }

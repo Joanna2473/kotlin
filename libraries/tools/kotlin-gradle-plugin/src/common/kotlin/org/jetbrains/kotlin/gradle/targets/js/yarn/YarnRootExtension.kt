@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2024 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
@@ -23,6 +23,9 @@ open class YarnRootExtension(
         const val YARN: String = JsYarnRootExtension.YARN
 
         operator fun get(project: Project): JsYarnRootExtension =
-            JsYarnRootExtension.get(project)
+            JsYarnRootExtension[project]
     }
 }
+
+val Project.yarn: JsYarnRootExtension
+    get() = JsYarnRootExtension[this]
