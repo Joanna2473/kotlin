@@ -72,17 +72,18 @@ class MainFunctionCallWrapperLowering(private val context: JsIrBackendContext) :
                 }
 
                 val mainFunctionCall = JsIrBuilder.buildCall(functionSymbolToCall).apply {
+                    arguments.clear()
                     if (shouldCallMainFunctionAsCoroutine) {
-                        extensionReceiver = IrRawFunctionReferenceImpl(
-                            UNDEFINED_OFFSET,
-                            UNDEFINED_OFFSET,
-                            context.irBuiltIns.anyType,
-                            originalFunctionSymbol
+                        arguments.add(
+                            IrRawFunctionReferenceImpl(
+                                UNDEFINED_OFFSET,
+                                UNDEFINED_OFFSET,
+                                context.irBuiltIns.anyType,
+                                originalFunctionSymbol
+                            )
                         )
                     }
-                    generateMainArguments().forEachIndexed { index, arg ->
-                        putValueArgument(index, arg)
-                    }
+                    arguments.addAll(generateMainArguments())
                 }
 
                 statements.add(mainFunctionCall)
@@ -95,11 +96,11 @@ class MainFunctionCallWrapperLowering(private val context: JsIrBackendContext) :
             runIf(hasStringArrayParameter()) {
                 context.platformArgumentsProviderJsExpression?.let {
                     JsIrBuilder.buildCall(context.intrinsics.jsCode).apply {
-                        putValueArgument(0, it.toIrConst(context.irBuiltIns.stringType))
+                        arguments[0] = it.toIrConst(context.irBuiltIns.stringType)
                     }
                 } ?: JsIrBuilder.buildArray(
                     mainFunctionArgs.map { it.toIrConst(context.irBuiltIns.stringType) },
-                    valueParameters.first().type,
+                    parameters[0].type,
                     context.irBuiltIns.stringType
                 )
             },
@@ -110,6 +111,6 @@ class MainFunctionCallWrapperLowering(private val context: JsIrBackendContext) :
     }
 
     private fun IrSimpleFunction.hasStringArrayParameter(): Boolean {
-        return valueParameters.firstOrNull()?.isStringArrayParameter() == true
+        return parameters.firstOrNull()?.isStringArrayParameter() == true
     }
 }
