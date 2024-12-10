@@ -6,7 +6,6 @@
 package org.jetbrains.kotlin.ir.backend.js
 
 import org.jetbrains.kotlin.backend.common.linkage.issues.checkNoUnboundSymbols
-import org.jetbrains.kotlin.config.phaser.PhaseConfig
 import org.jetbrains.kotlin.config.phaser.PhaserState
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -14,7 +13,7 @@ import org.jetbrains.kotlin.ir.IrBuiltIns
 import org.jetbrains.kotlin.ir.backend.js.lower.*
 import org.jetbrains.kotlin.ir.backend.js.lower.serialization.ir.JsIrLinker
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.CompilationOutputs
-import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.JsGenerationGranularity
+import org.jetbrains.kotlin.backend.js.JsGenerationGranularity
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
