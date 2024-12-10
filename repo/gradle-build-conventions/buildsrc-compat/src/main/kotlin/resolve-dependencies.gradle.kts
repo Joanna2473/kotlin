@@ -1,4 +1,3 @@
-@file:Suppress("DEPRECATION")
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenRootEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.d8.D8EnvSpec
@@ -58,6 +57,7 @@ val resolveJsTools by tasks.registering {
         }
 
         @OptIn(ExperimentalWasmDsl::class)
+        @Suppress("DEPRECATION")
         allprojects {
             extensions.findByType<D8EnvSpec>()?.run {
                 val versionValue = version.get()
