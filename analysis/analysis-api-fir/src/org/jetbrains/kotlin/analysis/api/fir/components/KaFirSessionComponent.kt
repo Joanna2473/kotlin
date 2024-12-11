@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.analysis.api.fir.components
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.KtSourceElement
+import org.jetbrains.kotlin.analysis.api.components.KaSessionComponent
 import org.jetbrains.kotlin.analysis.api.components.KaSubtypingErrorTypePolicy
 import org.jetbrains.kotlin.analysis.api.diagnostics.KaDiagnosticWithPsi
 import org.jetbrains.kotlin.analysis.api.fir.KaFirSession
@@ -30,7 +31,7 @@ import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.types.TypeCheckerState
 import org.jetbrains.kotlin.types.model.convertVariance
 
-internal interface KaFirSessionComponent {
+internal interface KaFirSessionComponent : KaSessionComponent {
     val analysisSession: KaFirSession
 
     val project: Project get() = analysisSession.project
