@@ -8,15 +8,15 @@
 
 package org.jetbrains.kotlin.build.binaryen
 
+import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.testing.Test
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenRootEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenSetupTask
 
 abstract class BinaryenExtension(
     private val binaryenRoot: BinaryenRootEnvSpec,
-    private val setupTask: TaskProvider<out BinaryenSetupTask>,
+    private val setupTask: TaskProvider<out Task>,
 ) {
     fun Test.setupBinaryen() {
         dependsOn(setupTask)
