@@ -5,11 +5,31 @@
 
 package org.jetbrains.kotlin.cli.pipeline.js
 
+import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
+import org.jetbrains.kotlin.builtins.DefaultBuiltIns
+import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.cli.common.perfManager
-import org.jetbrains.kotlin.cli.js.klib.transformFirToIr
 import org.jetbrains.kotlin.cli.pipeline.CheckCompilationErrors
 import org.jetbrains.kotlin.cli.pipeline.PerformanceNotifications
 import org.jetbrains.kotlin.cli.pipeline.PipelinePhase
+import org.jetbrains.kotlin.config.languageVersionSettings
+import org.jetbrains.kotlin.descriptors.impl.ModuleDescriptorImpl
+import org.jetbrains.kotlin.diagnostics.impl.BaseDiagnosticsCollector
+import org.jetbrains.kotlin.fir.backend.Fir2IrConfiguration
+import org.jetbrains.kotlin.fir.backend.Fir2IrExtensions
+import org.jetbrains.kotlin.fir.backend.Fir2IrVisibilityConverter
+import org.jetbrains.kotlin.fir.descriptors.FirModuleDescriptor
+import org.jetbrains.kotlin.fir.pipeline.Fir2IrActualizedResult
+import org.jetbrains.kotlin.fir.pipeline.FirResult
+import org.jetbrains.kotlin.fir.pipeline.ModuleCompilerAnalyzedOutput
+import org.jetbrains.kotlin.fir.pipeline.convertToIrAndActualize
+import org.jetbrains.kotlin.incremental.components.LookupTracker
+import org.jetbrains.kotlin.ir.backend.js.JsFactories
+import org.jetbrains.kotlin.ir.backend.js.ModulesStructure
+import org.jetbrains.kotlin.ir.backend.js.lower.serialization.ir.JsManglerIr
+import org.jetbrains.kotlin.ir.types.IrTypeSystemContextImpl
+import org.jetbrains.kotlin.library.unresolvedDependencies
+import org.jetbrains.kotlin.storage.LockBasedStorageManager
 
 object JsFir2IrPipelinePhase : PipelinePhase<JsFrontendPipelineArtifact, JsFir2IrPipelineArtifact>(
     name = "JsFir2IrPipelinePhase",
@@ -29,5 +49,51 @@ object JsFir2IrPipelinePhase : PipelinePhase<JsFrontendPipelineArtifact, JsFir2I
             diagnosticsReporter,
             moduleStructure
         )
+    }
+
+    fun transformFirToIr(
+        moduleStructure: ModulesStructure,
+        firOutputs: List<ModuleCompilerAnalyzedOutput>,
+        diagnosticsReporter: BaseDiagnosticsCollector,
+    ): Fir2IrActualizedResult {
+        val fir2IrExtensions = Fir2IrExtensions.Default
+
+        var builtInsModule: KotlinBuiltIns? = null
+        val dependencies = mutableListOf<ModuleDescriptorImpl>()
+
+        val librariesDescriptors = moduleStructure.allDependencies.map { resolvedLibrary ->
+            val storageManager = LockBasedStorageManager("ModulesStructure")
+
+            val moduleDescriptor = JsFactories.DefaultDeserializedDescriptorFactory.createDescriptorOptionalBuiltIns(
+                resolvedLibrary,
+                moduleStructure.compilerConfiguration.languageVersionSettings,
+                storageManager,
+                builtInsModule,
+                packageAccessHandler = null,
+                lookupTracker = LookupTracker.DO_NOTHING
+            )
+            dependencies += moduleDescriptor
+            moduleDescriptor.setDependencies(ArrayList(dependencies))
+
+            val isBuiltIns = resolvedLibrary.unresolvedDependencies.isEmpty()
+            if (isBuiltIns) builtInsModule = moduleDescriptor.builtIns
+
+            moduleDescriptor
+        }
+
+        val firResult = FirResult(firOutputs)
+        return firResult.convertToIrAndActualize(
+            fir2IrExtensions,
+            Fir2IrConfiguration.forKlibCompilation(moduleStructure.compilerConfiguration, diagnosticsReporter),
+            IrGenerationExtension.getInstances(moduleStructure.project),
+            irMangler = JsManglerIr,
+            visibilityConverter = Fir2IrVisibilityConverter.Default,
+            kotlinBuiltIns = builtInsModule ?: DefaultBuiltIns.Instance,
+            typeSystemContextProvider = ::IrTypeSystemContextImpl,
+            specialAnnotationsProvider = null,
+            extraActualDeclarationExtractorsInitializer = { emptyList() },
+        ) { irModuleFragment ->
+            (irModuleFragment.descriptor as? FirModuleDescriptor)?.let { it.allDependencyModules = librariesDescriptors }
+        }
     }
 }
