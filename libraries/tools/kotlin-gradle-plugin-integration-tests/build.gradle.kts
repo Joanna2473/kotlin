@@ -244,19 +244,21 @@ if (project.kotlinBuildProperties.isTeamcityBuild) {
     val requiresKotlinNative = listOf("NativeKGP", "MppKGP", "OtherKGP")
     val gradleVersionTaskGroup = "Kotlin Gradle Plugin Verification grouped by Gradle version"
     val kotlinNativeVersionForGradleTests = System.getProperty("kotlinNativeVersionForGradleIT")
-    val hostArch = when (System.getProperty("os.arch")) {
-        "x86_64" -> "x86_64"
-        "amd64" -> "x86_64"
-        "arm64" -> "aarch64"
-        "aarch64" -> "aarch64"
-        else -> null
+    val hostArch = System.getProperty("os.arch").lowercase().let {
+        when (it) {
+            "x86_64" -> "x86_64"
+            "amd64" -> "x86_64"
+            "arm64" -> "aarch64"
+            "aarch64" -> "aarch64"
+            else -> error("Unsupported architecture: $it")
+        }
     }
     val hostOs = System.getProperty("os.name").let {
         when {
             it == "Mac OS X" -> "macos"
             it == "Linux" -> "linux"
             it.startsWith("Windows") -> "windows"
-            else -> null
+            else -> error("Unsupported OS: $it")
         }
     }
     val platformName = "$hostOs-$hostArch"
