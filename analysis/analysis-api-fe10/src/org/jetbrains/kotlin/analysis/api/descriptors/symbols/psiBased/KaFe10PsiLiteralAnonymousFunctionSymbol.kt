@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.KaFe1
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.createErrorType
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.ktVisibility
 import org.jetbrains.kotlin.analysis.api.descriptors.utils.cached
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.KaAnonymousFunctionSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.KaReceiverParameterSymbol
@@ -73,7 +73,7 @@ internal class KaFe10PsiLiteralAnonymousFunctionSymbol(
         get() = withValidityAssertion { psi.isExtensionDeclaration() }
 
     override fun createPointer(): KaSymbolPointer<KaAnonymousFunctionSymbol> = withValidityAssertion {
-        KaPsiBasedSymbolPointer.createForSymbolFromSource<KaAnonymousFunctionSymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
+        KaBasePsiSymbolPointer.createForSymbolFromSource<KaAnonymousFunctionSymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
     }
 
     override fun equals(other: Any?): Boolean = isEqualTo(other)

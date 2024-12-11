@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.symbols.calculateHashCode
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.descriptorBased.base.*
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.isEqualTo
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.pointers.KaFe10NeverRestoringSymbolPointer
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.*
 import org.jetbrains.kotlin.analysis.api.symbols.pointers.KaSymbolPointer
@@ -106,7 +106,7 @@ internal class KaFe10DescSyntheticJavaPropertySymbol(
         get() = withValidityAssertion { descriptor.typeParameters.map { it.toKtTypeParameter(analysisContext) } }
 
     override fun createPointer(): KaSymbolPointer<KaSyntheticJavaPropertySymbol> = withValidityAssertion {
-        KaPsiBasedSymbolPointer.createForSymbolFromSource<KaSyntheticJavaPropertySymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
+        KaBasePsiSymbolPointer.createForSymbolFromSource<KaSyntheticJavaPropertySymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
     }
 
     override fun equals(other: Any?): Boolean = isEqualTo(other)

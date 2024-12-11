@@ -14,7 +14,7 @@ import org.jetbrains.kotlin.analysis.api.symbols.pointers.KaSymbolPointer
 sealed class KaBasePropertyAccessorSymbolPointer<T : KaPropertyAccessorSymbol>(
     private val propertySymbolPointer: KaSymbolPointer<KaPropertySymbol>,
     originalSymbol: T?,
-) : KaBaseSymbolPointer<T>(originalSymbol) {
+) : KaBaseCachedSymbolPointer<T>(originalSymbol) {
     protected fun restorePropertySymbol(analysisSession: KaSession): KaPropertySymbol? = with(analysisSession) {
         return propertySymbolPointer.restoreSymbol()
     }
@@ -30,7 +30,7 @@ sealed class KaBasePropertyAccessorSymbolPointer<T : KaPropertyAccessorSymbol>(
 @KaImplementationDetail
 class KaBasePropertyGetterSymbolPointer(
     propertySymbolPointer: KaSymbolPointer<KaPropertySymbol>,
-    originalSymbol: KaPropertyGetterSymbol?
+    originalSymbol: KaPropertyGetterSymbol?,
 ) : KaBasePropertyAccessorSymbolPointer<KaPropertyGetterSymbol>(propertySymbolPointer, originalSymbol) {
     @KaImplementationDetail
     override fun restoreIfNotCached(analysisSession: KaSession): KaPropertyGetterSymbol? {
@@ -41,7 +41,7 @@ class KaBasePropertyGetterSymbolPointer(
 @KaImplementationDetail
 class KaBasePropertySetterSymbolPointer(
     propertySymbolPointer: KaSymbolPointer<KaPropertySymbol>,
-    originalSymbol: KaPropertySetterSymbol?
+    originalSymbol: KaPropertySetterSymbol?,
 ) : KaBasePropertyAccessorSymbolPointer<KaPropertySetterSymbol>(propertySymbolPointer, originalSymbol) {
     @KaImplementationDetail
     override fun restoreIfNotCached(analysisSession: KaSession): KaPropertySetterSymbol? {

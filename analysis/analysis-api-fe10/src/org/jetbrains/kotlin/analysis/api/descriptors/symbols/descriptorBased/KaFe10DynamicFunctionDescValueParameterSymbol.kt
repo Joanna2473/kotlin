@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.Fe10AnalysisContext
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.base.KaFe10Symbol
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.descriptorBased.base.toKtType
 import org.jetbrains.kotlin.analysis.api.impl.base.annotations.KaBaseEmptyAnnotationList
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBaseSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBaseCachedSymbolPointer
 import org.jetbrains.kotlin.analysis.api.lifetime.KaLifetimeToken
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.KaNamedFunctionSymbol
@@ -78,8 +78,8 @@ internal class KaFe10DynamicFunctionDescValueParameterSymbol(
 
     private class Pointer(
         val ownerPointer: KaSymbolPointer<KaNamedFunctionSymbol>,
-        originalSymbol: KaValueParameterSymbol?
-    ) : KaBaseSymbolPointer<KaValueParameterSymbol>(originalSymbol) {
+        originalSymbol: KaValueParameterSymbol?,
+    ) : KaBaseCachedSymbolPointer<KaValueParameterSymbol>(originalSymbol) {
         @KaImplementationDetail
         override fun restoreIfNotCached(analysisSession: KaSession): KaValueParameterSymbol? {
             val owner = ownerPointer.restoreSymbol(analysisSession) as? KaFe10DescNamedFunctionSymbol ?: return null

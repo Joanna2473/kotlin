@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.annotations.KaFe10Annotatio
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.base.KaFe10Symbol
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.pointers.KaFe10NeverRestoringSymbolPointer
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.pointers.KaFe10PsiDefaultBackingFieldSymbolPointer
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.lifetime.KaLifetimeToken
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.KaBackingFieldSymbol
@@ -28,7 +28,7 @@ internal class KaFe10DescDefaultBackingFieldSymbol(
     override val analysisContext: Fe10AnalysisContext
 ) : KaBackingFieldSymbol(), KaFe10Symbol {
     override fun createPointer(): KaSymbolPointer<KaBackingFieldSymbol> = withValidityAssertion {
-        KaPsiBasedSymbolPointer.createForSymbolFromSource<KaPropertySymbol>(owningProperty)
+        KaBasePsiSymbolPointer.createForSymbolFromSource<KaPropertySymbol>(owningProperty)
             ?.let { KaFe10PsiDefaultBackingFieldSymbolPointer(it, this) }
             ?: KaFe10NeverRestoringSymbolPointer()
     }

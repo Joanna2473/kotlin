@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.symbols.descriptorBased.bas
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.isEqualTo
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.pointers.KaFe10DescSyntheticFieldSymbolPointer
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.pointers.KaFe10NeverRestoringSymbolPointer
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.KaBackingFieldSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.KaKotlinPropertySymbol
@@ -46,7 +46,7 @@ internal class KaFe10DescSyntheticFieldSymbol(
     override fun createPointer(): KaSymbolPointer<KaBackingFieldSymbol> = withValidityAssertion {
         val accessorPsi = descriptor.containingDeclaration.toSourceElement.getPsi()
         if (accessorPsi is KtPropertyAccessor) {
-            val accessorPointer = KaPsiBasedSymbolPointer.createForSymbolFromPsi<KaPropertyAccessorSymbol>(accessorPsi)
+            val accessorPointer = KaBasePsiSymbolPointer.createForSymbolFromPsi<KaPropertyAccessorSymbol>(accessorPsi)
             if (accessorPointer != null) {
                 return KaFe10DescSyntheticFieldSymbolPointer(accessorPointer, this)
             }

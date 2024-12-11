@@ -26,11 +26,11 @@ import java.lang.ref.SoftReference
 import kotlin.reflect.KClass
 
 @KaImplementationDetail
-class KaPsiBasedSymbolPointer<S : KaSymbol> private constructor(
+class KaBasePsiSymbolPointer<S : KaSymbol> private constructor(
     private val psiPointer: SmartPsiElementPointer<out KtElement>,
     private val expectedClass: KClass<S>,
     originalSymbol: S?,
-) : KaBaseSymbolPointer<S>(originalSymbol) {
+) : KaBaseCachedSymbolPointer<S>(originalSymbol) {
     @KaImplementationDetail
     override fun restoreIfNotCached(analysisSession: KaSession): S? {
         val psi = psiPointer.element ?: return null
@@ -53,7 +53,7 @@ class KaPsiBasedSymbolPointer<S : KaSymbol> private constructor(
     }
 
     override fun pointsToTheSameSymbolAs(other: KaSymbolPointer<KaSymbol>): Boolean = this === other ||
-            other is KaPsiBasedSymbolPointer &&
+            other is KaBasePsiSymbolPointer &&
             other.expectedClass == expectedClass &&
             other.psiPointer == psiPointer
 
@@ -66,11 +66,11 @@ class KaPsiBasedSymbolPointer<S : KaSymbol> private constructor(
     @KaImplementationDetail
     companion object {
         @Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
-        inline fun <reified S : KaSymbol> createForSymbolFromSource(symbol: @kotlin.internal.NoInfer S): KaPsiBasedSymbolPointer<S>? {
+        inline fun <reified S : KaSymbol> createForSymbolFromSource(symbol: @kotlin.internal.NoInfer S): KaBasePsiSymbolPointer<S>? {
             return createForSymbolFromSource(symbol, S::class)
         }
 
-        fun <S : KaSymbol> createForSymbolFromSource(symbol: S, expectedClass: KClass<S>): KaPsiBasedSymbolPointer<S>? {
+        fun <S : KaSymbol> createForSymbolFromSource(symbol: S, expectedClass: KClass<S>): KaBasePsiSymbolPointer<S>? {
             ifDisabled { return null }
 
             if (symbol.origin != KaSymbolOrigin.SOURCE) return null
@@ -82,7 +82,7 @@ class KaPsiBasedSymbolPointer<S : KaSymbol> private constructor(
                 else -> return null
             }
 
-            return KaPsiBasedSymbolPointer(psi, expectedClass, symbol)
+            return KaBasePsiSymbolPointer(psi, expectedClass, symbol)
         }
 
 
@@ -90,13 +90,13 @@ class KaPsiBasedSymbolPointer<S : KaSymbol> private constructor(
             ktElement: KtElement,
             expectedClass: KClass<S>,
             originalSymbol: S?
-        ): KaPsiBasedSymbolPointer<S>? {
+        ): KaBasePsiSymbolPointer<S>? {
             ifDisabled { return null }
 
-            return KaPsiBasedSymbolPointer(ktElement, expectedClass, originalSymbol)
+            return KaBasePsiSymbolPointer(ktElement, expectedClass, originalSymbol)
         }
 
-        inline fun <reified S : KaSymbol> createForSymbolFromPsi(ktElement: KtElement): KaPsiBasedSymbolPointer<S>? {
+        inline fun <reified S : KaSymbol> createForSymbolFromPsi(ktElement: KtElement): KaBasePsiSymbolPointer<S>? {
             return createForSymbolFromPsi(ktElement, S::class, null)
         }
 

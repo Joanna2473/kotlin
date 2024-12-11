@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.creat
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.kaSymbolModality
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.ktVisibility
 import org.jetbrains.kotlin.analysis.api.descriptors.utils.cached
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.KaPropertySetterSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.KaReceiverParameterSymbol
@@ -93,7 +93,7 @@ internal class KaFe10PsiPropertySetterSymbol(
         }
 
     override fun createPointer(): KaSymbolPointer<KaPropertySetterSymbol> = withValidityAssertion {
-        KaPsiBasedSymbolPointer.createForSymbolFromSource<KaPropertySetterSymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
+        KaBasePsiSymbolPointer.createForSymbolFromSource<KaPropertySetterSymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
     }
 
     override fun equals(other: Any?): Boolean = isEqualTo(other)

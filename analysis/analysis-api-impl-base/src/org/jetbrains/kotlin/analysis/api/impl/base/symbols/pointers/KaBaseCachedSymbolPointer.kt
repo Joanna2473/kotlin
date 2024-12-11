@@ -6,14 +6,16 @@
 package org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers
 
 import org.jetbrains.kotlin.analysis.api.KaSession
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBaseCachedSymbolPointer.Companion.NOT_CACHED
 import org.jetbrains.kotlin.analysis.api.symbols.*
 import org.jetbrains.kotlin.analysis.api.symbols.pointers.KaSymbolPointer
 import org.jetbrains.kotlin.psi.KtClassInitializer
+import org.jetbrains.kotlin.utils.exceptions.errorWithAttachment
 import java.lang.ref.WeakReference
 
-abstract class KaBaseSymbolPointer<out S : KaSymbol>(originalSymbol: S?) : KaSymbolPointer<S>() {
+abstract class KaBaseCachedSymbolPointer<out S : KaSymbol>(originalSymbol: S?) : KaSymbolPointer<S>() {
     /**
-     * Most of the pointers are derived from [KaBaseSymbolPointer] and support weak symbol cache.
+     * Most of the pointers are derived from [KaBaseCachedSymbolPointer] and support weak symbol cache.
      * This means that if the original symbol the pointer is created from is not garbage-collected and still valid on restore,
      * then the [cachedSymbol] will be immediately returned.
      * Otherwise, the new symbol is built from data stored in the pointer, which takes a bit more resources.
@@ -22,30 +24,40 @@ abstract class KaBaseSymbolPointer<out S : KaSymbol>(originalSymbol: S?) : KaSym
      * Currently, symbol caching is only supported for non-local declarations.
      * The invalidation process for local declarations is bulky, as the lifetime token stays the same on in-block modifications.
      */
-    final override fun restoreSymbol(analysisSession: KaSession): S? {
-        @Suppress("UNCHECKED_CAST")
-        val cached = (cachedSymbol as? WeakReference<*>)?.get() as? S
-        val lifetimeToken = cached?.token
-        if (lifetimeToken == analysisSession.token) {
-            return cached
+    final override fun restoreSymbol(analysisSession: KaSession): S? = when (val cachedSymbol = cachedSymbol) {
+        is WeakReference<*> -> {
+            val value = cachedSymbol.get()
+            @Suppress("UNCHECKED_CAST")
+            if (value != null && (value as S).token == analysisSession.token) {
+                value
+            } else {
+                restoreIfNotCached(analysisSession).also {
+                    this.cachedSymbol = WeakReference(it)
+                }
+            }
         }
-
-        return restoreIfNotCached(analysisSession)?.also {
-            runCaching(it)
+        NOT_CACHED -> restoreIfNotCached(analysisSession)
+        null -> restoreIfNotCached(analysisSession)?.also(::cacheWithIsCacheableCheck)
+        else -> errorWithAttachment("Unexpected value: ${cachedSymbol::class.simpleName}") {
+            withEntry("cachedSymbol", cachedSymbol.toString())
         }
     }
 
-    private var cachedSymbol: Any? = originalSymbol?.let {
-        runCaching(it)
-    }
+    /**
+     * This property can have three values:
+     *
+     * 1. **null** – cache is not initialized, so it can be initialized with the next [restoreSymbol]
+     * 2. [NOT_CACHED] – the symbol cannot be cached, so [restoreSymbol] should delegate directly to [restoreIfNotCached]
+     * 3. [WeakReference] – the symbol is cacheable, [cachedSymbol] stores the result of the latest [restoreIfNotCached] call
+     */
+    private var cachedSymbol: Any? = originalSymbol?.let(::cacheWithIsCacheableCheck)
 
-    private fun runCaching(symbol: S) {
-        if (cachedSymbol === NOT_CACHED) return
+    private fun cacheWithIsCacheableCheck(symbol: S) {
         cachedSymbol = if (symbol.isCacheable) WeakReference(symbol) else NOT_CACHED
     }
 
     companion object {
-        private val NOT_CACHED = object {}
+        private val NOT_CACHED = Any()
 
         internal val KaSymbol.isCacheable: Boolean
             get() = when (this) {

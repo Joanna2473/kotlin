@@ -213,7 +213,7 @@ internal inline fun <R> KaFirPsiSymbol<*, *>.ifSource(action: () -> R): R? {
 }
 
 /**
- * Potentially, we may use [KaFirKtBasedSymbol.backingPsi] to create [KaPsiBasedSymbolPointer] for library elements as well,
+ * Potentially, we may use [KaFirKtBasedSymbol.backingPsi] to create [org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer] for library elements as well,
  * but it triggers AST tree calculation.
  *
  * Another potential issue: the library PSI may represent both [KaSymbolOrigin.SOURCE] and as [KaSymbolOrigin.LIBRARY],
@@ -222,7 +222,7 @@ internal inline fun <R> KaFirPsiSymbol<*, *>.ifSource(action: () -> R): R? {
 internal inline fun <reified S : KaSymbol> KaFirKtBasedSymbol<*, *>.psiBasedSymbolPointerOfTypeIfSource(): KaSymbolPointer<S>? {
     return ifSource {
         backingPsi?.let {
-            KaPsiSymbolPointerCreator.symbolPointerOfType(it, this as? S)
+            KaPsiSymbolPointerCreator.symbolPointerOfType(it, this as S)
         }
     }
 }

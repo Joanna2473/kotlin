@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.symbols.descriptorBased.bas
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.isEqualTo
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.pointers.KaFe10DescNamedClassSymbolPointer
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.pointers.KaFe10NeverRestoringSymbolPointer
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.impl.base.symbols.toKtClassKind
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.*
@@ -92,7 +92,7 @@ internal class KaFe10DescNamedClassSymbol(
         get() = withValidityAssertion { descriptor.declaredTypeParameters.map { KaFe10DescTypeParameterSymbol(it, analysisContext) } }
 
     override fun createPointer(): KaSymbolPointer<KaNamedClassSymbol> = withValidityAssertion {
-        KaPsiBasedSymbolPointer.createForSymbolFromSource<KaNamedClassSymbol>(this)?.let {
+        KaBasePsiSymbolPointer.createForSymbolFromSource<KaNamedClassSymbol>(this)?.let {
             return it
         }
 

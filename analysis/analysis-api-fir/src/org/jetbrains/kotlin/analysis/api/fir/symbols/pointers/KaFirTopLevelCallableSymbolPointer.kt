@@ -8,7 +8,7 @@ package org.jetbrains.kotlin.analysis.api.fir.symbols.pointers
 import org.jetbrains.kotlin.analysis.api.KaImplementationDetail
 import org.jetbrains.kotlin.analysis.api.KaSession
 import org.jetbrains.kotlin.analysis.api.fir.KaFirSession
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBaseSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBaseCachedSymbolPointer
 import org.jetbrains.kotlin.analysis.api.symbols.KaCallableSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.KaSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.pointers.KaSymbolPointer
@@ -19,8 +19,8 @@ import org.jetbrains.kotlin.name.CallableId
 
 internal abstract class KaTopLevelCallableSymbolPointer<S : KaCallableSymbol>(
     private val callableId: CallableId,
-    originalSymbol: S?
-) : KaBaseSymbolPointer<S>(originalSymbol) {
+    originalSymbol: S?,
+) : KaBaseCachedSymbolPointer<S>(originalSymbol) {
     @KaImplementationDetail
     final override fun restoreIfNotCached(analysisSession: KaSession): S? {
         require(analysisSession is KaFirSession)

@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.symbols.isEqualTo
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.pointers.KaFe10NeverRestoringSymbolPointer
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.KaFe10PsiSymbol
 import org.jetbrains.kotlin.analysis.api.descriptors.utils.cached
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.KaAnonymousObjectSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.pointers.KaSymbolPointer
@@ -37,7 +37,7 @@ internal class KaFe10PsiAnonymousObjectSymbol(
         }
 
     override fun createPointer(): KaSymbolPointer<KaAnonymousObjectSymbol> = withValidityAssertion {
-        KaPsiBasedSymbolPointer.createForSymbolFromSource<KaAnonymousObjectSymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
+        KaBasePsiSymbolPointer.createForSymbolFromSource<KaAnonymousObjectSymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
     }
 
     override fun equals(other: Any?): Boolean = isEqualTo(other)

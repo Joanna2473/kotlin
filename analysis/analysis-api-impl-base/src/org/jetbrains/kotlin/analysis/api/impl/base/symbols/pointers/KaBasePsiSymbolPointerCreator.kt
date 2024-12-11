@@ -13,12 +13,12 @@ import kotlin.reflect.KClass
 
 internal class KaBasePsiSymbolPointerCreator : KaPsiSymbolPointerCreator {
     override fun symbolPointer(element: KtElement, originalSymbol: KaSymbol?): KaSymbolPointer<KaSymbol> =
-        KaPsiBasedSymbolPointer(element, KaSymbol::class, originalSymbol)
+        KaBasePsiSymbolPointer(element, KaSymbol::class, originalSymbol)
 
     override fun <S : KaSymbol> symbolPointerOfType(
         element: KtElement,
         expectedType: KClass<S>,
         originalSymbol: S?
     ): KaSymbolPointer<S> =
-        KaPsiBasedSymbolPointer(element, expectedType, originalSymbol)
+        KaBasePsiSymbolPointer(element, expectedType, originalSymbol)
 }

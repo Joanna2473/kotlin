@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.analysis.api.KaSession
 import org.jetbrains.kotlin.analysis.api.descriptors.KaFe10Session
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.descriptorBased.base.getSymbolPointerSignature
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.descriptorBased.base.toKtCallableSymbol
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBaseSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBaseCachedSymbolPointer
 import org.jetbrains.kotlin.analysis.api.symbols.KaFunctionSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.KaSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.pointers.KaSymbolPointer
@@ -25,7 +25,7 @@ internal class KaFe10DescFunctionSymbolPointer<T : KaFunctionSymbol>(
     private val callableId: CallableId,
     private val signature: String,
     originalSymbol: T?
-) : KaBaseSymbolPointer<T>(originalSymbol) {
+) : KaBaseCachedSymbolPointer<T>(originalSymbol) {
     @KaImplementationDetail
     override fun restoreIfNotCached(analysisSession: KaSession): T? {
         check(analysisSession is KaFe10Session)

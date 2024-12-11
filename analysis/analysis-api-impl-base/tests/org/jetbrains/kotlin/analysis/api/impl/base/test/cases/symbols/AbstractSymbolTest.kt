@@ -8,8 +8,8 @@ package org.jetbrains.kotlin.analysis.api.impl.base.test.cases.symbols
 import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.analysis.api.KaSession
 import org.jetbrains.kotlin.analysis.api.impl.base.components.KaBaseSymbolProvider
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBaseSymbolPointer
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBaseCachedSymbolPointer.Companion.isCacheable
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.impl.base.test.cases.symbols.SymbolTestDirectives.DO_NOT_CHECK_NON_PSI_SYMBOL_RESTORE
 import org.jetbrains.kotlin.analysis.api.impl.base.test.cases.symbols.SymbolTestDirectives.DO_NOT_CHECK_NON_PSI_SYMBOL_RESTORE_K1
 import org.jetbrains.kotlin.analysis.api.impl.base.test.cases.symbols.SymbolTestDirectives.DO_NOT_CHECK_NON_PSI_SYMBOL_RESTORE_K2
@@ -181,7 +181,7 @@ abstract class AbstractSymbolTest : AbstractAnalysisApiBasedTest() {
     }
 
     private fun KaSymbol.createPointerForTest(disablePsiBasedLogic: Boolean): KaSymbolPointer<*> =
-        KaPsiBasedSymbolPointer.withDisabledPsiBasedPointers(disable = disablePsiBasedLogic) { createPointer() }
+        KaBasePsiSymbolPointer.withDisabledPsiBasedPointers(disable = disablePsiBasedLogic) { createPointer() }
 
     private fun assertSymbolPointer(pointer: KaSymbolPointer<*>, testServices: TestServices) {
         testServices.assertions.assertTrue(value = pointer.pointsToTheSameSymbolAs(pointer)) {
@@ -335,7 +335,7 @@ abstract class AbstractSymbolTest : AbstractAnalysisApiBasedTest() {
                     restoreSymbol(pointer, disablePsiBasedLogic) ?: error("Unexpectedly non-restored symbol pointer: ${it::class}")
                 val secondRestore =
                     restoreSymbol(pointer, disablePsiBasedLogic) ?: error("Unexpectedly non-restored symbol pointer: ${it::class}")
-                if (KaBaseSymbolPointer.run { firstRestore.isCacheable }) {
+                if (firstRestore.isCacheable) {
                     testServices.assertions.assertTrue(firstRestore === secondRestore) {
                         "${pointer::class} does not support symbol caching"
                     }

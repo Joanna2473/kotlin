@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.kaSym
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.ktVisibility
 import org.jetbrains.kotlin.analysis.api.descriptors.utils.cached
 import org.jetbrains.kotlin.analysis.api.impl.base.symbols.invalidEnumEntryAsClassKind
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.*
 import org.jetbrains.kotlin.analysis.api.symbols.pointers.KaSymbolPointer
@@ -120,7 +120,7 @@ internal class KaFe10PsiNamedClassSymbol(
         get() = withValidityAssertion { psi.ktVisibility ?: descriptor?.ktVisibility ?: Visibilities.Public }
 
     override fun createPointer(): KaSymbolPointer<KaNamedClassSymbol> = withValidityAssertion {
-        KaPsiBasedSymbolPointer.createForSymbolFromSource<KaNamedClassSymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
+        KaBasePsiSymbolPointer.createForSymbolFromSource<KaNamedClassSymbol>(this) ?: KaFe10NeverRestoringSymbolPointer()
     }
 
     override fun equals(other: Any?): Boolean = isEqualTo(other)

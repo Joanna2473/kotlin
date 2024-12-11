@@ -20,7 +20,7 @@ import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.creat
 import org.jetbrains.kotlin.analysis.api.descriptors.symbols.psiBased.base.ktVisibility
 import org.jetbrains.kotlin.analysis.api.descriptors.utils.cached
 import org.jetbrains.kotlin.analysis.api.impl.base.annotations.KaBaseEmptyAnnotationList
-import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaPsiBasedSymbolPointer
+import org.jetbrains.kotlin.analysis.api.impl.base.symbols.pointers.KaBasePsiSymbolPointer
 import org.jetbrains.kotlin.analysis.api.lifetime.withValidityAssertion
 import org.jetbrains.kotlin.analysis.api.symbols.KaPropertySetterSymbol
 import org.jetbrains.kotlin.analysis.api.symbols.KaSymbolOrigin
@@ -77,7 +77,7 @@ internal class KaFe10PsiDefaultSetterParameterSymbol(
         get() = withValidityAssertion { KaBaseEmptyAnnotationList(token) }
 
     override fun createPointer(): KaSymbolPointer<KaValueParameterSymbol> = withValidityAssertion {
-        KaPsiBasedSymbolPointer.createForSymbolFromPsi<KaPropertySetterSymbol>(accessorPsi)
+        KaBasePsiSymbolPointer.createForSymbolFromPsi<KaPropertySetterSymbol>(accessorPsi)
             ?.let {
                 KaFe10PsiDefaultSetterParameterSymbolPointer(it, this)
             } ?: KaFe10NeverRestoringSymbolPointer()
