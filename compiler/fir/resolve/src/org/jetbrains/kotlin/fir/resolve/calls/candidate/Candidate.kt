@@ -175,7 +175,7 @@ class Candidate(
 
     @UpdatingCandidateInvariants
     fun replaceArgumentPrefix(newArgumentPrefix: List<ConeResolutionAtom>) {
-        val remainingArguments = arguments.drop(newArgumentPrefix.size)
+        val remainingArguments = arguments.subList(newArgumentPrefix.size, arguments.size)
 
         val newArgumentMapping = LinkedHashMap<ConeResolutionAtom, FirValueParameter>()
         for ((oldArgument, newArgument) in arguments.zip(newArgumentPrefix)) {
