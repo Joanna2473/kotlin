@@ -15825,6 +15825,11 @@ public class LightAnalysisModeTestGenerated extends AbstractLightAnalysisModeTes
       runTest("compiler/testData/codegen/box/elvis/primitive.kt");
     }
 
+    @TestMetadata("withNothingConstraintAndExpectedType.kt")
+    public void testWithNothingConstraintAndExpectedType() {
+      runTest("compiler/testData/codegen/box/elvis/withNothingConstraintAndExpectedType.kt");
+    }
+
     @TestMetadata("withReturn.kt")
     public void testWithReturn() {
       runTest("compiler/testData/codegen/box/elvis/withReturn.kt");
