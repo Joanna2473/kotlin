@@ -146,11 +146,11 @@ abstract class NumericForLoopHeader<T : NumericHeaderInfo>(
                     // last <= inductionVar (use `<` if last is exclusive)
                     if (this is UnsignedProgressionType) {
                         irCall(intCompFun).apply {
-                            putValueArgument(0, irCall(unsignedCompareToFun!!).apply {
-                                dispatchReceiver = lastExpression.asUnsigned()
-                                putValueArgument(0, irGet(inductionVariable).asUnsigned())
-                            })
-                            putValueArgument(1, irInt(0))
+                            arguments[0] = irCall(unsignedCompareToFun!!).apply {
+                                arguments[0] = lastExpression.asUnsigned()
+                                arguments[1] = irGet(inductionVariable).asUnsigned()
+                            }
+                            arguments[1] = irInt(0)
                         }
                     } else {
                         irCall(elementCompFun!!).apply {
