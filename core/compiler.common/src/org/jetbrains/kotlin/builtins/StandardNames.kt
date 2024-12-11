@@ -213,13 +213,13 @@ object StandardNames {
         // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73740),
         // builtins from kotlin.concurrent package are kept till Atomic API is completely moved to kotlin.concurrent.atomics
         // and built with the new bootstrap compiler which provides builtins from the new package.
-        @JvmField val atomicInt_concurrent: FqName = concurrent("AtomicInt")
-        @JvmField val atomicLong_concurrent: FqName = concurrent("AtomicLong")
-        @JvmField val atomicBoolean_concurrent: FqName = concurrent("AtomicBoolean")
-        @JvmField val atomicReference_concurrent: FqName = concurrent("AtomicReference")
-        @JvmField val atomicIntArray_concurrent: FqName = concurrent("AtomicIntArray")
-        @JvmField val atomicLongArray_concurrent: FqName = concurrent("AtomicLongArray")
-        @JvmField val atomicArray_concurrent: FqName = concurrent("AtomicArray")
+        @JvmField val atomicInt_migration: FqName = concurrent("AtomicInt")
+        @JvmField val atomicLong_migration: FqName = concurrent("AtomicLong")
+        @JvmField val atomicBoolean_migration: FqName = concurrent("AtomicBoolean")
+        @JvmField val atomicReference_migration: FqName = concurrent("AtomicReference")
+        @JvmField val atomicIntArray_migration: FqName = concurrent("AtomicIntArray")
+        @JvmField val atomicLongArray_migration: FqName = concurrent("AtomicLongArray")
+        @JvmField val atomicArray_migration: FqName = concurrent("AtomicArray")
 
         @JvmField val atomicInt: FqName = concurrentAtomics("AtomicInt")
         @JvmField val atomicLong: FqName = concurrentAtomics("AtomicLong")
