@@ -71,6 +71,7 @@ fun generateJUnit3CompilerTests(args: Array<String>, mainClassName: String?) {
                 model("cli/jvm/_languageVersion", extension = "args", testMethod = "doJvmTest", recursive = false)
                 model("cli/jvm/_jdkHome", extension = "args", testMethod = "doJvmTest", recursive = false)
                 model("cli/jvm/_jdkRelease", extension = "args", testMethod = "doJvmTest", recursive = false)
+                model("cli/jvm/_classPath", extension = "args", testMethod = "doJvmTest", recursive = false)
                 model("cli/jvm/sourceFilesAndDirectories", extension = "args", testMethod = "doJvmTest", recursive = false)
                 model("cli/jvm", extension = "args", testMethod = "doJvmTest", recursive = false)
                 model("cli/js", extension = "args", testMethod = "doJsTest", recursive = false)
