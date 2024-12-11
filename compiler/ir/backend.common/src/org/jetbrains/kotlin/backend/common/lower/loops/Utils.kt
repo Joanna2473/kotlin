@@ -36,7 +36,7 @@ internal fun IrExpression.negate(): IrExpression {
 
             val unaryMinusFun = type.getClass()!!.functions.single {
                 it.name == OperatorNameConventions.UNARY_MINUS &&
-                        it.valueParameters.isEmpty()
+                        it.hasShape(dispatchReceiver = true)
             }
             IrCallImpl(
                 startOffset, endOffset, unaryMinusFun.returnType,
