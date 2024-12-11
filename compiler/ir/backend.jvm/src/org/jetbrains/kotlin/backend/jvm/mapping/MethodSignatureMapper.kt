@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.codegen.signature.BothSignatureWriter
 import org.jetbrains.kotlin.codegen.signature.JvmSignatureWriter
 import org.jetbrains.kotlin.codegen.state.extractTypeMappingModeFromAnnotation
 import org.jetbrains.kotlin.codegen.state.isMethodWithDeclarationSiteWildcardsFqName
+import org.jetbrains.kotlin.config.JvmDefaultMode
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.lazy.IrLazyClass
@@ -35,7 +36,6 @@ import org.jetbrains.kotlin.metadata.jvm.JvmProtoBuf
 import org.jetbrains.kotlin.metadata.jvm.deserialization.JvmProtoBufUtil
 import org.jetbrains.kotlin.name.JvmStandardClassIds.JVM_SUPPRESS_WILDCARDS_ANNOTATION_FQ_NAME
 import org.jetbrains.kotlin.name.NameUtils
-import org.jetbrains.kotlin.resolve.calls.model.ResolvedCallArgument.DefaultArgument.arguments
 import org.jetbrains.kotlin.resolve.jvm.JAVA_LANG_RECORD_FQ_NAME
 import org.jetbrains.kotlin.resolve.jvm.jvmSignature.JvmMethodGenericSignature
 import org.jetbrains.kotlin.resolve.jvm.jvmSignature.JvmMethodParameterKind
@@ -369,7 +369,30 @@ class MethodSignatureMapper(private val context: JvmBackendContext, private val 
             else -> Opcodes.INVOKEVIRTUAL
         }
 
-        val declaration = findSuperDeclaration(callee, isSuperCall)
+        // Do not attempt to replace a call to a method with some super method, in a few select cases:
+        // 1) if this is a call to a class bridge for JVM default compatibility.
+        //     a) in case of a class from source, it's enough to check that `defaultImplsRedirection` attribute is set for the function.
+        //     b) in case of a class from binaries, ... ?! TODO
+        // 2) if this is a super-call which is inside a class bridge for JVM default compatibility.
+        //
+        // The reason is that in these cases the IR is already correct, and replacing it will lead to incorrect behavior,
+        // or even StackOverflowError. Ideally, `findSuperDeclaration` should be removed altogether as it causes the same problem even
+        // without these bridges (KT-73800), but for now, this is a workaround specifically for compatibility bridges.
+        val isCompatibilityMode =
+            context.config.jvmDefaultMode == JvmDefaultMode.ALL_COMPATIBILITY // TODO: also check annotation
+        val declaration =
+            // TODO: isCompatibilityMode is not correct here because we rather need to get this flag value for the callee's containing class
+            // TODO: also, it's risky to check if defaultImplsRedirection is non-null for any declaration from the hierarchy
+            // Maybe there should be a separate lowering which processes all fake overrides of non-abstract methods from interfaces in classes,
+            // and replaces (?) them with something that is computed once in JvmCachedDeclarations.
+            // But not sure what to do with lazy IR, so maybe we just need to "pull" the correct value here instead.
+            if (isCompatibilityMode && callee.allOverridden(true).any { it.defaultImplsRedirection != null })
+                callee
+            else if (isCompatibilityMode && caller?.origin == JvmLoweredDeclarationOrigin.SUPER_INTERFACE_METHOD_BRIDGE)
+                callee
+            else
+                findSuperDeclaration(callee, isSuperCall)
+
         val signature =
             if (caller != null && caller.isBridge()) {
                 // Do not remap special builtin methods when called from a bridge. The bridges are there to provide the
