@@ -24,7 +24,7 @@ public abstract class KaLifetimeToken {
     public abstract fun isValid(): Boolean
 
     /**
-     * Returns the reason why [isValid] is `false`. The function should only be called when the lifetime token is actually invalid.
+     * Returns the reason why [isValid] is `false`. If the lifetime token is not invalid, the function throws an exception.
      */
     public abstract fun getInvalidationReason(): String
 
@@ -35,8 +35,7 @@ public abstract class KaLifetimeToken {
     public abstract fun isAccessible(): Boolean
 
     /**
-     * Returns the reason why [isAccessible] is `false`. The function should only be called when the lifetime token is actually
-     * inaccessible.
+     * Returns the reason why [isAccessible] is `false`. If the lifetime token is not inaccessible, the function throws an exception.
      */
     public abstract fun getInaccessibilityReason(): String
 }
