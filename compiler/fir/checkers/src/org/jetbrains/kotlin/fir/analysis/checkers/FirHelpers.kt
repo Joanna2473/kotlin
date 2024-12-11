@@ -120,7 +120,7 @@ fun FirClassSymbol<*>.isSupertypeOf(other: FirClassSymbol<*>, session: FirSessio
 }
 
 fun ConeKotlinType.isValueClass(session: FirSession): Boolean {
-    // Value classes have inline modifier in FIR
+    // Value classes have `inline` or `value` modifier in FIR
     return toRegularClassSymbol(session)?.isInlineOrValue == true
 }
 
