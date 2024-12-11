@@ -106,7 +106,15 @@ fun IrClass.hasJvmDefaultWithCompatibilityAnnotation(): Boolean = hasAnnotation(
 fun IrFunction.hasPlatformDependent(): Boolean = propertyIfAccessor.hasAnnotation(PLATFORM_DEPENDENT_ANNOTATION_FQ_NAME)
 
 fun IrFunction.getJvmVisibilityOfDefaultArgumentStub() =
-    if (DescriptorVisibilities.isPrivate(visibility) || isInlineOnly()) JavaDescriptorVisibilities.PACKAGE_VISIBILITY else DescriptorVisibilities.PUBLIC
+    if (visibility == DescriptorVisibilities.INTERNAL) {
+        DescriptorVisibilities.INTERNAL
+    } else {
+        if (DescriptorVisibilities.isPrivate(visibility) || isInlineOnly()) {
+            JavaDescriptorVisibilities.PACKAGE_VISIBILITY
+        } else {
+            DescriptorVisibilities.PUBLIC
+        }
+    }
 
 fun IrDeclaration.isInCurrentModule(): Boolean =
     getPackageFragment() is IrFile
