@@ -131,8 +131,7 @@ abstract class NumericForLoopHeader<T : NumericHeaderInfo>(
                 val unsignedCompareToFun = if (this is UnsignedProgressionType) {
                     unsignedType.getClass()!!.functions.single {
                         it.name == OperatorNameConventions.COMPARE_TO &&
-                                it.dispatchReceiverParameter != null && it.extensionReceiverParameter == null &&
-                                it.valueParameters.size == 1 && it.valueParameters[0].type == unsignedType
+                                it.hasShape(dispatchReceiver = true, regularParameters = 1, parameterTypes = listOf(null, unsignedType))
                     }
                 } else null
 
