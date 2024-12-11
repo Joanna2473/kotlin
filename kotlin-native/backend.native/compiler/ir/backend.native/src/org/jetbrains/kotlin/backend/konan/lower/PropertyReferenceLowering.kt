@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
+import org.jetbrains.kotlin.utils.addToStdlib.runIf
 import org.jetbrains.kotlin.utils.addToStdlib.shouldNotBeCalled
 
 internal class PropertyReferencesConstructorsSet(
@@ -66,10 +67,6 @@ internal class PropertyReferenceLowering(val generationState: NativeGenerationSt
                 require(originalPropertySymbol is IrPropertySymbol)
                 val typeArguments = (expression.type as IrSimpleType).arguments.map { it.typeOrNull ?: irBuiltIns.anyNType  }
                 val block =  irBuilder.irBlock {
-                    val captures = expression.boundValues.map {
-                        if (it is IrGetValue) it.symbol.owner else irTemporary(it)
-                    }
-
                     val constructor = if (expression.setterFunction != null) {
                         mutableSymbols
                     } else {
@@ -78,19 +75,26 @@ internal class PropertyReferenceLowering(val generationState: NativeGenerationSt
 
                     +irCall(constructor, expression.type, typeArguments).apply {
                         arguments[0] = irString(originalPropertySymbol.owner.name.asString())
-                        arguments[1] = irRichFunctionReference(
+                        val getterReference = irRichFunctionReference(
                                 function = expression.getterFunction,
                                 superType = symbols.kFunctionN(typeArguments.size - 1).typeWith(typeArguments),
                                 reflectionTarget = originalPropertySymbol.owner.getter!!.symbol,
-                                captures = captures,
+                                captures = expression.boundValues,
                                 origin = expression.origin
                         )
+                        arguments[1] = getterReference
                         expression.setterFunction?.let { setterFunction ->
+                            // we need to avoid calculation of bound values twice, so store them to temp variables
+                            val tempVars = getterReference.boundValues.map {
+                                if (it is IrGetValue) it.symbol.owner else irTemporary(it)
+                            }
+                            getterReference.boundValues.clear()
+                            getterReference.boundValues += tempVars.map { irGet(it) }
                             arguments[2] = irRichFunctionReference(
                                     function = setterFunction,
                                     superType = symbols.kFunctionN(typeArguments.size).typeWith(typeArguments + irBuiltIns.unitType),
                                     reflectionTarget = originalPropertySymbol.owner.setter!!.symbol,
-                                    captures = captures,
+                                    captures = tempVars.map { irGet(it) },
                                     origin = expression.origin
                             )
                         }
@@ -116,14 +120,14 @@ internal class PropertyReferenceLowering(val generationState: NativeGenerationSt
             function: IrSimpleFunction,
             superType: IrSimpleType,
             reflectionTarget: IrSimpleFunctionSymbol,
-            captures: List<IrValueDeclaration>,
+            captures: List<IrExpression>,
             origin: IrStatementOrigin?,
     ): IrRichFunctionReferenceImpl = irRichFunctionReference(
             invokeFunction = function,
             superType = superType,
             reflectionTargetSymbol = reflectionTarget,
             overriddenFunctionSymbol = UpgradeCallableReferences.selectSAMOverriddenFunction(superType),
-            captures = captures.map { irGet(it) },
+            captures = captures,
             origin = origin
     )
 
