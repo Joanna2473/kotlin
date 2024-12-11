@@ -325,7 +325,7 @@ private class RangeLoopTransformer(
 
         iterator.apply {
             this.type = receiverType
-            this.initializer = initializer.extensionReceiver
+            this.initializer = initializer.arguments[0]
         }
 
         val loop = statements[1] as IrWhileLoop
