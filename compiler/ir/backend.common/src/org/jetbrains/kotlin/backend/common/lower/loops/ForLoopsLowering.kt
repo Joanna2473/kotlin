@@ -320,9 +320,7 @@ private class RangeLoopTransformer(
         val receiverClass = receiverType.getClass() ?: return
         val next = receiverClass.functions.singleOrNull {
             it.name == OperatorNameConventions.NEXT &&
-                    it.dispatchReceiverParameter != null &&
-                    it.extensionReceiverParameter == null &&
-                    it.valueParameters.isEmpty()
+                    it.hasShape(dispatchReceiver = true)
         } ?: return
 
         iterator.apply {
