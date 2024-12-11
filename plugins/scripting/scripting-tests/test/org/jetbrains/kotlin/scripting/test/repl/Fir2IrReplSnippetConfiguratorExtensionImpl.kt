@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.ir.util.createThisReceiverParameter
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.NameUtils
+import org.jetbrains.kotlin.name.SpecialNames
 import kotlin.script.experimental.host.ScriptingHostConfiguration
 
 class Fir2IrReplSnippetConfiguratorExtensionImpl(
