@@ -128,7 +128,7 @@ internal abstract class UnsignedProgressionType(
             ).apply {
                 typeArguments[0] = fromType
                 typeArguments[1] = unsignedType
-                putValueArgument(0, this@asUnsigned)
+                arguments[0] = this@asUnsigned
             }
         } else {
             // Fallback to calling `toUInt/ULong()` extension function.
