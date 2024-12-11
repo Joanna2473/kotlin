@@ -418,7 +418,7 @@ kotlin {
             }
 
             prepareJsIrMainSources.configure {
-                // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73740),
+                // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73816),
                 // builtins from kotlin.concurrent package are kept till Atomic API is completely moved to kotlin.concurrent.atomics
                 // and built with the new bootstrap compiler which provides builtins from the new package.
                 val ignoredFileNames = setOf("Atomics.jvm.kt", "Atomics.kt", "AtomicArrays.jvm.kt", "AtomicArrays.kt")
@@ -489,7 +489,7 @@ kotlin {
                 val sources = unimplementedNativeBuiltIns
 
                 val excluded = listOf(
-                    // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73740),
+                    // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73816),
                     // builtins from kotlin.concurrent package are kept till Atomic API is completely moved to kotlin.concurrent.atomics
                     // and built with the new bootstrap compiler which provides builtins from the new package.
                     "Atomics.jvm.kt", "AtomicArrays.jvm.kt",

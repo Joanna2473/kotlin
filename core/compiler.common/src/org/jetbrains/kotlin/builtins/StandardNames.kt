@@ -104,7 +104,7 @@ object StandardNames {
         KOTLIN_REFLECT_FQ_NAME,
         KOTLIN_INTERNAL_FQ_NAME,
         COROUTINES_PACKAGE_FQ_NAME,
-        // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73740),
+        // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73816),
         // builtins from kotlin.concurrent package are kept till Atomic API is completely moved to kotlin.concurrent.atomics
         // and built with the new bootstrap compiler which provides builtins from the new package.
         CONCURRENT_PACKAGE_FQ_NAME,
@@ -210,7 +210,7 @@ object StandardNames {
         @JvmField val uIntArrayFqName: FqName = fqName("UIntArray")
         @JvmField val uLongArrayFqName: FqName = fqName("ULongArray")
 
-        // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73740),
+        // TODO: atomic builtins are moving from kotlin.concurrent to kotlin.concurrent.atomics package (see KT-73816),
         // builtins from kotlin.concurrent package are kept till Atomic API is completely moved to kotlin.concurrent.atomics
         // and built with the new bootstrap compiler which provides builtins from the new package.
         @JvmField val atomicInt_migration: FqName = concurrent("AtomicInt")
