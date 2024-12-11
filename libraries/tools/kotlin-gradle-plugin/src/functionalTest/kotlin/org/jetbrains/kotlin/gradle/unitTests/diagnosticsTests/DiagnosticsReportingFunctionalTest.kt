@@ -3,6 +3,8 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
+@file:Suppress("FunctionName")
+
 package org.jetbrains.kotlin.gradle.unitTests.diagnosticsTests
 
 import org.gradle.api.Project
@@ -160,6 +162,56 @@ class DiagnosticsReportingFunctionalTest {
             reportTestDiagnostic(severity = ERROR)
             evaluate()
             checkDiagnostics("suppressForWarningsDoesntWorkForErrors")
+        }
+    }
+
+    @Test
+    fun `verify all diagnostic factories have unique ids`() {
+        val diagnosticFactories = KotlinToolingDiagnostics::class.nestedClasses
+            .mapNotNull { nestedClass ->
+                nestedClass.objectInstance as? ToolingDiagnosticFactory
+            }
+
+        // Track seen IDs
+        val seenIds = mutableSetOf<String>()
+        val duplicateIds = mutableListOf<Pair<String, List<String>>>()
+
+        // Check for duplicates
+        diagnosticFactories.forEach { factory ->
+            if (!seenIds.add(factory.id)) {
+                // If ID is already in the set, it's a duplicate
+                val duplicatesOfThisId = diagnosticFactories
+                    .filter { it.id == factory.id }
+                    .map { it::class.simpleName!! }
+
+                duplicateIds.add(factory.id to duplicatesOfThisId)
+            }
+        }
+
+        // Assertion with detailed error message
+        assert(duplicateIds.isEmpty()) {
+            val errorMessage = duplicateIds.joinToString("\n") { (id, classes) ->
+                "Duplicate ID '$id' found in classes: ${classes.joinToString(", ")}"
+            }
+            "Duplicate IDs detected:\n$errorMessage"
+        }
+    }
+
+    @Test
+    fun `verify all diagnostic factories have valid ids`() {
+        val diagnosticFactories = KotlinToolingDiagnostics::class.nestedClasses
+            .mapNotNull { nestedClass ->
+                nestedClass.objectInstance as? ToolingDiagnosticFactory
+            }
+
+        // Ensure all factories have non-empty, non-blank IDs
+        val invalidIdFactories = diagnosticFactories.filter { it.id.isBlank() }
+
+        assert(invalidIdFactories.isEmpty()) {
+            val errorMessage = invalidIdFactories.joinToString("\n") {
+                "Factory ${it::class.simpleName} has invalid (blank) ID: '${it.id}'"
+            }
+            "Found factories with invalid (blank) IDs:\n$errorMessage"
         }
     }
 }
