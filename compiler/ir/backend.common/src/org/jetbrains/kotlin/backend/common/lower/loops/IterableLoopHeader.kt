@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrWhileLoopImpl
 import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.util.coerceToUnitIfNeeded
 import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.hasShape
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
 internal class IterableLoopHeader(
@@ -58,9 +59,10 @@ internal class IterableLoopHeader(
         //   }
         val iteratorClass = headerInfo.iteratorVariable.type.getClass()!!
         val hasNext =
-            irCall(iteratorClass.functions.first { it.name == OperatorNameConventions.HAS_NEXT && it.valueParameters.isEmpty() }).apply {
-                dispatchReceiver = irGet(headerInfo.iteratorVariable)
-            }
+            irCall(iteratorClass.functions.first { it.name == OperatorNameConventions.HAS_NEXT && it.hasShape(dispatchReceiver = true) })
+                .apply {
+                    dispatchReceiver = irGet(headerInfo.iteratorVariable)
+                }
         val newLoop = IrWhileLoopImpl(oldLoop.startOffset, oldLoop.endOffset, oldLoop.type, oldLoop.origin).apply {
             label = oldLoop.label
             condition = hasNext
