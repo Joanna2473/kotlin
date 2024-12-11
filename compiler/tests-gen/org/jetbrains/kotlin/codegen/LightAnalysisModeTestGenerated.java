@@ -26535,6 +26535,11 @@ public class LightAnalysisModeTestGenerated extends AbstractLightAnalysisModeTes
         runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/uint.kt");
       }
 
+      @TestMetadata("uintInt.kt")
+      public void testUintInt() {
+        runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/uintInt.kt");
+      }
+
       @TestMetadata("uintReceiver.kt")
       public void testUintReceiver() {
         runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/uintReceiver.kt");

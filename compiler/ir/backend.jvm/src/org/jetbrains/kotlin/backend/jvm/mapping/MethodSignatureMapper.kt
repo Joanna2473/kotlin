@@ -302,8 +302,6 @@ class MethodSignatureMapper(private val context: JvmBackendContext, private val 
             )
                 ?: if (declaration.isMethodWithDeclarationSiteWildcards && !declaration.isStaticInlineClassReplacement && type.argumentsCount() != 0) {
                     TypeMappingMode.GENERIC_ARGUMENT // Render all wildcards
-                } else if (declaration.origin == JvmLoweredDeclarationOrigin.FUNCTION_WITH_EXPOSED_INLINE_CLASS) {
-                    TypeMappingMode.GENERIC_ARGUMENT.wrapInlineClassesMode()
                 } else {
                     getOptimalModeForValueParameter(type)
                 }
@@ -355,7 +353,10 @@ class MethodSignatureMapper(private val context: JvmBackendContext, private val 
             return
         }
 
-        val mode = getTypeMappingModeForParameter(typeSystem, declaration, type)
+        var mode = getTypeMappingModeForParameter(typeSystem, declaration, type)
+        if (declaration.origin == JvmLoweredDeclarationOrigin.FUNCTION_WITH_EXPOSED_INLINE_CLASS && type.isInlineClassType()) {
+            mode = mode.wrapInlineClassesMode()
+        }
         typeMapper.mapType(type, mode, sw, materialized)
     }
 
