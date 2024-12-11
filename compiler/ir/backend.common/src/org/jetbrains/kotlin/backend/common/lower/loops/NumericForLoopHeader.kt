@@ -194,8 +194,8 @@ abstract class NumericForLoopHeader<T : NumericHeaderInfo>(
                             ),
                             context.andand(
                                 irCall(builtIns.lessFunByOperandType.getValue(stepClass.symbol)).apply {
-                                    putValueArgument(0, stepExpression.shallowCopy())
-                                    putValueArgument(1, zeroStepExpression())
+                                    arguments[0] = stepExpression.shallowCopy()
+                                    arguments[1] = zeroStepExpression()
                                 },
                                 conditionForDecreasing()
                             )
