@@ -171,8 +171,8 @@ abstract class NumericForLoopHeader<T : NumericHeaderInfo>(
                         }
                     } else {
                         irCall(elementCompFun!!).apply {
-                            putValueArgument(0, irGet(inductionVariable))
-                            putValueArgument(1, lastExpression)
+                            arguments[0] = irGet(inductionVariable)
+                            arguments[1] = lastExpression
                         }
                     }
 
