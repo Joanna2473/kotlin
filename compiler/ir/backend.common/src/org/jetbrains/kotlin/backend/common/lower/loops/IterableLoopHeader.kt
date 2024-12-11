@@ -38,7 +38,7 @@ internal class IterableLoopHeader(
             val iteratorClass = headerInfo.iteratorVariable.type.getClass()!!
             val next =
                 irCall(iteratorClass.functions.first {
-                    it.name == OperatorNameConventions.NEXT && it.valueParameters.isEmpty()
+                    it.name == OperatorNameConventions.NEXT && it.hasShape(dispatchReceiver = true)
                 }.symbol).apply {
                     dispatchReceiver = irGet(headerInfo.iteratorVariable)
                 }
