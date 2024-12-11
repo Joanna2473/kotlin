@@ -214,17 +214,6 @@ class PropertyReferenceLowering(private val context: JsIrBackendContext) : BodyL
             expression.transformChildrenVoid(this)
 
             val factoryFunction = buildFactoryFunction(expression)
-
-            checkIr(
-                (expression.arguments zip (expression.getter ?: expression.setter)?.owner?.parameters.orEmpty())
-                    .none { (arg, param) -> arg != null && param.kind == IrParameterKind.Regular },
-                "Regular parameters of a property accessor cannot be bound in a property reference"
-            ) {
-                withIrEntry("expression", expression)
-                withIrEntry("getter", expression.getter?.owner)
-                withIrEntry("setter", expression.setter?.owner)
-            }
-
             return IrCallImpl(
                 expression.startOffset,
                 expression.endOffset,
