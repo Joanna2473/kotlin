@@ -243,25 +243,6 @@ if (project.kotlinBuildProperties.isTeamcityBuild) {
     val junitTags = listOf("JvmKGP", "DaemonsKGP", "JsKGP", "NativeKGP", "MppKGP", "AndroidKGP", "OtherKGP")
     val requiresKotlinNative = listOf("NativeKGP", "MppKGP", "OtherKGP")
     val gradleVersionTaskGroup = "Kotlin Gradle Plugin Verification grouped by Gradle version"
-    val kotlinNativeVersionForGradleTests = System.getProperty("kotlinNativeVersionForGradleIT")
-    val hostArch = System.getProperty("os.arch").lowercase().let {
-        when (it) {
-            "x86_64" -> "x86_64"
-            "amd64" -> "x86_64"
-            "arm64" -> "aarch64"
-            "aarch64" -> "aarch64"
-            else -> error("Unsupported architecture: $it")
-        }
-    }
-    val hostOs = System.getProperty("os.name").let {
-        when {
-            it == "Mac OS X" -> "macos"
-            it == "Linux" -> "linux"
-            it.startsWith("Windows") -> "windows"
-            else -> error("Unsupported OS: $it")
-        }
-    }
-    val platformName = "$hostOs-$hostArch"
 
     junitTags.forEach { junitTag ->
         val taskPrefix = "kgp${junitTag.substringBefore("KGP")}"
@@ -273,11 +254,8 @@ if (project.kotlinBuildProperties.isTeamcityBuild) {
 
                 systemProperty("gradle.integration.tests.gradle.version.filter", gradleVersion)
                 systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
-
                 if (junitTag in requiresKotlinNative) {
-                    dependencies {
-                        implementation("org.jetbrains.kotlin:kotlin-native-prebuilt-$platformName-$kotlinNativeVersionForGradleTests")
-                    }
+                    applyKotlinNativeFromCurrentBranchIfNeeded()
                 }
 
                 useJUnitPlatform {
