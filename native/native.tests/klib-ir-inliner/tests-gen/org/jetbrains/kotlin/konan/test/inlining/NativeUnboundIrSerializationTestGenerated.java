@@ -25867,6 +25867,15 @@ public class NativeUnboundIrSerializationTestGenerated extends AbstractNativeUnb
       @Tag("klib")
       public class JvmExposeBoxed {
         @Nested
+        @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/featureInteraction")
+        @TestDataPath("$PROJECT_ROOT")
+        @Tag("frontend-fir")
+        @FirPipeline()
+        @Tag("klib")
+        public class FeatureInteraction {
+        }
+
+        @Nested
         @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/inherit")
         @TestDataPath("$PROJECT_ROOT")
         @Tag("frontend-fir")

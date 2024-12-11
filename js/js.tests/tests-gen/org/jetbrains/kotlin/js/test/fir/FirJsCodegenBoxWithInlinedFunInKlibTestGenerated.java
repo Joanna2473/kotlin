@@ -24395,6 +24395,16 @@ public class FirJsCodegenBoxWithInlinedFunInKlibTestGenerated extends AbstractFi
       }
 
       @Nested
+      @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/featureInteraction")
+      @TestDataPath("$PROJECT_ROOT")
+      public class FeatureInteraction {
+        @Test
+        public void testAllFilesPresentInFeatureInteraction() {
+          KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/featureInteraction"), Pattern.compile("^(.+)\\.kt$"), null, TargetBackend.JS_IR, true);
+        }
+      }
+
+      @Nested
       @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/inherit")
       @TestDataPath("$PROJECT_ROOT")
       public class Inherit {

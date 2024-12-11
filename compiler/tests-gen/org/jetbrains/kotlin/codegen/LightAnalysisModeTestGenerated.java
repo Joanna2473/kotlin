@@ -26545,6 +26545,24 @@ public class LightAnalysisModeTestGenerated extends AbstractLightAnalysisModeTes
         runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/uintReceiver.kt");
       }
 
+      @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/featureInteraction")
+      @TestDataPath("$PROJECT_ROOT")
+      @RunWith(JUnit3RunnerWithInners.class)
+      public static class FeatureInteraction extends AbstractLightAnalysisModeTest {
+        private void runTest(String testDataFilePath) {
+          KotlinTestUtils.runTest(this::doTest, TargetBackend.JVM_IR, testDataFilePath);
+        }
+
+        public void testAllFilesPresentInFeatureInteraction() {
+          KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/featureInteraction"), Pattern.compile("^(.+)\\.kt$"), null, TargetBackend.JVM_IR, true);
+        }
+
+        @TestMetadata("jvmOverloads.kt")
+        public void testJvmOverloads() {
+          runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/featureInteraction/jvmOverloads.kt");
+        }
+      }
+
       @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/inherit")
       @TestDataPath("$PROJECT_ROOT")
       @RunWith(JUnit3RunnerWithInners.class)

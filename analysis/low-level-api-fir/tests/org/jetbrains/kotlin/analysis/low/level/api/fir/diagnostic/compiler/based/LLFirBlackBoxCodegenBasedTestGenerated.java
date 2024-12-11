@@ -31642,6 +31642,22 @@ public class LLFirBlackBoxCodegenBasedTestGenerated extends AbstractLLFirBlackBo
       }
 
       @Nested
+      @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/featureInteraction")
+      @TestDataPath("$PROJECT_ROOT")
+      public class FeatureInteraction {
+        @Test
+        public void testAllFilesPresentInFeatureInteraction() {
+          KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/featureInteraction"), Pattern.compile("^(.+)\\.kt$"), null, true);
+        }
+
+        @Test
+        @TestMetadata("jvmOverloads.kt")
+        public void testJvmOverloads() {
+          runTest("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/featureInteraction/jvmOverloads.kt");
+        }
+      }
+
+      @Nested
       @TestMetadata("compiler/testData/codegen/box/inlineClasses/jvmExposeBoxed/inherit")
       @TestDataPath("$PROJECT_ROOT")
       public class Inherit {
