@@ -103,8 +103,7 @@ abstract class NumericForLoopHeader<T : NumericHeaderInfo>(
             val stepType = stepClass.defaultType
             val plusFun = elementClass.defaultType.getClass()!!.functions.single {
                 it.name == OperatorNameConventions.PLUS &&
-                        it.valueParameters.size == 1 &&
-                        it.valueParameters[0].type == stepType
+                        it.hasShape(dispatchReceiver = true, regularParameters = 1, parameterTypes = listOf(null, stepType))
             }
             irSet(
                 inductionVariable.symbol, irCallOp(
