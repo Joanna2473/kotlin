@@ -5,12 +5,14 @@
 
 package org.jetbrains.kotlin.analysis.api.components
 
+import org.jetbrains.kotlin.analysis.api.lifetime.KaLifetimeOwner
+
 /**
- * A marker interface for a [KaSession][org.jetbrains.kotlin.analysis.api.KaSession] component.
+ * A component of a [KaSession][org.jetbrains.kotlin.analysis.api.KaSession].
  *
  * Session components mix functions and properties into the session, which allows using them directly from an [analyze][org.jetbrains.kotlin.analysis.api.analyze]
  * block where a [KaSession][org.jetbrains.kotlin.analysis.api.KaSession] is available as a receiver. As such, functions from session
- * components define a large part of the Analysis API's surface, in addition to [lifetime owners][org.jetbrains.kotlin.analysis.api.lifetime.KaLifetimeOwner]
+ * components define a large part of the Analysis API's surface, in addition to other [lifetime owners][org.jetbrains.kotlin.analysis.api.lifetime.KaLifetimeOwner]
  * like [KaSymbol][org.jetbrains.kotlin.analysis.api.symbols.KaSymbol].
  *
  * **Important:** Any public function or property in a "session component" is directly available in a [KaSession][org.jetbrains.kotlin.analysis.api.KaSession]
@@ -29,4 +31,4 @@ package org.jetbrains.kotlin.analysis.api.components
  * session component, it is usable directly in the [KaSession][org.jetbrains.kotlin.analysis.api.KaSession] context because the property has
  * been mixed into the session.
  */
-public interface KaSessionComponent
+public interface KaSessionComponent : KaLifetimeOwner
