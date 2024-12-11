@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.ir.backend.js.utils.compileSuspendAsJsGenerator
 import org.jetbrains.kotlin.ir.backend.js.utils.isLoweredSuspendFunction
 import org.jetbrains.kotlin.ir.backend.js.utils.isStringArrayParameter
 import org.jetbrains.kotlin.ir.declarations.IrFile
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrRawFunctionReferenceImpl
@@ -111,6 +112,6 @@ class MainFunctionCallWrapperLowering(private val context: JsIrBackendContext) :
     }
 
     private fun IrSimpleFunction.hasStringArrayParameter(): Boolean {
-        return parameters.firstOrNull()?.isStringArrayParameter() == true
+        return parameters.firstOrNull { it.kind == IrParameterKind.Regular }?.isStringArrayParameter() == true
     }
 }
