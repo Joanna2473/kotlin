@@ -137,7 +137,7 @@ internal abstract class UnsignedProgressionType(
                 unsignedConversionFunction,
                 typeArgumentsCount = 0
             ).apply {
-                extensionReceiver = this@asUnsigned
+                arguments[0] = this@asUnsigned
             }
         }
     }
