@@ -23,8 +23,15 @@ import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.calls.inference.ConstraintSystemBuilder
 
 enum class ImplicitInvokeMode {
+    // Supposed to be the most regular situation: we're just resolving to simple functions or properties
     None,
+
+    // For `f(..)`, we've found some property named `f` and looking to resolve `f.invoke(..)` without any additional magic
     Regular,
+
+    // For `f()`, we've found some property named `f` which types with a function type with extension receiver.
+    // Also, we've found a receiver candidate (implicit or explicit), and now we're going to resolve the `invoke` call with
+    // the receiver bound as a first argument `f.invoke(receiver,...)`
     ReceiverAsArgument,
 }
 
