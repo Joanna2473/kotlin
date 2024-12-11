@@ -17,10 +17,9 @@ internal class IrConstTypeAnnotationTransformer(context: IrConstEvaluationContex
         element.acceptVoid(
             object : IrTypeVisitorVoid() {
                 override fun visitElement(element: IrElement) {
-                    if (element is IrOverridableDeclaration<*> && element.isFakeOverride) {
-                        return handleAsFakeOverride { element.acceptChildrenVoid(this) }
+                    return handleAsFakeOverrideIf(element is IrOverridableDeclaration<*> && element.isFakeOverride) {
+                        element.acceptChildrenVoid(this)
                     }
-                    element.acceptChildrenVoid(this)
                 }
 
                 override fun visitType(container: IrElement, type: IrType) {

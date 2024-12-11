@@ -17,9 +17,6 @@ internal class IrConstDeclarationAnnotationTransformer(context: IrConstEvaluatio
     override fun visitAnnotations(element: IrElement) {
         element.acceptVoid(object : IrElementVisitorVoid {
             override fun visitElement(element: IrElement) {
-                if (element is IrOverridableDeclaration<*> && element.isFakeOverride) {
-                    return handleAsFakeOverride { element.acceptChildrenVoid(this) }
-                }
                 element.acceptChildrenVoid(this)
             }
 
@@ -29,8 +26,10 @@ internal class IrConstDeclarationAnnotationTransformer(context: IrConstEvaluatio
             }
 
             override fun visitDeclaration(declaration: IrDeclarationBase) {
-                transformAnnotations(declaration)
-                super.visitDeclaration(declaration)
+                return handleAsFakeOverrideIf(declaration is IrOverridableDeclaration<*> && declaration.isFakeOverride) {
+                    transformAnnotations(declaration)
+                    super.visitDeclaration(declaration)
+                }
             }
         })
     }

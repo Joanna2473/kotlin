@@ -22,7 +22,9 @@ import org.jetbrains.kotlin.ir.util.toIrConst
 internal abstract class IrConstAnnotationTransformer(private val context: IrConstEvaluationContext) {
     var insideFakeOverrideDeclaration = false
 
-    protected inline fun <T> handleAsFakeOverride(action: () -> T): T {
+    protected inline fun <T> handleAsFakeOverrideIf(condition: Boolean, action: () -> T): T {
+        if (!condition) return action()
+
         val oldValue = insideFakeOverrideDeclaration
         try {
             insideFakeOverrideDeclaration = true
