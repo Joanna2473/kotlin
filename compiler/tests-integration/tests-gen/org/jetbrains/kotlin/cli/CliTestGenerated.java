@@ -214,6 +214,21 @@ public class CliTestGenerated extends AbstractCliTest {
     public void testWarningSuppressionInvalid() {
       runTest("compiler/testData/cli/jvm/_suppressWarnings/warningSuppressionInvalid.args");
     }
+
+    @TestMetadata("warningSupressionWithError.args")
+    public void testWarningSupressionWithError() {
+      runTest("compiler/testData/cli/jvm/_suppressWarnings/warningSupressionWithError.args");
+    }
+
+    @TestMetadata("warningSupressionWithNowarn.args")
+    public void testWarningSupressionWithNowarn() {
+      runTest("compiler/testData/cli/jvm/_suppressWarnings/warningSupressionWithNowarn.args");
+    }
+
+    @TestMetadata("warningSupressionWithReportAllWarn.args")
+    public void testWarningSupressionWithReportAllWarn() {
+      runTest("compiler/testData/cli/jvm/_suppressWarnings/warningSupressionWithReportAllWarn.args");
+    }
   }
 
   @TestMetadata("compiler/testData/cli/jvm/_languageFeatures")
@@ -226,6 +241,113 @@ public class CliTestGenerated extends AbstractCliTest {
 
     public void testAllFilesPresentIn_languageFeatures() {
       KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/cli/jvm/_languageFeatures"), Pattern.compile("^(.+)\\.args$"), null, true);
+    }
+
+    @TestMetadata("compiler/testData/cli/jvm/_languageFeatures/contextParameters")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class ContextParameters extends AbstractCliTest {
+      private void runTest(String testDataFilePath) {
+        KotlinTestUtils.runTest(this::doJvmTest, this, testDataFilePath);
+      }
+
+      public void testAllFilesPresentInContextParameters() {
+        KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/cli/jvm/_languageFeatures/contextParameters"), Pattern.compile("^(.+)\\.args$"), null, true);
+      }
+
+      @TestMetadata("contextParameters.args")
+      public void testContextParameters() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/contextParameters/contextParameters.args");
+      }
+
+      @TestMetadata("contextReceiversAndParametersAtTheSameTime.args")
+      public void testContextReceiversAndParametersAtTheSameTime() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/contextParameters/contextReceiversAndParametersAtTheSameTime.args");
+      }
+
+      @TestMetadata("contextReceiversDeprecated.args")
+      public void testContextReceiversDeprecated() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/contextParameters/contextReceiversDeprecated.args");
+      }
+    }
+
+    @TestMetadata("compiler/testData/cli/jvm/_languageFeatures/coroutines_1_3")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class Coroutines_1_3 extends AbstractCliTest {
+      private void runTest(String testDataFilePath) {
+        KotlinTestUtils.runTest(this::doJvmTest, this, testDataFilePath);
+      }
+
+      public void testAllFilesPresentInCoroutines_1_3() {
+        KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/cli/jvm/_languageFeatures/coroutines_1_3"), Pattern.compile("^(.+)\\.args$"), null, true);
+      }
+
+      @TestMetadata("coroutinesEnable.args")
+      public void testCoroutinesEnable() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/coroutines_1_3/coroutinesEnable.args");
+      }
+
+      @TestMetadata("coroutinesError.args")
+      public void testCoroutinesError() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/coroutines_1_3/coroutinesError.args");
+      }
+
+      @TestMetadata("coroutinesErrorAndEnable.args")
+      public void testCoroutinesErrorAndEnable() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/coroutines_1_3/coroutinesErrorAndEnable.args");
+      }
+
+      @TestMetadata("coroutinesWarn.args")
+      public void testCoroutinesWarn() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/coroutines_1_3/coroutinesWarn.args");
+      }
+    }
+
+    @TestMetadata("compiler/testData/cli/jvm/_languageFeatures/enumEntries")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class EnumEntries extends AbstractCliTest {
+      private void runTest(String testDataFilePath) {
+        KotlinTestUtils.runTest(this::doJvmTest, this, testDataFilePath);
+      }
+
+      public void testAllFilesPresentInEnumEntries() {
+        KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/cli/jvm/_languageFeatures/enumEntries"), Pattern.compile("^(.+)\\.args$"), null, true);
+      }
+
+      @TestMetadata("enumEntriesForJavaNotEnabled.args")
+      public void testEnumEntriesForJavaNotEnabled() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/enumEntries/enumEntriesForJavaNotEnabled.args");
+      }
+
+      @TestMetadata("enumEntriesNotEnabled.args")
+      public void testEnumEntriesNotEnabled() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/enumEntries/enumEntriesNotEnabled.args");
+      }
+    }
+
+    @TestMetadata("compiler/testData/cli/jvm/_languageFeatures/useBuilderInferenceWithoutAnnotation_1_7")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class UseBuilderInferenceWithoutAnnotation_1_7 extends AbstractCliTest {
+      private void runTest(String testDataFilePath) {
+        KotlinTestUtils.runTest(this::doJvmTest, this, testDataFilePath);
+      }
+
+      public void testAllFilesPresentInUseBuilderInferenceWithoutAnnotation_1_7() {
+        KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/cli/jvm/_languageFeatures/useBuilderInferenceWithoutAnnotation_1_7"), Pattern.compile("^(.+)\\.args$"), null, true);
+      }
+
+      @TestMetadata("builderInferenceByDefault.args")
+      public void testBuilderInferenceByDefault() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/useBuilderInferenceWithoutAnnotation_1_7/builderInferenceByDefault.args");
+      }
+
+      @TestMetadata("builderInferenceEnable.args")
+      public void testBuilderInferenceEnable() {
+        runTest("compiler/testData/cli/jvm/_languageFeatures/useBuilderInferenceWithoutAnnotation_1_7/builderInferenceEnable.args");
+      }
     }
 
     @TestMetadata("compiler/testData/cli/jvm/_languageFeatures/whenGuards")
@@ -297,6 +419,11 @@ public class CliTestGenerated extends AbstractCliTest {
       runTest("compiler/testData/cli/jvm/_apiVersion/apiVersionDeprecated.args");
     }
 
+    @TestMetadata("apiVersionEmpty.args")
+    public void testApiVersionEmpty() {
+      runTest("compiler/testData/cli/jvm/_apiVersion/apiVersionEmpty.args");
+    }
+
     @TestMetadata("apiVersionGreaterThanLanguage.args")
     public void testApiVersionGreaterThanLanguage() {
       runTest("compiler/testData/cli/jvm/_apiVersion/apiVersionGreaterThanLanguage.args");
@@ -355,9 +482,24 @@ public class CliTestGenerated extends AbstractCliTest {
       runTest("compiler/testData/cli/jvm/_languageVersion/languageVersionDeprecated.args");
     }
 
+    @TestMetadata("languageVersionEmpty.args")
+    public void testLanguageVersionEmpty() {
+      runTest("compiler/testData/cli/jvm/_languageVersion/languageVersionEmpty.args");
+    }
+
+    @TestMetadata("languageVersionExperimental.args")
+    public void testLanguageVersionExperimental() {
+      runTest("compiler/testData/cli/jvm/_languageVersion/languageVersionExperimental.args");
+    }
+
     @TestMetadata("languageVersionInvalid.args")
     public void testLanguageVersionInvalid() {
       runTest("compiler/testData/cli/jvm/_languageVersion/languageVersionInvalid.args");
+    }
+
+    @TestMetadata("languageVersionMupltiple.args")
+    public void testLanguageVersionMupltiple() {
+      runTest("compiler/testData/cli/jvm/_languageVersion/languageVersionMupltiple.args");
     }
 
     @TestMetadata("languageVersionUnsupported.args")
@@ -378,14 +520,39 @@ public class CliTestGenerated extends AbstractCliTest {
       KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/cli/jvm/_jdkHome"), Pattern.compile("^(.+)\\.args$"), null, false);
     }
 
-    @TestMetadata("warningJdkWithNoJdk.args")
-    public void testWarningJdkWithNoJdk() {
-      runTest("compiler/testData/cli/jvm/_jdkHome/warningJdkWithNoJdk.args");
+    @TestMetadata("emptyJdkHome.args")
+    public void testEmptyJdkHome() {
+      runTest("compiler/testData/cli/jvm/_jdkHome/emptyJdkHome.args");
     }
 
-    @TestMetadata("wrongJdkPath.args")
-    public void testWrongJdkPath() {
-      runTest("compiler/testData/cli/jvm/_jdkHome/wrongJdkPath.args");
+    @TestMetadata("invalidJdkHome.args")
+    public void testInvalidJdkHome() {
+      runTest("compiler/testData/cli/jvm/_jdkHome/invalidJdkHome.args");
+    }
+
+    @TestMetadata("invalidMultipleArgJdkHome.args")
+    public void testInvalidMultipleArgJdkHome() {
+      runTest("compiler/testData/cli/jvm/_jdkHome/invalidMultipleArgJdkHome.args");
+    }
+
+    @TestMetadata("jdkHome.args")
+    public void testJdkHome() {
+      runTest("compiler/testData/cli/jvm/_jdkHome/jdkHome.args");
+    }
+
+    @TestMetadata("multipleJdkHome.args")
+    public void testMultipleJdkHome() {
+      runTest("compiler/testData/cli/jvm/_jdkHome/multipleJdkHome.args");
+    }
+
+    @TestMetadata("warningJdkHomeWithNoJdk.args")
+    public void testWarningJdkHomeWithNoJdk() {
+      runTest("compiler/testData/cli/jvm/_jdkHome/warningJdkHomeWithNoJdk.args");
+    }
+
+    @TestMetadata("wrongJdkHome.args")
+    public void testWrongJdkHome() {
+      runTest("compiler/testData/cli/jvm/_jdkHome/wrongJdkHome.args");
     }
   }
 
@@ -454,6 +621,34 @@ public class CliTestGenerated extends AbstractCliTest {
     @TestMetadata("jdkReleaseInvalidEmpty.args")
     public void testJdkReleaseInvalidEmpty() {
       runTest("compiler/testData/cli/jvm/_jdkRelease/jdkReleaseInvalidEmpty.args");
+    }
+  }
+
+  @TestMetadata("compiler/testData/cli/jvm/_classPath")
+  @TestDataPath("$PROJECT_ROOT")
+  @RunWith(JUnit3RunnerWithInners.class)
+  public static class _classPath extends AbstractCliTest {
+    private void runTest(String testDataFilePath) {
+      KotlinTestUtils.runTest(this::doJvmTest, this, testDataFilePath);
+    }
+
+    public void testAllFilesPresentIn_classPath() {
+      KtTestUtil.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/cli/jvm/_classPath"), Pattern.compile("^(.+)\\.args$"), null, false);
+    }
+
+    @TestMetadata("classPath.args")
+    public void testClassPath() {
+      runTest("compiler/testData/cli/jvm/_classPath/classPath.args");
+    }
+
+    @TestMetadata("emptyClassPath.args")
+    public void testEmptyClassPath() {
+      runTest("compiler/testData/cli/jvm/_classPath/emptyClassPath.args");
+    }
+
+    @TestMetadata("invalidClassPath.args")
+    public void testInvalidClassPath() {
+      runTest("compiler/testData/cli/jvm/_classPath/invalidClassPath.args");
     }
   }
 
@@ -547,16 +742,6 @@ public class CliTestGenerated extends AbstractCliTest {
       runTest("compiler/testData/cli/jvm/argumentPassedMultipleTimes.args");
     }
 
-    @TestMetadata("builderInferenceByDefault.args")
-    public void testBuilderInferenceByDefault() {
-      runTest("compiler/testData/cli/jvm/builderInferenceByDefault.args");
-    }
-
-    @TestMetadata("builderInferenceErrors.args")
-    public void testBuilderInferenceErrors() {
-      runTest("compiler/testData/cli/jvm/builderInferenceErrors.args");
-    }
-
     @TestMetadata("classAndPartClash.args")
     public void testClassAndPartClash() {
       runTest("compiler/testData/cli/jvm/classAndPartClash.args");
@@ -602,41 +787,6 @@ public class CliTestGenerated extends AbstractCliTest {
       runTest("compiler/testData/cli/jvm/conflictingJvmDeclarationsK2.args");
     }
 
-    @TestMetadata("contextParameters.args")
-    public void testContextParameters() {
-      runTest("compiler/testData/cli/jvm/contextParameters.args");
-    }
-
-    @TestMetadata("contextReceiversAndParametersAtTheSameTime.args")
-    public void testContextReceiversAndParametersAtTheSameTime() {
-      runTest("compiler/testData/cli/jvm/contextReceiversAndParametersAtTheSameTime.args");
-    }
-
-    @TestMetadata("contextReceiversDeprecated.args")
-    public void testContextReceiversDeprecated() {
-      runTest("compiler/testData/cli/jvm/contextReceiversDeprecated.args");
-    }
-
-    @TestMetadata("coroutinesEnable.args")
-    public void testCoroutinesEnable() {
-      runTest("compiler/testData/cli/jvm/coroutinesEnable.args");
-    }
-
-    @TestMetadata("coroutinesError.args")
-    public void testCoroutinesError() {
-      runTest("compiler/testData/cli/jvm/coroutinesError.args");
-    }
-
-    @TestMetadata("coroutinesErrorAndEnable.args")
-    public void testCoroutinesErrorAndEnable() {
-      runTest("compiler/testData/cli/jvm/coroutinesErrorAndEnable.args");
-    }
-
-    @TestMetadata("coroutinesWarn.args")
-    public void testCoroutinesWarn() {
-      runTest("compiler/testData/cli/jvm/coroutinesWarn.args");
-    }
-
     @TestMetadata("disabledFeatureFromUnsupportedVersion.args")
     public void testDisabledFeatureFromUnsupportedVersion() {
       runTest("compiler/testData/cli/jvm/disabledFeatureFromUnsupportedVersion.args");
@@ -665,16 +815,6 @@ public class CliTestGenerated extends AbstractCliTest {
     @TestMetadata("emptySourcesWithModuleInfo.args")
     public void testEmptySourcesWithModuleInfo() {
       runTest("compiler/testData/cli/jvm/emptySourcesWithModuleInfo.args");
-    }
-
-    @TestMetadata("enumEntriesForJavaNotEnabled.args")
-    public void testEnumEntriesForJavaNotEnabled() {
-      runTest("compiler/testData/cli/jvm/enumEntriesForJavaNotEnabled.args");
-    }
-
-    @TestMetadata("enumEntriesNotEnabled.args")
-    public void testEnumEntriesNotEnabled() {
-      runTest("compiler/testData/cli/jvm/enumEntriesNotEnabled.args");
     }
 
     @TestMetadata("errorSuppressionNoWarning.args")
@@ -1210,11 +1350,6 @@ public class CliTestGenerated extends AbstractCliTest {
     @TestMetadata("noStdlibK2.args")
     public void testNoStdlibK2() {
       runTest("compiler/testData/cli/jvm/noStdlibK2.args");
-    }
-
-    @TestMetadata("nonExistingClassPathAndAnnotationsPath.args")
-    public void testNonExistingClassPathAndAnnotationsPath() {
-      runTest("compiler/testData/cli/jvm/nonExistingClassPathAndAnnotationsPath.args");
     }
 
     @TestMetadata("nonExistingPhaseName.args")
