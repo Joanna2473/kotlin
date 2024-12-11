@@ -154,8 +154,8 @@ abstract class NumericForLoopHeader<T : NumericHeaderInfo>(
                         }
                     } else {
                         irCall(elementCompFun!!).apply {
-                            putValueArgument(0, lastExpression)
-                            putValueArgument(1, irGet(inductionVariable))
+                            arguments[0] = lastExpression
+                            arguments[1] = irGet(inductionVariable)
                         }
                     }
 
