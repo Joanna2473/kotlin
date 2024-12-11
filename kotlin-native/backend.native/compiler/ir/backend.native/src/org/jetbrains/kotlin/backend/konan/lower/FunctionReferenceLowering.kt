@@ -412,7 +412,7 @@ internal class FunctionReferenceLowering(val generationState: NativeGenerationSt
 
             val builder = context.createIrBuilder(symbol)
             body = builder.irBlockBody {
-                val variablesRamping = buildMap {
+                val variablesMapping = buildMap {
                     for ((index, field) in boundFields.withIndex()) {
                         put(invokeFunction.parameters[index], irTemporary(irGetField(irGet(dispatchReceiverParameter!!), field)))
                     }
@@ -425,7 +425,7 @@ internal class FunctionReferenceLowering(val generationState: NativeGenerationSt
                         }
                     }
                 }
-                +invokeFunction.body!!.transform(object : VariableRemapper(variablesRamping) {
+                val transformedBody = invokeFunction.body!!.transform(object : VariableRemapper(variablesMapping) {
                     override fun visitReturn(expression: IrReturn): IrExpression {
                         if (expression.returnTargetSymbol == invokeFunction.symbol) {
                             expression.returnTargetSymbol = this@apply.symbol
@@ -438,7 +438,12 @@ internal class FunctionReferenceLowering(val generationState: NativeGenerationSt
                             declaration.parent = this@apply
                         return super.visitDeclaration(declaration)
                     }
-                }, null).statements
+                }, null)
+                when (transformedBody) {
+                    is IrBlockBody -> +transformedBody.statements
+                    is IrExpressionBody -> +irReturn(transformedBody.expression)
+                    else -> error("Unexpected body type: ${transformedBody::class.simpleName}")
+                }
             }
         }
     }

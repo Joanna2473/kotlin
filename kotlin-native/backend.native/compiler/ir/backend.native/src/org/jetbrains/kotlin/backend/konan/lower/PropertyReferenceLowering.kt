@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrLocalDelegatedPropertySymbol
 import org.jetbrains.kotlin.ir.symbols.IrPropertySymbol
+import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.*
@@ -49,12 +50,12 @@ internal val KonanSymbols.mutablePropertiesConstructors
 internal class PropertyReferenceLowering(val generationState: NativeGenerationState) : FileLoweringPass {
     private val context = generationState.context
     private val symbols = context.ir.symbols
+    private val irBuiltIns = context.irBuiltIns
     private val immutableSymbols = symbols.immutablePropertiesConstructors
     private val mutableSymbols = symbols.mutablePropertiesConstructors
 
     override fun lower(irFile: IrFile) {
         irFile.transformChildrenVoid(object : IrElementTransformerVoidWithContext() {
-
             override fun visitRichPropertyReference(expression: IrRichPropertyReference): IrExpression {
                 expression.transformChildrenVoid(this)
                 val irBuilder = context.createIrBuilder(currentScope!!.scope.scopeOwnerSymbol).at(expression).toNativeConstantReflectionBuilder(context.ir.symbols)
@@ -63,7 +64,7 @@ internal class PropertyReferenceLowering(val generationState: NativeGenerationSt
                     return irBuilder.createLocalKProperty(originalPropertySymbol.owner.name.asString(), expression.type)
                 }
                 require(originalPropertySymbol is IrPropertySymbol)
-                val typeArguments = (expression.type as IrSimpleType).arguments.map { it.typeOrNull ?: context.irBuiltIns.anyNType  }
+                val typeArguments = (expression.type as IrSimpleType).arguments.map { it.typeOrNull ?: irBuiltIns.anyNType  }
                 val block =  irBuilder.irBlock {
                     val captures = expression.boundValues.map {
                         if (it is IrGetValue) it.symbol.owner else irTemporary(it)
@@ -77,31 +78,21 @@ internal class PropertyReferenceLowering(val generationState: NativeGenerationSt
 
                     +irCall(constructor, expression.type, typeArguments).apply {
                         arguments[0] = irString(originalPropertySymbol.owner.name.asString())
-                        val getterType = symbols.kFunctionN(typeArguments.size - 1).typeWith(typeArguments)
-                        arguments[1] = IrRichFunctionReferenceImpl(
-                                startOffset = expression.startOffset,
-                                endOffset = expression.endOffset,
-                                type = getterType,
-                                reflectionTargetSymbol = originalPropertySymbol.owner.getter!!.symbol,
-                                overriddenFunctionSymbol = UpgradeCallableReferences.selectSAMOverriddenFunction(getterType),
-                                invokeFunction = expression.getterFunction,
+                        arguments[1] = irRichFunctionReference(
+                                function = expression.getterFunction,
+                                superType = symbols.kFunctionN(typeArguments.size - 1).typeWith(typeArguments),
+                                reflectionTarget = originalPropertySymbol.owner.getter!!.symbol,
+                                captures = captures,
                                 origin = expression.origin
-                        ).apply {
-                            boundValues += captures.map { irGet(it) }
-                        }
+                        )
                         expression.setterFunction?.let { setterFunction ->
-                            val setterType = symbols.kFunctionN(typeArguments.size).typeWith(typeArguments + context.irBuiltIns.unitType)
-                            val reference = IrRichFunctionReferenceImpl(
-                                    startOffset = expression.startOffset,
-                                    endOffset = expression.endOffset,
-                                    type = setterType,
-                                    reflectionTargetSymbol = originalPropertySymbol.owner.setter!!.symbol,
-                                    invokeFunction = setterFunction,
-                                    overriddenFunctionSymbol = UpgradeCallableReferences.selectSAMOverriddenFunction(setterType),
+                            arguments[2] = irRichFunctionReference(
+                                    function = setterFunction,
+                                    superType = symbols.kFunctionN(typeArguments.size).typeWith(typeArguments + irBuiltIns.unitType),
+                                    reflectionTarget = originalPropertySymbol.owner.setter!!.symbol,
+                                    captures = captures,
                                     origin = expression.origin
                             )
-                            reference.boundValues += captures.map { irGet(it) }
-                            arguments[2] = reference
                         }
                     }
                 }
@@ -121,9 +112,23 @@ internal class PropertyReferenceLowering(val generationState: NativeGenerationSt
         })
     }
 
+    private fun IrBuilderWithScope.irRichFunctionReference(
+            function: IrSimpleFunction,
+            superType: IrSimpleType,
+            reflectionTarget: IrSimpleFunctionSymbol,
+            captures: List<IrValueDeclaration>,
+            origin: IrStatementOrigin?,
+    ): IrRichFunctionReferenceImpl = irRichFunctionReference(
+            invokeFunction = function,
+            superType = superType,
+            reflectionTargetSymbol = reflectionTarget,
+            overriddenFunctionSymbol = UpgradeCallableReferences.selectSAMOverriddenFunction(superType),
+            captures = captures.map { irGet(it) },
+            origin = origin
+    )
+
     private fun NativeConstantReflectionIrBuilder.createLocalKProperty(propertyName: String,
                                                                        propertyType: IrType): IrConstantValue {
-        val symbols = this@PropertyReferenceLowering.context.ir.symbols
         return irConstantObject(
                 symbols.kLocalDelegatedPropertyImpl.owner,
                 mapOf(

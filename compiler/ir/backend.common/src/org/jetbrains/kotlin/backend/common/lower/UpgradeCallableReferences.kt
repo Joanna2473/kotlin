@@ -98,11 +98,7 @@ open class UpgradeCallableReferences(
         }
 
         override fun visitElement(element: IrElement, data: IrDeclarationParent): IrElement {
-            if (element is IrDeclarationParent) {
-                element.transformChildren(this, element)
-            } else {
-                element.transformChildren(this, data)
-            }
+            element.transformChildren(this, element as? IrDeclarationParent ?: data)
             return element
         }
 
