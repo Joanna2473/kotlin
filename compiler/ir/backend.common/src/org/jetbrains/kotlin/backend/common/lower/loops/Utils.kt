@@ -58,7 +58,7 @@ internal fun IrExpression.decrement(): IrExpression {
         else -> {
             val decFun = type.getClass()!!.functions.single {
                 it.name == OperatorNameConventions.DEC &&
-                        it.valueParameters.isEmpty()
+                        it.hasShape(dispatchReceiver = true)
             }
             IrCallImpl(
                 startOffset, endOffset, type,
