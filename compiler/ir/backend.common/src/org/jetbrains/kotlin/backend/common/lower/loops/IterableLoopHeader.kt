@@ -40,7 +40,7 @@ internal class IterableLoopHeader(
                 irCall(iteratorClass.functions.first {
                     it.name == OperatorNameConventions.NEXT && it.hasShape(dispatchReceiver = true)
                 }.symbol).apply {
-                    dispatchReceiver = irGet(headerInfo.iteratorVariable)
+                    arguments[0] = irGet(headerInfo.iteratorVariable)
                 }
             // The call could be wrapped in an IMPLICIT_NOTNULL type-cast (see comment in ForLoopsLowering.gatherLoopVariableInfo()).
             // Find and replace the call to preserve any type-casts.
